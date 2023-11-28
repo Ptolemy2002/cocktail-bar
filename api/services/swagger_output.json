@@ -28,49 +28,46 @@
         }
       }
     },
-    "/recipes/names": {
-      "get": {
-        "description": "Get each unique recipe name.",
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/recipes/categories": {
-      "get": {
-        "description": "Get each unique recipe category.",
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/recipes/glasses": {
-      "get": {
-        "description": "Get each unique recipe glass.",
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/recipes/get/all": {
+    "/recipes/all": {
       "get": {
         "description": "Get all recipes.",
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
           }
         }
       }
     },
-    "/recipes/get/{key}-equals/{value}": {
+    "/recipes/all/list-{prop}": {
       "get": {
-        "description": "Get Recipes where the value stored under key equals the specified value (case sensitive).",
+        "description": "List all values stored under the specified property.",
+        "parameters": [
+          {
+            "name": "prop",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          },
+          "400": {
+            "description": "Invalid property name specified in the request. Response body contains error details."
+          }
+        }
+      }
+    },
+    "/recipes/{key}-equals/{value}": {
+      "get": {
+        "description": "Get Recipes where the value stored under key equals the specified value (case insensitive).",
         "parameters": [
           {
             "name": "key",
@@ -88,13 +85,88 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
           }
         }
       }
     },
-    "/recipes/get/{key}-contains/{value}": {
+    "/recipes/{key}-equals/{value}/list-{prop}": {
       "get": {
-        "description": "Get Recipes where the value stored under key contains the specified value (case sensitive).",
+        "description": "List all values stored under the specified property in Recipes where the value stored under key equals the specified value (case insensitive).",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "value",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "prop",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          },
+          "400": {
+            "description": "Invalid property name specified in the request. Response body contains error details."
+          }
+        }
+      }
+    },
+    "/recipes/{key}-equals/{value}/list-{prop}/distinct": {
+      "get": {
+        "description": "List all distinct values stored under the specified property in Recipes where the value stored under key equals the specified value (case insensitive).",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "value",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "prop",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          },
+          "400": {
+            "description": "Invalid property name specified in the request. Response body contains error details."
+          }
+        }
+      }
+    },
+    "/recipes/{key}-contains/{value}": {
+      "get": {
+        "description": "Get Recipes where the value stored under key contains the specified value (case insensitive).",
         "parameters": [
           {
             "name": "key",
@@ -112,6 +184,81 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          }
+        }
+      }
+    },
+    "/recipes/{key}-contains/{value}/list-{prop}": {
+      "get": {
+        "description": "List all values stored under the specified property in Recipes where the value stored under key contains the specified value (case insensitive).",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "value",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "prop",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          },
+          "400": {
+            "description": "Invalid property name specified in the request. Response body contains error details."
+          }
+        }
+      }
+    },
+    "/recipes/{key}-contains/{value}/list-{prop}/distinct": {
+      "get": {
+        "description": "List all distinct values stored under the specified property in Recipes where the value stored under key contains the specified value (case insensitive).",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "value",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "prop",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          },
+          "400": {
+            "description": "Invalid property name specified in the request. Response body contains error details."
           }
         }
       }

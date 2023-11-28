@@ -1,26 +1,25 @@
 const mongoose = require('mongoose');
+const { errorResponse } = require('lib/misc');
 
 require('models/Recipe');
 const Recipe = mongoose.model('recipes');
 
-function errorResponse(err) {
-    return {
-        _isError: true,
-        type: err.name,
-        message: err.message
-    }
-}
-
-function transformQueryCaseInsensitive(query, matchWhole) {
+function transformQueryCaseInsensitive(query) {
     for (let key in query) {
         let value = query[key];
         if (typeof value === "string") {
-            if (matchWhole) {
-                if (!value.startsWith("^")) value = "^" + value;
-                if (!value.endsWith("$")) value += "$";
-            }
-
             query[key] = new RegExp(value, "i");
+        }
+    }
+
+    return query;
+}
+
+function transformQueryMatchWhole(query) {
+    for (let key in query) {
+        let value = query[key];
+        if (value instanceof RegExp) {
+            query[key] = new RegExp("^" + value.source + "$", value.flags);
         }
     }
 
@@ -30,7 +29,11 @@ function transformQueryCaseInsensitive(query, matchWhole) {
 function findFunction(fun) {
 	return async (collection, query, args={}) => {
         if (args.caseInsensitive) {
-            query = transformQueryCaseInsensitive(query, args.regexMatchWhole);
+            query = transformQueryCaseInsensitive(query);
+        }
+
+        if (args.matchWhole) {
+            query = transformQueryMatchWhole(query);
         }
 
         return await collection[fun](query);
@@ -39,6 +42,24 @@ function findFunction(fun) {
 
 const find = findFunction("find");
 const findOne = findFunction("findOne");
+
+function findAll(collection) {
+    return find(collection, {});
+}
+
+function findWhereEqual(collection, key, value, caseInsensitive=false) {
+    const query = {};
+    query[key] = value;
+    
+    return find(collection, query, { caseInsensitive, matchWhole: true });
+}
+
+function findWhereContains(collection, key, value, caseInsensitive=false) {
+    const query = {};
+    query[key] = value;
+    
+    return find(collection, query, { caseInsensitive, matchWhole: false });
+}
 
 async function listDistinct(collection, field) {
     const result = await collection.distinct(field);
@@ -62,8 +83,12 @@ function tryFunc(func) {
 
 module.exports = {
     "transformQueryCaseInsensitive": tryFunc(transformQueryCaseInsensitive),
+    "transformQueryMatchWhole": tryFunc(transformQueryMatchWhole),
     "find": tryFunc(find),
     "findOne": tryFunc(findOne),
+    "findAll": tryFunc(findAll),
+    "findWhereEqual": tryFunc(findWhereEqual),
+    "findWhereContains": tryFunc(findWhereContains),
     "listDistinct": tryFunc(listDistinct),
     "list": tryFunc(list),
     
