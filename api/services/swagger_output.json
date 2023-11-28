@@ -20,7 +20,95 @@
   "paths": {
     "/": {
       "get": {
-        "description": "Index route of the API. Use this route to check if the API is running.",
+        "description": "Root route. Use it to check if the API is running.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/recipes/names": {
+      "get": {
+        "description": "Get each unique recipe name.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/recipes/categories": {
+      "get": {
+        "description": "Get each unique recipe category.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/recipes/glasses": {
+      "get": {
+        "description": "Get each unique recipe glass.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/recipes/get/all": {
+      "get": {
+        "description": "Get all recipes.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/recipes/get/{key}-equals/{value}": {
+      "get": {
+        "description": "Get Recipes where the value stored under key equals the specified value (case sensitive).",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "value",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/recipes/get/{key}-contains/{value}": {
+      "get": {
+        "description": "Get Recipes where the value stored under key contains the specified value (case sensitive).",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "value",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"

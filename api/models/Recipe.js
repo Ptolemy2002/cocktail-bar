@@ -7,12 +7,15 @@ const RecipeSchema = new Schema({
 		required: true
 	},
 	image: String,
+	category: String,
 	glass: String,
 	ingredients: [
 		{
 			unit: String,
 			amount: Number,
-			ingredient: String
+			ingredient: String,
+			label: String,
+			special: String
 		}
 	],
 	garnish: String,
