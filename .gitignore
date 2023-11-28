@@ -1,4 +1,8 @@
+# Google App Engine app.yaml file
 app.yaml
+
+# Zone identifier files
+*:Zone.Identifier
 
 # Logs
 logs
