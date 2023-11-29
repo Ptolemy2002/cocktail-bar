@@ -6,8 +6,21 @@ function useApi(path, args={}) {
     const [failed, setFailed] = useState(false);
     const [error, setError] = useState(null);
 
-    const onSuccess = args.onSuccess || null;
-    const onFailure = args.onFailure || null;
+    const _onSuccess = args.onSuccess || null;
+    function onSuccess(data) {
+        setData(data);
+        setCompleted(true);
+        if (_onSuccess) _onSuccess(data);
+    }
+
+    const _onFailure = args.onFailure || null;
+    function onFailure(err) {
+        setFailed(true);
+        setCompleted(true);
+        setError(err);
+        if (_onFailure) _onFailure(err);
+    }
+
     const method = args.method || "GET";
     const queryParams = args.queryParams || null;
     const body = (
@@ -41,15 +54,14 @@ function useApi(path, args={}) {
         fetch(`${root}/api/v1/${path}`)
             .then((res) => res.json())
             .catch((err) => {
-                setFailed(true);
-                setCompleted(true);
-                setError(err);
-                if (onFailure) onFailure(err);
+                onFailure(err);
             })
             .then((data) => {
-                setData(data);
-                setCompleted(true);
-                if (onSuccess) onSuccess(data);
+                if (!data || data._isError) {
+                    onFailure(data);
+                } else {
+                    onSuccess(data);
+                }
             });
     }, [path]);
 

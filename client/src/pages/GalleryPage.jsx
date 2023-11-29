@@ -22,9 +22,9 @@ function GalleryPage() {
             </div>
         );
     } else {
-        const cocktailCards = cocktails.map((cocktail) => {
+        const cocktailCards = cocktails.map((cocktail, i) => {
             return (
-                <div key={cocktail.id} className="col col-12 col-md-6 col-lg-4 col-xl-3">
+                <div key={"col-" + i} className="col col-12 col-md-6 col-lg-4 col-xl-3">
                     <CocktailCard
                         cocktailData={cocktail}
                     />
@@ -68,7 +68,7 @@ function CocktailCard(props) {
 
             <div className="card-body">
                 <h5 className="card-title">{name}</h5>
-                <h6 class="card-subtitle mb-2 text-muted">{category}</h6>
+                <h6 className="card-subtitle mb-2 text-muted">{category}</h6>
 
                 <p className="card-text">
                     <b>Glass:</b> {glass} <br />
