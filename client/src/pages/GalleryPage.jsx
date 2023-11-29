@@ -1,8 +1,11 @@
 import React from "react";
 import { useApi } from "src/lib/Api";
 import { Link } from "react-router-dom";
+import { CocktailData } from "src/lib/CocktailUtil";
 
 function GalleryPage() {
+    document.title = "Gallery | Cocktail Bar";
+    
     const [cocktails, cocktailsCompleted, cocktailsFailed] = useApi("recipes/all", {
         onFailure: console.error
     });
@@ -26,7 +29,7 @@ function GalleryPage() {
             return (
                 <div key={"col-" + i} className="col col-12 col-md-6 col-lg-4 col-xl-3">
                     <CocktailCard
-                        cocktailData={cocktail}
+                        cocktailData={CocktailData.createFromJSON(cocktail)}
                     />
                 </div>
             );
@@ -48,42 +51,33 @@ function GalleryPage() {
 }
 
 function CocktailCard(props) {
-    const [image, _setImage] = React.useState(props.cocktailData.image || "Shaker.png");
-    const [name, _setName] = React.useState(props.cocktailData.name || "Unknown Cocktail");
-    const [category, _setCategory] = React.useState(props.cocktailData.category || "Unknown Category");
-    const [glass, _setGlass] = React.useState(props.cocktailData.glass || "Unknown");
-    const [garnish, _setGarnish] = React.useState(props.cocktailData.garnish || "None");
-    const [ingredients, _setIngredients] = React.useState(props.cocktailData.ingredients || []);
-
-    function isPlaceholderImage(image) {
-        return image === "Shaker.png";
-    }
-
-    const altText = isPlaceholderImage() ? "Placeholder image" : `Image of ${name}`;
-
+    const data = props.cocktailData;
+    const altText = data.isPlaceholderImage() ? "Placeholder image" : `Image of ${name}`;
 
     return (
         <div className="card">
-            <img className="card-img-top" src={`assets/images/${image}`} alt={altText}></img>
+            <img className="card-img-top" src={`assets/images/${data.image}`} alt={altText}></img>
 
             <div className="card-body">
-                <h5 className="card-title">{name}</h5>
-                <h6 className="card-subtitle mb-2 text-muted">{category}</h6>
+                <h5 className="card-title">{data.name}</h5>
+                <h6 className="card-subtitle mb-2 text-muted">{data.category}</h6>
 
                 <p className="card-text">
-                    <b>Glass:</b> {glass} <br />
-                    <b>Garnish:</b> {garnish} <br />
-                    <b>Ingredient Count:</b> {ingredients.length}
+                    <b>Glass:</b> {data.glass} <br />
+                    <b>Garnish:</b> {data.garnish} <br />
+                    <b>Ingredient Count:</b> {data.ingredients.length}
                 </p>
 
                 <Link 
-                    to="#"
+                    to={`/recipe/${data.name}`}
                     className="btn btn-outline-secondary"
                     data-bs-toggle="tooltip"
                     data-bs-placement="bottom"
-                    title="Click for more info"
+                    title="Click for the full recipe and to make edits"
                     role="button"
-                >View Recipe</Link>
+                >
+                    View Recipe
+                </Link>
             </div>
         </div>
     );

@@ -5,6 +5,7 @@ const { sendResponse, errorResponse } = require('lib/misc');
 
 function extractKey(res, key, docs, distinct=false) {
 	switch (key) {
+		case "id":
 		case "name":
 		case "category":
 		case "glass": {

@@ -1,6 +1,8 @@
 import React from "react";
 
 function HomePage() {
+    document.title = "Home | Cocktail Bar";
+    
     return (
         <div className="HomePage container">
             <h2>Home</h2>

@@ -77,7 +77,7 @@ function NavItem(props) {
     );
 }
 
-function Footer(props) {
+function Footer() {
     return (
         <footer className="container-fluid m-0 bg-light">
             <p>
