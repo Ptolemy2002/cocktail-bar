@@ -9,14 +9,14 @@ function GalleryPage() {
 
     if (!cocktailsCompleted) {
         return (
-            <div className="GalleryPage">
+            <div className="GalleryPage container">
                 <h2>Gallery</h2>
                 <p>Retrieving cocktails...</p>
             </div>
         );
     } else if (cocktailsFailed) {
         return (
-            <div className="GalleryPage">
+            <div className="GalleryPage container">
                 <h2>Gallery</h2>
                 <p>Failed to retrieve cocktails. Error details logged to console.</p>
             </div>
@@ -31,11 +31,13 @@ function GalleryPage() {
                 </div>
             );
         });
-        return (
-            <div className="GalleryPage">
-                <h1>Gallery</h1>
 
-                <div className="container card-container">
+        return (
+            <div className="GalleryPage container">
+                <h1>Gallery</h1>
+                <p>{cocktails.length} result(s)</p>
+
+                <div className="card-container">
                     <div className="row g-3">
                         {cocktailCards}
                     </div>
@@ -46,26 +48,42 @@ function GalleryPage() {
 }
 
 function CocktailCard(props) {
+    const [image, _setImage] = React.useState(props.cocktailData.image || "Shaker.png");
+    const [name, _setName] = React.useState(props.cocktailData.name || "Unknown Cocktail");
+    const [category, _setCategory] = React.useState(props.cocktailData.category || "Unknown Category");
+    const [glass, _setGlass] = React.useState(props.cocktailData.glass || "Unknown");
+    const [garnish, _setGarnish] = React.useState(props.cocktailData.garnish || "None");
+    const [ingredients, _setIngredients] = React.useState(props.cocktailData.ingredients || []);
+
+    function isPlaceholderImage(image) {
+        return image === "Shaker.png";
+    }
+
+    const altText = isPlaceholderImage() ? "Placeholder image" : `Image of ${name}`;
+
+
     return (
         <div className="card">
-            <img className="card-img-top" src="https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png" alt="Placeholder Image"></img>
+            <img className="card-img-top" src={`assets/images/${image}`} alt={altText}></img>
 
             <div className="card-body">
-                <h5 className="card-title">{props.cocktailData.name}</h5>
-                <h6 class="card-subtitle mb-2 text-muted">{props.cocktailData.category || "Unknown Category"}</h6>
+                <h5 className="card-title">{name}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">{category}</h6>
 
                 <p className="card-text">
-                    Placeholder
+                    <b>Glass:</b> {glass} <br />
+                    <b>Garnish:</b> {garnish} <br />
+                    <b>Ingredient Count:</b> {ingredients.length}
                 </p>
 
                 <Link 
-                    to="states/alabama/index.html"
+                    to="#"
                     className="btn btn-outline-secondary"
                     data-bs-toggle="tooltip"
                     data-bs-placement="bottom"
                     title="Click for more info"
                     role="button"
-                >View Details</Link>
+                >View Recipe</Link>
             </div>
         </div>
     );
