@@ -1,16 +1,22 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
-import HomePage from 'src/pages/HomePage';
-import NotFoundPage from './pages/NotFound';
+import { useCurrentPath, routes } from 'src/lib/Browser';
+import NotFoundPage from 'src/pages/NotFoundPage';
 
 function App() {
+    const routeElements = routes.map((route) => {
+        return (
+            <Route key={route.path} path={route.path} element={route.element} />
+        );
+    });
+
     return (
         <Router>
-            <Header title="Home" />
+            <Header title="Cocktail Bar" />
             <main className="flex-grow-1">
                 <Routes>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="*" element={<NotFoundPage />} />
+                    {routeElements}
+                    <Route key="404" path="*" element={<NotFoundPage />} />
                 </Routes>
             </main>
             <Footer />
@@ -19,11 +25,18 @@ function App() {
 }
 
 function Header(props) {
-    const [currentPath, setCurrentPath] = useState(window.location.pathname);
+    const currentPath = useCurrentPath();
 
-    function itemClass(name) {
-        return currentPath === name ? "nav-item active" : "nav-item";
-    }
+    const navItems = routes.map((route) => {
+        return (
+            <NavItem
+                key={route.path}
+                path={route.path}
+                text={route.navigationText}
+                active={currentPath === route.path}
+            />
+        );
+    });
 
     return (
         <header>
@@ -32,8 +45,8 @@ function Header(props) {
                 <button 
                     className="navbar-toggler"
                     type="button"
-                    data-toggle="collapse"
-                    data-target="#navbarSupportedContent"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent"
                     aria-controls="navbarSupportedContent"
                     aria-expanded="false"
                     aria-label="Toggle navigation"
@@ -42,18 +55,25 @@ function Header(props) {
                 </button>
 
                 <div className="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul className="navbar-nav mr-auto">
-                        <li className={itemClass("/")}>
-                            <Link to="/" className='nav-link'>Home <span className="visually-hidden">(current)</span></Link>
-                        </li>
-
-                        <li className={itemClass("/about")}>
-                            <Link to="/about" className='nav-link'>About</Link>
-                        </li>
+                    <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+                        {navItems}
                     </ul>
                 </div>
             </nav>
         </header>
+    );
+}
+
+function NavItem(props) {
+    let className = "nav-link";
+    if (props.active) {
+        className += " active";
+    }
+
+    return (
+        <li className="nav-item">
+            <Link to={props.path} className={className}>{props.text}</Link>
+        </li>
     );
 }
 

@@ -1,9 +1,19 @@
+@import "variables";
+@import "functions";
+@import "pages/home";
+@import "pages/gallery";
+@import "card";
+
 #root {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
 }
 
-header, footer, main {
+nav {
+    --bs-navbar-padding-x: 10px !important;
+}
+
+footer, main {
 	padding: 10px;
 }
