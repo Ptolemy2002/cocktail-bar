@@ -28,7 +28,7 @@ function GalleryPage() {
         const cocktailCards = cocktails.map((cocktail, i) => {
             return (
                 <div key={"col-" + i} className="col col-12 col-md-6 col-lg-4 col-xl-3">
-                    <CocktailCard
+                    <CocktailCard key={cocktail.name}
                         cocktailData={CocktailData.createFromJSON(cocktail)}
                     />
                 </div>
@@ -52,7 +52,7 @@ function GalleryPage() {
 
 function CocktailCard(props) {
     const data = props.cocktailData;
-    const altText = data.isPlaceholderImage() ? "Placeholder image" : `Image of ${name}`;
+    const altText = data.isPlaceholderImage() ? "Placeholder image" : `Image of a "${data.name}" cocktail`;
 
     return (
         <div className="card">
@@ -68,7 +68,8 @@ function CocktailCard(props) {
                     <b>Ingredient Count:</b> {data.ingredients.length}
                 </p>
 
-                <Link 
+                <Link
+                    key="view-recipe"
                     to={`/recipe/${data.name}`}
                     className="btn btn-outline-secondary"
                     data-bs-toggle="tooltip"

@@ -41,7 +41,7 @@ function Header(props) {
     return (
         <header>
             <nav className="navbar navbar-expand-lg navbar-light bg-light">
-                <Link to="#" className="navbar-brand">{props.title}</Link>
+                <Link key="brand" to="#" className="navbar-brand">{props.title}</Link>
                 <button 
                     className="navbar-toggler"
                     type="button"
