@@ -54,8 +54,6 @@ function transformQueryMatchWhole(query) {
         }
 
         query[key] = new RegExp("^" + value + "$", "i");
-        // Used to prevent the accentInsensitiveRegex from converting another time
-        query[key].source.accentInsensitive = true;
     }
 
     return query;
