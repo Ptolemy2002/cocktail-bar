@@ -75,8 +75,6 @@ function findFunction(fun) {
             query = transformQueryAccentInsensitive(query);
         }
 
-        console.log(query);
-
         return await collection[fun](query);
     }
 }
