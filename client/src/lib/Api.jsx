@@ -6,6 +6,8 @@ function useApi(path, args={}) {
     const [failed, setFailed] = useState(false);
     const [error, setError] = useState(null);
 
+    const delaySend = args.delaySend || false;
+
     const _onSuccess = args.onSuccess || null;
     function onSuccess(data) {
         setData(data);
@@ -15,6 +17,7 @@ function useApi(path, args={}) {
 
     const _onFailure = args.onFailure || null;
     function onFailure(err) {
+        setData(null);
         setFailed(true);
         setCompleted(true);
         setError(err);
@@ -50,7 +53,7 @@ function useApi(path, args={}) {
         root = process.env.REACT_APP_API_URL;
     }
 
-    useEffect(() => {
+    function sendRequest() {
         fetch(`${root}/api/v1/${encodeURIComponent(path)}`)
             .then((res) => res.json())
             .catch((err) => {
@@ -63,9 +66,15 @@ function useApi(path, args={}) {
                     onSuccess(data);
                 }
             });
-    }, [path]);
+    }
 
-    return [data, completed, failed, error];
+    useEffect(() => {
+        if (!delaySend) {
+            sendRequest();
+        }
+    }, []);
+
+    return [data, completed, failed, error, sendRequest];
 }
 
 export {useApi};
