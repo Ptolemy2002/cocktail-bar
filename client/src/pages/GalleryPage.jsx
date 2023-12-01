@@ -6,18 +6,18 @@ import { CocktailData } from "src/lib/CocktailUtil";
 function GalleryPage() {
     document.title = "Gallery | Cocktail Bar";
     
-    const [cocktails, cocktailsCompleted, cocktailsFailed, cockTailsError, refresh] = useApi("recipes/all", {
+    const [cocktails, cocktailsStatus, refresh] = useApi("recipes/all", {
         onFailure: console.error
     });
 
-    if (!cocktailsCompleted) {
+    if (!cocktailsStatus.completed) {
         return (
             <div className="GalleryPage container">
                 <h2>Gallery</h2>
                 <p>Retrieving cocktails...</p>
             </div>
         );
-    } else if (cocktailsFailed) {
+    } else if (cocktailsStatus.failed) {
         return (
             <div className="GalleryPage container">
                 <h2>Gallery</h2>

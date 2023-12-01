@@ -8,14 +8,14 @@ function RecipeDetailPage() {
     const [cocktailData, setCocktailData] = useState(null);
     const [pushStarted, setPushStarted] = useState(false);
 
-    const [pullResult, pullCompleted, pullFailed, pullError, refresh] = useApi("recipes/name-equals/" + encodeURIComponent(name), {
+    const [pullResult, pullStatus, refresh] = useApi("recipes/name-equals/" + encodeURIComponent(name), {
         onFailure: console.error,
         onSuccess: (result) => {
             setCocktailData(CocktailData.createFromJSON(result[0]));
         }
     });
 
-    const [pushResult, pushCompleted, pushFailed, pushError, _push] = useApi("recipes/update/by-id/" + encodeURIComponent(cocktailData?.id), {
+    const [pushResult, pushStatus, _push] = useApi("recipes/update/by-id/" + encodeURIComponent(cocktailData?.id), {
         method: "POST",
         body: cocktailData,
         // This prevvents immediately sending the request - Use the push() function instead
@@ -37,14 +37,14 @@ function RecipeDetailPage() {
 
     document.title = `${name} | Cocktail Bar`;
 
-    if (!pullCompleted) {
+    if (!pullStatus.completed) {
         return (
             <div className="RecipeDetailPage container">
                 <h1>{name}</h1>
                 <p>Retrieving cocktail data...</p>
             </div>
         );
-    } else if (pullFailed) {
+    } else if (pullStatus.failed) {
         return (
             <div className="RecipeDetailPage container">
                 <h1>{name}</h1>
@@ -55,11 +55,11 @@ function RecipeDetailPage() {
         let pushInfoElement = null;
 
         if (pushStarted) {
-            if (!pushCompleted) {
+            if (!pushStatus.completed) {
                 pushInfoElement = (
                     <p className="text-info">Updating cocktail data...</p>
                 );
-            } else if (pushFailed) {
+            } else if (pushStatus.failed) {
                 pushInfoElement = (
                     <p className="text-danger">Failed to update cocktail data. Error details logged to console.</p>
                 );

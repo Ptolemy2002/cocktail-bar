@@ -53,7 +53,7 @@ function useApi(path, args={}) {
         root = process.env.REACT_APP_API_URL;
     }
 
-    function sendRequest() {
+    function sendRequest(localArgs={}) {
         setData(null);
         setCompleted(false);
         setFailed(false);
@@ -63,12 +63,15 @@ function useApi(path, args={}) {
             .then((res) => res.json())
             .catch((err) => {
                 onFailure(err);
+                if (localArgs.onFailure) localArgs.onFailure(err);
             })
             .then((data) => {
                 if (!data || data._isError) {
                     onFailure(data);
+                    if (localArgs.onFailure) localArgs.onFailure(data);
                 } else {
                     onSuccess(data);
+                    if (localArgs.onSuccess) localArgs.onSuccess(data);
                 }
             });
     }
@@ -79,7 +82,7 @@ function useApi(path, args={}) {
         }
     }, []);
 
-    return [data, completed, failed, error, sendRequest];
+    return [data, {completed, failed, error}, sendRequest];
 }
 
 export {useApi};
