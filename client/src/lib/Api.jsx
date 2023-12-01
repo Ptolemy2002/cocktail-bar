@@ -25,7 +25,7 @@ function useApi(path, args={}) {
     }
 
     const method = args.method || "GET";
-    const queryParams = args.queryParams || null;
+    const queryParams = args.queryParams || {};
     const body = (
         args.body === null || args.body === undefined ?
             null:
@@ -40,15 +40,7 @@ function useApi(path, args={}) {
         options.body = body;
     }
 
-    if (queryParams) {
-        const queryString = Object.keys(queryParams)
-            .map((key) => `${encodeURIComponent(key.toString())}=${encodeURIComponent(queryParams[key].toString())}`)
-            .join("&");
-        path = `${path}?${queryString}`;
-    }
-
     let root = "http://localhost:8080";
-
     if (process.env.NODE_ENV === "production" && process.env.REACT_APP_API_URL) {
         root = process.env.REACT_APP_API_URL;
     }
@@ -59,7 +51,31 @@ function useApi(path, args={}) {
         setFailed(false);
         setError(null);
 
-        fetch(`${root}/api/v1/${path}`, options)
+        const localOptions = {...options};
+        let localPath = path;
+        if (localArgs.body) {
+            Object.keys(localArgs.body).forEach((key) => {
+                localOptions.body[key] = localArgs.body[key];
+            });
+        }
+
+        let localQueryParams = queryParams;
+        if (localArgs.queryParams) {
+            if (!localQueryParams) localQueryParams = {};
+            Object.keys(localArgs.queryParams).forEach((key) => {
+                localQueryParams[key] = localArgs.queryParams[key];
+            });
+        }
+
+        if (localQueryParams) {
+            const queryString = Object.keys(localQueryParams)
+                .map((key) => `${encodeURIComponent(key.toString())}=${encodeURIComponent(queryParams[key].toString())}`)
+                .join("&");
+            localPath = `${localPath}?${queryString}`;
+        }
+        
+
+        fetch(`${root}/api/v1/${localPath}`, localOptions)
             .then((res) => res.json())
             .catch((err) => {
                 onFailure(err);
