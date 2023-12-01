@@ -28,6 +28,8 @@ function Header(props) {
     const currentPath = useCurrentPath();
 
     const navItems = routes.map((route) => {
+        if (!route.navigationText) return null;
+        
         return (
             <NavItem
                 key={route.path}

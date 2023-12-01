@@ -6,7 +6,7 @@ import { CocktailData } from "src/lib/CocktailUtil";
 function GalleryPage() {
     document.title = "Gallery | Cocktail Bar";
     
-    const [cocktails, cocktailsCompleted, cocktailsFailed] = useApi("recipes/all", {
+    const [cocktails, cocktailsCompleted, cocktailsFailed, cockTailsError, refresh] = useApi("recipes/all", {
         onFailure: console.error
     });
 
@@ -40,6 +40,13 @@ function GalleryPage() {
                 <h1>Gallery</h1>
                 <p>{cocktails.length} result(s)</p>
 
+                <button
+                    className="btn btn-outline-secondary mb-3"
+                    onClick={refresh}
+                >
+                    Refresh
+                </button>
+
                 <div className="card-container">
                     <div className="row g-3">
                         {cocktailCards}
@@ -56,7 +63,7 @@ function CocktailCard(props) {
 
     return (
         <div className="card">
-            <img className="card-img-top" src={`assets/images/${data.image}`} alt={altText}></img>
+            <img className="card-img-top" src={`/assets/images/${data.image}`} alt={altText}></img>
 
             <div className="card-body">
                 <h5 className="card-title">{data.name}</h5>

@@ -54,7 +54,12 @@ function useApi(path, args={}) {
     }
 
     function sendRequest() {
-        fetch(`${root}/api/v1/${encodeURIComponent(path)}`)
+        setData(null);
+        setCompleted(false);
+        setFailed(false);
+        setError(null);
+
+        fetch(`${root}/api/v1/${path}`, options)
             .then((res) => res.json())
             .catch((err) => {
                 onFailure(err);

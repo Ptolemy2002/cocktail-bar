@@ -1,0 +1,30 @@
+@import "../variables";
+@import "../functions";
+
+// Put styles here that you want to be applied to the recipe detail page only
+.RecipeDetailPage {
+    .recipe-detail-container {
+        .bs-breakpoint-max(md, {
+            display: flex;
+            flex-direction: column;
+        });
+
+        .cover-img {
+            .bs-breakpoint-max(md, {
+                max-width: 100%;
+                margin-bottom: 20px;
+                .center-horizontal();
+            });
+    
+            .bs-breakpoint-min(md, {
+                max-width: 30%;
+                float: left;
+                margin-right: 20px;
+            });
+        }
+
+        .ingredient-list {
+            overflow: hidden;
+        }
+    }
+}

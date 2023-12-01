@@ -1,6 +1,3 @@
-import React from "react";
-import { useApi } from "src/lib/Api";
-
 class CocktailData {
     id = null;
     _name = "Unknown Cocktail";
@@ -343,6 +340,10 @@ class IngredientData extends I_IngredientData {
     clone() {
         return IngredientData.createFromJSON(this.toJSON());
     }
+
+    isSpecial() {
+        return false;
+    }
 }
 
 class SpecialIngredientData extends I_IngredientData {
@@ -383,6 +384,10 @@ class SpecialIngredientData extends I_IngredientData {
 
     clone() {
         return SpecialIngredientData.createFromJSON(this.toJSON());
+    }
+
+    isSpecial() {
+        return true;
     }
 }
 
