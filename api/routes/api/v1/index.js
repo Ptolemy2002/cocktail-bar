@@ -47,7 +47,7 @@ function extractProps(res, prop, docs, distinct=false) {
 			return result.filter(i => i !== undefined);
 		}
 		default: {
-			sendResponse(res, errorResponse(new SyntaxError("Invalid property name")), { errorStatus: 400 });
+			sendResponse(res, errorResponse(new SyntaxError(`Invalid property name: ${prop}`)), { errorStatus: 400 });
 		}
 	}
 }

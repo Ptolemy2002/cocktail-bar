@@ -51,7 +51,7 @@ function useApi(path, args={}) {
     }
 
     useEffect(() => {
-        fetch(`${root}/api/v1/${path}`)
+        fetch(`${root}/api/v1/${encodeURIComponent(path)}`)
             .then((res) => res.json())
             .catch((err) => {
                 onFailure(err);

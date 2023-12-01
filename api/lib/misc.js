@@ -1,5 +1,7 @@
 function sendResponse(res, data, args={}) {
-	if (!data || data._isError) {
+    if (!data) res.status(500).json(data);
+
+	if (data._isError) {
         const status = args.errorStatus || (data.type === "TypeError" ? 400 : 500);
 		res.status(status).json(data);
 	} else {
@@ -7,10 +9,11 @@ function sendResponse(res, data, args={}) {
 	}
 }
 
-function errorResponse(err) {
+function errorResponse(err, status) {
     return {
         _isError: true,
         type: err.name,
+        status: status || 500,
         message: err.message
     }
 }

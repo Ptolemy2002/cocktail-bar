@@ -68,7 +68,7 @@ function transformQueryMatchWhole(query) {
 }
 
 function findFunction(fun) {
-	return async (collection, query, args={}) => {
+	return async (collection, query={}, args={}) => {
         if (args.caseInsensitive) {
             query = transformQueryCaseInsensitive(query);
         }
@@ -84,7 +84,9 @@ function findFunction(fun) {
         // Verify that each id is a valid ObjectId
         Object.keys(query).forEach((key) => {
             if (key === "_id" && !mongoose.isValidObjectId(query[key])) {
-                throw new TypeError(`Invalid ObjectId: ${query[key]}`);
+                const err = new TypeError(`Invalid ObjectId: ${query[key]}`);
+                err.status = 400;
+                throw err;
             }
         });
 
@@ -136,7 +138,8 @@ function tryFunc(func) {
         try {
             return await func(...args);
         } catch (err) {
-            return errorResponse(err);
+            console.error(err);
+            return errorResponse(err, err.status);
         }
     }
 }

@@ -101,13 +101,6 @@ class CocktailData {
         this.dirty = true;
     }
 
-    static createFromID(id) {
-        const result = new CocktailData();
-        result.id = id;
-        result.checkpoint();
-        return result;
-    }
-
     static createFromJSON(cocktailState) {
         const result = new CocktailData();
         result.fromJSON(cocktailState).checkpoint();
@@ -390,12 +383,6 @@ class SpecialIngredientData extends I_IngredientData {
 
     clone() {
         return SpecialIngredientData.createFromJSON(this.toJSON());
-    }
-
-    revert() {
-        this.fromJSON(this.previousState);
-        this.dirty = false;
-        return this;
     }
 }
 
