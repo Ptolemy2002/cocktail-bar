@@ -1,6 +1,7 @@
 function sendResponse(res, data, args={}) {
-	if (data._isError) {
-		res.status(args.errorStatus || 500).json(data);
+	if (!data || data._isError) {
+        const status = args.errorStatus || (data.type === "TypeError" ? 400 : 500);
+		res.status(status).json(data);
 	} else {
 		res.status(args.status || 200).json(data);
 	}

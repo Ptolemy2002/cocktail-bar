@@ -4,22 +4,26 @@ const { errorResponse } = require('lib/misc');
 require('models/Recipe');
 const Recipe = mongoose.model('recipes');
 
-function accentInsensitive(string = '') {    
-    return string
-        .replaceAll(/a/g, '(a|á|à|ä|â)')
-        .replaceAll(/A/g, '(A|Á|À|Ä|Â)')
-        .replaceAll(/e/g, '(e|é|è|ë|ê)')
-        .replaceAll(/E/g, '(E|É|È|Ë|Ê)')
-        .replaceAll(/i/g, '(i|í|ì|ï|î)')
-        .replaceAll(/I/g, '(I|Í|Ì|Ï|Î)')
-        .replaceAll(/o/g, '(o|ó|ò|ö|ô)')
-        .replaceAll(/O/g, '(O|Ó|Ò|Ö|Ô)')
-        .replaceAll(/u/g, '(u|ú|ù|ü|û)')
-        .replaceAll(/U/g, '(U|Ú|Ù|Ü|Û)');
+function accentInsensitive(string = '') {   
+    const accentPatterns = [
+        "(a|á|à|ä|â)", "(A|Á|À|Ä|Â)",
+        "(e|é|è|ë|ê)", "(E|É|È|Ë|Ê)",
+        "(i|í|ì|ï|î)", "(I|Í|Ì|Ï|Î)",
+        "(o|ó|ò|ö|ô)", "(O|Ó|Ò|Ö|Ô)",
+        "(u|ú|ù|ü|û)", "(U|Ú|Ù|Ü|Û)"
+    ]
+    
+    accentPatterns.forEach((pattern) => {
+        string = string.replaceAll(new RegExp(pattern, "g"), pattern);
+    });
+
+    return string;
 }
 
 function transformQueryCaseInsensitive(query) {
     for (let key in query) {
+        if (key === "_id") continue;
+        
         let value = query[key];
         if (typeof value === "string") {
             query[key] = new RegExp(value, "i");
@@ -31,6 +35,8 @@ function transformQueryCaseInsensitive(query) {
 
 function transformQueryAccentInsensitive(query) {
     for (let key in query) {
+        if (key === "_id") continue;
+
         let value = query[key];
         if (typeof value === "string") {
             query[key] = new RegExp(accentInsensitive(value));
@@ -44,6 +50,8 @@ function transformQueryAccentInsensitive(query) {
 
 function transformQueryMatchWhole(query) {
     for (let key in query) {
+        if (key === "_id") continue;
+
         let value = query[key];
         if (value instanceof RegExp) {
             value = value.source;
@@ -73,17 +81,20 @@ function findFunction(fun) {
             query = transformQueryAccentInsensitive(query);
         }
 
+        // Verify that each id is a valid ObjectId
+        Object.keys(query).forEach((key) => {
+            if (key === "_id" && !mongoose.isValidObjectId(query[key])) {
+                throw new TypeError(`Invalid ObjectId: ${query[key]}`);
+            }
+        });
+
         return await collection[fun](query);
     }
 }
 
-const find = findFunction("find");
+const findAll = findFunction("find");
 const findOne = findFunction("findOne");
 const countAll = findFunction("countDocuments");
-
-function findAll(collection) {
-    return find(collection, {});
-}
 
 function whereEqual(fun) {
     return (collection, key, value, caseInsensitive=false) => {
@@ -103,8 +114,8 @@ function whereContains(fun) {
     };
 }
 
-const findWhereEqual = whereEqual(find);
-const findWhereContains = whereContains(find);
+const findWhereEqual = whereEqual(findAll);
+const findWhereContains = whereContains(findAll);
 const findOneWhereEqual = whereEqual(findOne);
 const findOneWhereContains = whereContains(findOne);
 const countWhereEqual = whereEqual(countAll);
@@ -135,9 +146,8 @@ module.exports = {
     "transformQueryCaseInsensitive": tryFunc(transformQueryCaseInsensitive),
     "transformQueryAccentInsensitive": tryFunc(transformQueryAccentInsensitive),
     "transformQueryMatchWhole": tryFunc(transformQueryMatchWhole),
-    "find": tryFunc(find),
-    "findOne": tryFunc(findOne),
     "findAll": tryFunc(findAll),
+    "findOne": tryFunc(findOne),
     "countAll": tryFunc(countAll),
     "findWhereEqual": tryFunc(findWhereEqual),
     "findWhereContains": tryFunc(findWhereContains),
