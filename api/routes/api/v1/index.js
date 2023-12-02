@@ -124,12 +124,12 @@ router.get("/recipes/:key-contains/:value/count", async (req, res) => {
 });
 
 router.post("/recipes/update/by-name/:name", async (req, res) => {
-	const result = await updateOne(Recipe, { name: req.params.name }, req.body);
+	const result = await updateOne(Recipe, { name: req.params.name }, {$set: req.body});
 	sendResponse(res, result);
 });
 
 router.post("/recipes/update/by-id/:id", async (req, res) => {
-	const result = await updateOne(Recipe, { _id: req.params.id }, req.body);
+	const result = await updateOne(Recipe, { _id: req.params.id }, {$set: req.body});
 	sendResponse(res, result);
 });
 

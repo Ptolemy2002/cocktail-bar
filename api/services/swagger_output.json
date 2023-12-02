@@ -365,6 +365,60 @@
           }
         }
       }
+    },
+    "/recipes/update/by-name/{name}": {
+      "post": {
+        "description": "Update a Recipe with the specified name. Data to update is specified in the request body.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          }
+        }
+      }
+    },
+    "/recipes/update/by-id/{id}": {
+      "post": {
+        "description": "Update a Recipe with the specified id. Data to update is specified in the request body.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          }
+        }
+      }
     }
   }
 }
