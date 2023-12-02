@@ -316,14 +316,20 @@ function RecipeDetailEdit(props) {
             });
 
             imageListElement = (
-                <select className="form-control mb-1" value={image} onChange={imageChanged}>
-                    {imageOptions}
-                </select>
+                <div className="mb-1">
+                    Choose an image
+                    <select className="form-control mb-1" value={image} onChange={imageChanged}>
+                        {imageOptions}
+                    </select>
+                </div>
             );
         }
     } else {
         imageListElement = (
-            <input type="text" placeholder="Enter Image Here" className="form-control mb-1" value={image} onChange={imageChanged} />
+            <div className="mb-1">
+                If your image source is a URL, prepend the URL with "url-" (without quotes). <br />
+                <input type="text" placeholder="Enter Image Here" className="form-control" value={image} onChange={imageChanged} />
+            </div>
         );
     }
 
@@ -345,9 +351,12 @@ function RecipeDetailEdit(props) {
             });
 
             categoryListElement = (
-                <select className="form-control mb-1" value={category} onChange={categoryChanged}>
-                    {categoryOptions}
-                </select>
+                <div className="mb-1">
+                    Choose a category
+                    <select className="form-control mb-1" value={category} onChange={categoryChanged}>
+                        {categoryOptions}
+                    </select>
+                </div>
             );
         }
     } else {
@@ -374,9 +383,12 @@ function RecipeDetailEdit(props) {
             });
 
             glassListElement = (
-                <select className="form-control mb-1" value={glass} onChange={glassChanged}>
-                    {glassOptions}
-                </select>
+                <div className="mb-1">
+                    Choose a glass
+                    <select className="form-control mb-1" value={glass} onChange={glassChanged}>
+                        {glassOptions}
+                    </select>
+                </div>
             );
         }
     } else {
@@ -403,9 +415,12 @@ function RecipeDetailEdit(props) {
             });
 
             garnishListElement = (
-                <select className="form-control mb-1" value={garnish} onChange={garnishChanged}>
-                    {garnishOptions}
-                </select>
+                <div className="mb-1">
+                    Choose a garnish
+                    <select className="form-control mb-1" value={garnish} onChange={garnishChanged}>
+                        {garnishOptions}
+                    </select>
+                </div>
             );
         }
     } else {
@@ -418,12 +433,12 @@ function RecipeDetailEdit(props) {
         <div className="recipe-detail-container">
             <h2>Properties</h2>
             <div className="form-group mb-3">
-                <label htmlFor="name">Name</label>
+                <label htmlFor="name"><h6>Name</h6></label>
                 <input type="text" placeholder="Enter Name Here" className="form-control" value={name} onChange={nameChanged} />
             </div>
 
             <div className="form-group mb-3">
-                <label htmlFor="image">Image</label>
+                <label htmlFor="image"><h6>Image</h6></label>
                 {imageListElement}
                 <div className="btns-hor">
                     <button className="btn btn-outline-secondary" onClick={() => setCustomImage(!customImage)}>
@@ -440,7 +455,7 @@ function RecipeDetailEdit(props) {
             </div>
 
             <div className="form-group mb-3">
-                <label htmlFor="category">Category</label>
+                <label htmlFor="category"><h6>Category</h6></label>
                 {categoryListElement}
                 <div className="btns-hor">
                     <button className="btn btn-outline-secondary" onClick={() => setCustomCategory(!customCategory)}>
@@ -456,7 +471,7 @@ function RecipeDetailEdit(props) {
                 </div>
             </div>
             <div className="form-group mb-3">
-                <label htmlFor="glass">Glass</label>
+                <label htmlFor="glass"><h6>Glass</h6></label>
                 {glassListElement}
                 <div className="btns-hor">
                     <button className="btn btn-outline-secondary" onClick={() => setCustomGlass(!customGlass)}>
@@ -472,7 +487,7 @@ function RecipeDetailEdit(props) {
                 </div>
             </div>
             <div className="form-group mb-3">
-                <label htmlFor="garnish">Garnish</label>
+                <label htmlFor="garnish"><h6>Garnish</h6></label>
                 {garnishListElement}
                 <div className="btns-hor">
                     <button className="btn btn-outline-secondary" onClick={() => setCustomGarnish(!customGarnish)}>
@@ -493,7 +508,8 @@ function RecipeDetailEdit(props) {
 
             <h2>Preparation Instructions</h2>
             <textarea ref={preparationTextBox} className="form-control mb-3" value={preparation} onChange={preparationChanged} />
-
+            
+            <h2>Options</h2>
             <div className="btns-hor">
                 <button className="btn btn-outline-secondary" onClick={() => {
                     save();
@@ -632,7 +648,7 @@ function IngredientEdit(props) {
         return (
             <div className="ingredient-edit">
                 <div className="form-group mb-1">
-                    <label htmlFor="name">Name</label>
+                    <label htmlFor="name"><h6>Name</h6></label>
                     <input type="text" placeholder="Enter Name Here" className="form-control" value={name} onChange={nameChanged} />
                 </div>
 
@@ -644,18 +660,18 @@ function IngredientEdit(props) {
                 {
                     useLabel ? (
                         <div className="form-group mb-1">
-                            <label htmlFor="label">Label</label>
+                            <label htmlFor="label"><h6>Label</h6></label>
                             <input type="text" placeholder="Enter Label Here" className="form-control" value={label} onChange={labelChanged} />
                         </div>
                     ) : null
                 }
                 
                 <div className="form-group mb-1">
-                    <label htmlFor="amount">Amount</label>
+                    <label htmlFor="amount"><h6>Amount</h6></label>
                     <input type="text" placeholder="Enter Amount Here" className="form-control" value={amount} onChange={amountChanged} />
                 </div>
                 <div className="form-group mb-1">
-                    <label htmlFor="unit">Unit</label>
+                    <label htmlFor="unit"><h6>Unit</h6></label>
                     <input type="text" placeholder="Enter Unit Here" className="form-control" value={unit} onChange={unitChanged} />
                 </div>
                 <div className="btns-hor">
@@ -685,7 +701,7 @@ function IngredientEdit(props) {
         return (
             <div className="ingredient-edit">
                 <div className="form-group mb-1">
-                    <label htmlFor="name">Text</label>
+                    <label htmlFor="name"><h6>Text</h6></label>
                     <input type="text" placeholder="Enter Text Here" className="form-control" value={text} onChange={textChanged} />
                 </div>
                 <div className="btns-hor">
