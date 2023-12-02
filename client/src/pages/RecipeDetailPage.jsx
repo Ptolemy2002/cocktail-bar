@@ -1,50 +1,53 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import { useApi } from "src/lib/Api";
 import { useParams } from "react-router-dom";
 import { CocktailData } from "src/lib/CocktailUtil";
 
 function RecipeDetailPage() {
     const { name } = useParams();
-    const [cocktailData, setCocktailData] = useState(null);
-    const [pushStarted, setPushStarted] = useState(false);
-
-    const [pullResult, pullStatus, refresh] = useApi("recipes/name-equals/" + encodeURIComponent(name), {
-        onFailure: console.error,
-        onSuccess: (result) => {
-            setCocktailData(CocktailData.createFromJSON(result[0]));
-        }
-    });
-
-    const [pushResult, pushStatus, _push] = useApi("recipes/update/by-id/" + encodeURIComponent(cocktailData?.id), {
-        method: "POST",
-        body: cocktailData,
-        // This prevvents immediately sending the request - Use the push() function instead
-        delaySend: true,
-        onFailure: (err) => {
-            console.error(err);
-            setPushStarted(false);
-        },
-        onSuccess: () => {
-            refresh();
-            setPushStarted(false);
-        }
-    });
-
-    function push() {
-        setPushStarted(true);
-        _push();
-    }
+    const [firstPull, setFirstPull] = useState(true);
 
     document.title = `${name} | Cocktail Bar`;
 
-    if (!pullStatus.completed) {
+    const [pullResult, pullStatus, _pull] = useApi("recipes/name-equals/" + encodeURIComponent(name), {
+        // This prevents immediately sending the request - Use the pull() function instead
+        delaySend: true,
+        onSuccess: () => {
+            if (firstPull) {
+                setFirstPull(false);
+            }
+        },
+
+        onFailure: () => {
+            if (firstPull) {
+                setFirstPull(false);
+            }
+        }
+    });
+
+    const [pushResult, pushStatus, _push] = useApi("recipes/update/by-name/" + encodeURIComponent(name), {
+        method: "POST",
+        // This prevents immediately sending the request - Use the push() function instead
+        delaySend: true
+    });
+
+    const [cocktailData] = useState(CocktailData.createFromJSON({name: name}, _push, _pull));
+
+    // Pull the cocktail data when the component is first mounted
+    useEffect(() => {
+        cocktailData.pull();
+    }, []);
+
+    // The use of firstPull here is necessary because the useEffect() hook is called after the first render and lastRequest is initially null.
+    // Thus, the first render would show the main section of the page when it should show the loading message.
+    if ((cocktailData.lastRequest === "pull" && cocktailData.requestInProgress) || firstPull) {
         return (
             <div className="RecipeDetailPage container">
                 <h1>{name}</h1>
                 <p>Retrieving cocktail data...</p>
             </div>
         );
-    } else if (pullStatus.failed) {
+    } else if (cocktailData.lastRequest === "pull" && cocktailData.requestFailed) {
         return (
             <div className="RecipeDetailPage container">
                 <h1>{name}</h1>
@@ -54,12 +57,12 @@ function RecipeDetailPage() {
     } else {
         let pushInfoElement = null;
 
-        if (pushStarted) {
-            if (!pushStatus.completed) {
+        if (cocktailData.lastRequest === "push") {
+            if (cocktailData.requestInProgress) {
                 pushInfoElement = (
                     <p className="text-info">Updating cocktail data...</p>
                 );
-            } else if (pushStatus.failed) {
+            } else if (cocktailData.requestFailed) {
                 pushInfoElement = (
                     <p className="text-danger">Failed to update cocktail data. Error details logged to console.</p>
                 );

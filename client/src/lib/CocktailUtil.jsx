@@ -8,6 +8,13 @@ class CocktailData {
     _ingredients = [];
     _preparation = "None";
 
+    lastRequest = null;
+    requestInProgress = false;
+    requestFailed = false;
+    requestError = null;
+    _push = null;
+    _pull = null;
+
     previousStates = [];
     _stateIndex = 0;
     _dirty = false;
@@ -98,9 +105,19 @@ class CocktailData {
         this.dirty = true;
     }
 
-    static createFromJSON(cocktailState) {
+    static createFromID(id, _push, _pull) {
+        const result = new CocktailData();
+        result.id = id;
+        result._push = _push;
+        result._pull = _pull;
+        return result;
+    }
+
+    static createFromJSON(cocktailState, _push, _pull) {
         const result = new CocktailData();
         result.fromJSON(cocktailState).checkpoint();
+        result._push = _push;
+        result._pull = _pull;
         return result;
     }
 
@@ -142,7 +159,7 @@ class CocktailData {
     }
 
     clone() {
-        return CocktailData.createFromJSON(this.toJSON());
+        return CocktailData.createFromJSON(this.toJSON(), this._push, this._pull);
     }
 
     undo(steps = 1) {
@@ -185,6 +202,77 @@ class CocktailData {
         this.previousStates.push(this.toJSON());
         this.dirty = false;
         this.stateIndex = this.previousStates.length - 1;
+
+        return this;
+    }
+
+    push() {
+        if (!this._push) throw new TypeError("Push function not set.");
+        if (this.requestInProgress) {
+            if (this.lastRequest === "push") {
+                console.warn("Attempted to push data while a push request was already in progress. Ignoring...");
+                return this;
+            } else {
+                throw new Error("Attempted to push data while a pull request was in progress. This is not supported.");
+            }
+        }
+
+        this.lastRequest = "push";
+        this.requestError = null;
+        this.requestFailed = false;
+        this.requestInProgress = true;
+        this._push({
+            body: this.toJSON(),
+            onSuccess: () => {
+                this.requestInProgress = false;
+            },
+
+            onFailure: (err) => {
+                console.error(err);
+                this.requestError = err;
+                this.requestFailed = true;
+                this.requestInProgress = false;
+            }
+        });
+
+        return this;
+    }
+
+    pull() {
+        if (!this._pull) throw new TypeError("Pull function not set.");
+        if (this.requestInProgress) {
+            if (this.lastRequest === "pull") {
+                console.warn("Attempted to pull data while a pull request was already in progress. Ignoring...");
+                return this;
+            } else {
+                throw new Error("Attempted to pull data while a push request was in progress. This is not supported.");
+            }
+        }
+
+        this.lastRequest = "pull";
+        this.requestError = null;
+        this.requestFailed = false;
+        this.requestInProgress = true;
+
+        this._pull({
+            onSuccess: (data) => {
+                if (Array.isArray(data) && data.length > 0) {
+                    this.fromJSON(data[0]);
+                } else {
+                    this.fromJSON(data);
+                }
+
+                this.checkpoint();
+                this.requestInProgress = false;
+            },
+
+            onFailure: (err) => {
+                console.error(err);
+                this.requestError = err;
+                this.requestFailed = true;
+                this.requestInProgress = false;
+            }
+        });
 
         return this;
     }
