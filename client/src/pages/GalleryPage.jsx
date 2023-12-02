@@ -7,7 +7,13 @@ function GalleryPage() {
     document.title = "Gallery | Cocktail Bar";
     
     const [cocktails, cocktailsStatus, refresh] = useApi("recipes/all", {
-        onFailure: console.error
+        onFailure: console.error,
+        onSuccess: (data) => {
+            // Sort Alphabetically by name
+            data.sort((a, b) => {
+                return a.name.localeCompare(b.name);
+            });
+        }
     });
 
     if (!cocktailsStatus.completed) {

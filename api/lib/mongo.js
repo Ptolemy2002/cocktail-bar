@@ -133,6 +133,41 @@ async function list(collection, field) {
     return result.map((item) => item[field]);
 }
 
+function updateFunction(fun) {
+    return async (collection, query={}, update={}, args={}) => {
+        if (args.caseInsensitive) {
+            query = transformQueryCaseInsensitive(query);
+        }
+
+        if (args.matchWhole) {
+            query = transformQueryMatchWhole(query);
+        }
+
+        if (!args.accentSensitive) {
+            query = transformQueryAccentInsensitive(query);
+        }
+
+        // Verify that each id is a valid ObjectId
+        Object.keys(query).forEach((key) => {
+            if (key === "_id" && !mongoose.isValidObjectId(query[key])) {
+                const err = new TypeError(`Invalid ObjectId: ${query[key]}`);
+                err.status = 400;
+                throw err;
+            }
+        });
+
+        // If the update has an _id, remove it
+        if (update.hasOwnProperty("_id")) {
+            delete update._id;
+        }
+
+        return await collection[fun](query, update);
+    }
+}
+
+const updateOne = updateFunction("updateOne");
+const updateMany = updateFunction("updateMany");
+
 function tryFunc(func) {
     return async (...args) => {
         try {
@@ -160,6 +195,8 @@ module.exports = {
     "countWhereContains": tryFunc(countWhereContains),
     "listDistinct": tryFunc(listDistinct),
     "list": tryFunc(list),
+    "updateOne": tryFunc(updateOne),
+    "updateMany": tryFunc(updateMany),
     
     Recipe
 };

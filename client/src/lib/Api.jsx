@@ -25,7 +25,7 @@ function useApi(path, args={}) {
     }
 
     const method = args.method || "GET";
-    const queryParams = args.queryParams || {};
+    const queryParams = args.queryParams || null;
     const body = (
         args.body === null || args.body === undefined ?
             null:
@@ -51,12 +51,19 @@ function useApi(path, args={}) {
         setFailed(false);
         setError(null);
 
-        const localOptions = {...options};
+        const localOptions = {...(options || {})};
         let localPath = path;
         if (localArgs.body) {
+            if (!localOptions.body) localOptions.body = "{}";
+            localOptions.body = JSON.parse(localOptions.body);
+
             Object.keys(localArgs.body).forEach((key) => {
                 localOptions.body[key] = localArgs.body[key];
             });
+            localOptions.body = JSON.stringify(localOptions.body);
+            localOptions.headers = {
+                "Content-Type": "application/json"
+            };
         }
 
         let localQueryParams = queryParams;
@@ -74,7 +81,6 @@ function useApi(path, args={}) {
             localPath = `${localPath}?${queryString}`;
         }
         
-
         fetch(`${root}/api/v1/${localPath}`, localOptions)
             .then((res) => res.json())
             .catch((err) => {

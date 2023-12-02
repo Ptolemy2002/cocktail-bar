@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { findAll, findWhereEqual, findWhereContains, countAll, countWhereEqual, countWhereContains, Recipe } = require('lib/mongo');
+const { findAll, findWhereEqual, findWhereContains, countAll, countWhereEqual, countWhereContains, updateOne, Recipe } = require('lib/mongo');
 const { sendResponse, errorResponse } = require('lib/misc');
 
 function convertKey(key) {
@@ -25,6 +25,7 @@ function extractProps(res, prop, docs, distinct=false) {
 		case "category":
 		case "preparation":
 		case "garnish":
+		case "image":
 		case "glass": {
 			let result = docs.map(doc => doc[prop]);
 			if (distinct) {
@@ -119,6 +120,16 @@ router.get("/recipes/:key-contains/:value/list-:prop/distinct", async (req, res)
 
 router.get("/recipes/:key-contains/:value/count", async (req, res) => {
 	const result = await countWhereContains(Recipe, convertKey(req.params.key), req.params.value, true);
+	sendResponse(res, result);
+});
+
+router.post("/recipes/update/by-name/:name", async (req, res) => {
+	const result = await updateOne(Recipe, { name: req.params.name }, req.body);
+	sendResponse(res, result);
+});
+
+router.post("/recipes/update/by-id/:id", async (req, res) => {
+	const result = await updateOne(Recipe, { _id: req.params.id }, req.body);
 	sendResponse(res, result);
 });
 

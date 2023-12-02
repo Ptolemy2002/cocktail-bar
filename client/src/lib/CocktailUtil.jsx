@@ -206,7 +206,7 @@ class CocktailData {
         return this;
     }
 
-    push() {
+    push(onSuccess, onFailure) {
         if (!this._push) throw new TypeError("Push function not set.");
         if (this.requestInProgress) {
             if (this.lastRequest === "push") {
@@ -224,7 +224,9 @@ class CocktailData {
         this._push({
             body: this.toJSON(),
             onSuccess: () => {
+                this.checkpoint();
                 this.requestInProgress = false;
+                if (onSuccess) onSuccess();
             },
 
             onFailure: (err) => {
@@ -232,13 +234,14 @@ class CocktailData {
                 this.requestError = err;
                 this.requestFailed = true;
                 this.requestInProgress = false;
+                if (onFailure) onFailure(err);
             }
         });
 
         return this;
     }
 
-    pull() {
+    pull(onSuccess, onFailure) {
         if (!this._pull) throw new TypeError("Pull function not set.");
         if (this.requestInProgress) {
             if (this.lastRequest === "pull") {
@@ -256,7 +259,18 @@ class CocktailData {
 
         this._pull({
             onSuccess: (data) => {
-                if (Array.isArray(data) && data.length > 0) {
+                if (Array.isArray(data)) {
+                    if (data.length === 0) {
+                        const err = new Error("No data returned from server.");
+                        err.is404 = true;
+                        console.error(err);
+                        this.requestError = err;
+                        this.requestFailed = true;
+                        this.requestInProgress = false;
+                        if (onFailure) onFailure(err);
+                        return;
+                    }
+
                     this.fromJSON(data[0]);
                 } else {
                     this.fromJSON(data);
@@ -264,6 +278,7 @@ class CocktailData {
 
                 this.checkpoint();
                 this.requestInProgress = false;
+                if (onSuccess) onSuccess();
             },
 
             onFailure: (err) => {
@@ -271,10 +286,27 @@ class CocktailData {
                 this.requestError = err;
                 this.requestFailed = true;
                 this.requestInProgress = false;
+                if (onFailure) onFailure(err);
             }
         });
 
         return this;
+    }
+
+    pullInProgress() {
+        return this.requestInProgress && this.lastRequest === "pull";
+    }
+
+    pullFailed() {
+        return this.requestFailed && this.lastRequest === "pull";
+    }
+
+    pushInProgress() {
+        return this.requestInProgress && this.lastRequest === "push";
+    }
+
+    pushFailed() {
+        return this.requestFailed && this.lastRequest === "push";
     }
 
     isPlaceholderImage() {
