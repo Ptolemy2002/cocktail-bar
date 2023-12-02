@@ -2,7 +2,8 @@ import React, {useEffect, useLayoutEffect, useState, useRef} from "react";
 import { useApi } from "src/lib/Api";
 import { useParams } from "react-router-dom";
 import { CocktailData, IngredientData, SpecialIngredientData } from "src/lib/CocktailUtil";
-import NotFoundPage from "./NotFoundPage";
+import NotFoundPage from "src/pages/NotFoundPage";
+import { nanoid } from "nanoid";
 
 function RecipeDetailPage() {
     const { name } = useParams();
@@ -570,7 +571,7 @@ function IngredientEditList(props) {
 
     const ingredientElements = ingredients.map((ingredient, i) => {
         return (
-            <div key={"ingredient-edit-" + ingredient.name} className="ingredient-container mb-2">
+            <div key={"ingredient-edit-" + nanoid()} className="ingredient-container mb-2">
                 <IngredientEdit
                     ingredient={ingredient}
                     removeIngredient={() => removeIngredient(i)}
