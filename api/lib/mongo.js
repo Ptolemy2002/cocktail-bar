@@ -161,7 +161,7 @@ function updateFunction(fun) {
             delete update._id;
         }
 
-        return await collection[fun](query, update);
+        return await collection[fun](query, {$set: update});
     }
 }
 
