@@ -134,7 +134,7 @@ function RecipeDetailDisplay(props) {
         } else {
             return (
                 <li key={"ingredient-" + i}>
-                    {ingredient.amount}{ingredient.unit} of {ingredient.name}
+                    {ingredient.amount}{ingredient.unit} of {ingredient.name}{ingredient.label ? ` (${ingredient.label})` : ""}
                 </li>
             );
         }
@@ -537,6 +537,22 @@ function IngredientEdit(props) {
     const [amount, setAmount] = useState(ingredient.amount);
     const [unit, setUnit] = useState(ingredient.unit);
     const [text, setText] = useState(ingredient.text);
+    const [label, setLabel] = useState(ingredient.label);
+    const [useLabel, setUseLabel] = useState(!!ingredient.label);
+    const labelCheckBox = useRef(null);
+
+    function labelCheckBoxChanged(event) {
+        setUseLabel(event.target.checked);
+        if (!event.target.checked) {
+            setLabel(null);
+            ingredient.label = null;
+        }
+    }
+
+    function labelChanged(event) {
+        setLabel(event.target.value);
+        ingredient.label = event.target.value;
+    }
 
     function nameChanged(event) {
         setName(event.target.value);
@@ -565,6 +581,21 @@ function IngredientEdit(props) {
                     <label htmlFor="name">Name</label>
                     <input type="text" placeholder="Enter Name Here" className="form-control" value={name} onChange={nameChanged} />
                 </div>
+
+                <div className="form-check mb-1">
+                    <input type="checkbox" className="form-check-input" id="use-label" checked={useLabel} onChange={labelCheckBoxChanged} ref={labelCheckBox} />
+                    <label className="form-check-label" htmlFor="use-label">Use Label</label>
+                </div>
+
+                {
+                    useLabel ? (
+                        <div className="form-group mb-1">
+                            <label htmlFor="label">Label</label>
+                            <input type="text" placeholder="Enter Label Here" className="form-control" value={label} onChange={labelChanged} />
+                        </div>
+                    ) : null
+                }
+                
                 <div className="form-group mb-1">
                     <label htmlFor="amount">Amount</label>
                     <input type="text" placeholder="Enter Amount Here" className="form-control" value={amount} onChange={amountChanged} />
