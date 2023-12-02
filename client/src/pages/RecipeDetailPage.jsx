@@ -5,24 +5,12 @@ import { CocktailData } from "src/lib/CocktailUtil";
 
 function RecipeDetailPage() {
     const { name } = useParams();
-    const [firstPull, setFirstPull] = useState(true);
 
     document.title = `${name} | Cocktail Bar`;
 
     const [pullResult, pullStatus, _pull] = useApi("recipes/name-equals/" + encodeURIComponent(name), {
         // This prevents immediately sending the request - Use the cocktailData.pull() function instead
-        delaySend: true,
-        onSuccess: () => {
-            if (firstPull) {
-                setFirstPull(false);
-            }
-        },
-
-        onFailure: () => {
-            if (firstPull) {
-                setFirstPull(false);
-            }
-        }
+        delaySend: true
     });
 
     const [pushResult, pushStatus, _push] = useApi("recipes/update/by-name/" + encodeURIComponent(name), {
@@ -38,9 +26,8 @@ function RecipeDetailPage() {
         cocktailData.pull();
     }, []);
 
-    // The use of firstPull here is necessary because the useEffect() hook is called after the first render and lastRequest is initially null.
-    // Thus, the first render would show the main section of the page when it should show the loading message.
-    if ((cocktailData.lastRequest === "pull" && cocktailData.requestInProgress) || firstPull) {
+    // If lastRequest is null, the pull has not been started yet, but will be soon
+    if ((cocktailData.lastRequest === "pull" && cocktailData.requestInProgress) || cocktailData.lastRequest === null) {
         return (
             <div className="RecipeDetailPage container">
                 <h1>{name}</h1>
