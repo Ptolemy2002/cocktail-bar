@@ -19,7 +19,7 @@ const app = express();
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_CONNECTION_STRING, { useNewUrlParser: true })
-  .then(() =>  console.log('connection succesful'))
+  .then(() =>  console.log('Successfully connected to MongoDB'))
   .catch((err) => console.error(err));
 
 // view engine setup

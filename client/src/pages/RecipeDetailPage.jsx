@@ -140,9 +140,10 @@ function RecipeDetailDisplay(props) {
         }
     });
 
+    const imgPath = data.image.startsWith("url-") ? (data.image.substring(4)) : ("/assets/images/" + data.image);
     return (
         <div className="recipe-detail-container">
-            <img src={`/assets/images/${data.image}`} alt={altText} className="img-fluid cover-img" />
+            <img src={imgPath} alt={altText} className="img-fluid cover-img" />
 
             <h2>Properties</h2>
             <h5>{data.category}</h5>
@@ -207,6 +208,8 @@ function RecipeDetailEdit(props) {
         }
     });
 
+    const [prevImage, setPrevImage] = useState(image);
+    const [customImage, _setCustomImage] = useState(false);
     const [prevCategory, setPrevCategory] = useState(category);
     const [customCategory, _setCustomCategory] = useState(false);
     const [prevGlass, setPrevGlass] = useState(glass);
@@ -251,6 +254,16 @@ function RecipeDetailEdit(props) {
         }
     }
 
+    function setCustomImage(value) {
+        _setCustomImage(value);
+        if (value) {
+            setPrevImage(image);
+            setImage("");
+        } else {
+            setImage(prevImage);
+        }
+    }
+
     function save() {
         data.name = name;
         data.image = image;
@@ -286,25 +299,31 @@ function RecipeDetailEdit(props) {
     }
 
     let imageListElement = null;
-    if (!imageListStatus.completed) {
-        imageListElement = (
-            <p>Retrieving image options...</p>
-        );
-    } else if (imageListStatus.failed) {
-        imageListElement = (
-            <p>Failed to retrieve image options. Error details logged to console.</p>
-        );
-    } else {
-        const imageOptions = imageList.map((image, i) => {
-            return (
-                <option key={"image-option-" + i} value={image}>{image}</option>
+    if (!customImage) {
+        if (!imageListStatus.completed) {
+            imageListElement = (
+                <p>Retrieving image options...</p>
             );
-        });
+        } else if (imageListStatus.failed) {
+            imageListElement = (
+                <p>Failed to retrieve image options. Error details logged to console.</p>
+            );
+        } else {
+            const imageOptions = imageList.map((image, i) => {
+                return (
+                    <option key={"image-option-" + i} value={image}>{image}</option>
+                );
+            });
 
+            imageListElement = (
+                <select className="form-control mb-1" value={image} onChange={imageChanged}>
+                    {imageOptions}
+                </select>
+            );
+        }
+    } else {
         imageListElement = (
-            <select className="form-control mb-1" value={image} onChange={imageChanged}>
-                {imageOptions}
-            </select>
+            <input type="text" placeholder="Enter Image Here" className="form-control mb-1" value={image} onChange={imageChanged} />
         );
     }
 
@@ -404,11 +423,20 @@ function RecipeDetailEdit(props) {
             </div>
 
             <div className="form-group mb-3">
-                <label htmlFor="image">Image (Choose One)</label>
+                <label htmlFor="image">Image</label>
                 {imageListElement}
-                <button className="btn btn-outline-secondary" onClick={imageListRefresh}>
-                    Refresh Image Options
-                </button>
+                <div className="btns-hor">
+                    <button className="btn btn-outline-secondary" onClick={() => setCustomImage(!customImage)}>
+                        {customImage ? "Use Existing Image" : "Use Custom Image"}
+                    </button>
+                    {
+                        customImage ? null : (
+                            <button className="btn btn-outline-secondary" onClick={imageListRefresh}>
+                                Refresh Image Options
+                            </button>
+                        )
+                    }
+                </div>
             </div>
 
             <div className="form-group mb-3">
@@ -500,14 +528,40 @@ function IngredientEditList(props) {
         setIngredients(ingredients.filter((ingredient, i) => i !== index));
     }
 
+    function ingredientUpHandler(index) {
+        return () => {
+            if (index > 0) {
+                const newIngredients = [...ingredients];
+                const temp = newIngredients[index - 1];
+                newIngredients[index - 1] = newIngredients[index];
+                newIngredients[index] = temp;
+                setIngredients(newIngredients);
+            }
+        };
+    }
+
+    function ingredientDownHandler(index) {
+        return () => {
+            if (index < ingredients.length - 1) {
+                const newIngredients = [...ingredients];
+                const temp = newIngredients[index + 1];
+                newIngredients[index + 1] = newIngredients[index];
+                newIngredients[index] = temp;
+                setIngredients(newIngredients);
+            }
+        };
+    }
+
     const ingredientElements = ingredients.map((ingredient, i) => {
         return (
-            <div key={"ingredient-edit-" + i} className="ingredient-container mb-2">
-                <h3>Ingredient {i + 1}</h3>
-
+            <div key={"ingredient-edit-" + ingredient.name} className="ingredient-container mb-2">
                 <IngredientEdit
                     ingredient={ingredient}
                     removeIngredient={() => removeIngredient(i)}
+                    isFirstChild={i === 0}
+                    isLastChild={i === ingredients.length - 1}
+                    moveUp={ingredientUpHandler(i)}
+                    moveDown={ingredientDownHandler(i)}
                 />
             </div>
         );
@@ -608,6 +662,22 @@ function IngredientEdit(props) {
                     <button className="btn btn-outline-secondary" onClick={removeIngredient}>
                         Remove Ingredient
                     </button>
+
+                    {
+                        props.isFirstChild ? null : (
+                            <button className="btn btn-outline-secondary" onClick={props.moveUp}>
+                                Move Up
+                            </button>
+                        )
+                    }
+
+                    {
+                        props.isLastChild ? null : (
+                            <button className="btn btn-outline-secondary" onClick={props.moveDown}>
+                                Move Down
+                            </button>
+                        )
+                    }
                 </div>
             </div>
         );
@@ -622,6 +692,22 @@ function IngredientEdit(props) {
                     <button className="btn btn-outline-secondary" onClick={removeIngredient}>
                         Remove Ingredient
                     </button>
+
+                    {
+                        props.isFirstChild ? null : (
+                            <button className="btn btn-outline-secondary" onClick={props.moveUp}>
+                                Move Up
+                            </button>
+                        )
+                    }
+
+                    {
+                        props.isLastChild ? null : (
+                            <button className="btn btn-outline-secondary" onClick={props.moveDown}>
+                                Move Down
+                            </button>
+                        )
+                    }
                 </div>
             </div>
         );

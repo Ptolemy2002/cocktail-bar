@@ -66,10 +66,11 @@ function GalleryPage() {
 function CocktailCard(props) {
     const data = props.cocktailData;
     const altText = data.isPlaceholderImage() ? "Placeholder image" : `Image of a "${data.name}" cocktail`;
+    const imgPath = data.image.startsWith("url-") ? data.image.substring(4) : "/assets/images/" + data.image;
 
     return (
         <div className="card">
-            <img className="card-img-top" src={`/assets/images/${data.image}`} alt={altText}></img>
+            <img className="card-img-top" src={imgPath} alt={altText}></img>
 
             <div className="card-body">
                 <h5 className="card-title">{data.name}</h5>
