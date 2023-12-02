@@ -10,7 +10,7 @@ function RecipeDetailPage() {
     document.title = `${name} | Cocktail Bar`;
 
     const [pullResult, pullStatus, _pull] = useApi("recipes/name-equals/" + encodeURIComponent(name), {
-        // This prevents immediately sending the request - Use the pull() function instead
+        // This prevents immediately sending the request - Use the cocktailData.pull() function instead
         delaySend: true,
         onSuccess: () => {
             if (firstPull) {
@@ -27,7 +27,7 @@ function RecipeDetailPage() {
 
     const [pushResult, pushStatus, _push] = useApi("recipes/update/by-name/" + encodeURIComponent(name), {
         method: "POST",
-        // This prevents immediately sending the request - Use the push() function instead
+        // This prevents immediately sending the request - Use the cocktailData.push() function instead
         delaySend: true
     });
 
