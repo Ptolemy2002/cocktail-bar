@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { CocktailData, IngredientData, SpecialIngredientData } from "src/lib/CocktailUtil";
 import NotFoundPage from "src/pages/NotFoundPage";
 import { nanoid } from "nanoid";
+import CocktailImage from "src/components/CocktailImage";
 
 function RecipeDetailPage() {
     const { name } = useParams();
@@ -141,10 +142,9 @@ function RecipeDetailDisplay(props) {
         }
     });
 
-    const imgPath = data.image.startsWith("url-") ? (data.image.substring(4)) : ("/assets/images/" + data.image);
     return (
         <div className="recipe-detail-container">
-            <img src={imgPath} alt={altText} className="img-fluid cover-img" />
+            <CocktailImage src={data.image} alt={altText} className="img-fluid cover-img" />
 
             <h2>Properties</h2>
             <h5>{data.category}</h5>

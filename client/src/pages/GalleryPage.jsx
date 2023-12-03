@@ -2,6 +2,7 @@ import React from "react";
 import { useApi } from "src/lib/Api";
 import { Link } from "react-router-dom";
 import { CocktailData } from "src/lib/CocktailUtil";
+import CocktailImage from "src/components/CocktailImage";
 
 function GalleryPage() {
     document.title = "Gallery | Cocktail Bar";
@@ -66,11 +67,10 @@ function GalleryPage() {
 function CocktailCard(props) {
     const data = props.cocktailData;
     const altText = data.isPlaceholderImage() ? "Placeholder image" : `Image of a "${data.name}" cocktail`;
-    const imgPath = data.image.startsWith("url-") ? data.image.substring(4) : "/assets/images/" + data.image;
 
     return (
         <div className="card">
-            <img className="card-img-top" src={imgPath} alt={altText}></img>
+            <CocktailImage className="card-img-top" src={data.image} alt={altText} />
 
             <div className="card-body">
                 <h5 className="card-title">{data.name}</h5>
