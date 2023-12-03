@@ -217,7 +217,7 @@ class CocktailData {
                 console.warn("Attempted to push data while a push request was already in progress. Ignoring...");
                 return this;
             } else {
-                throw new Error("Attempted to push data while a pull request was in progress. This is not supported.");
+                throw new Error("Attempted to push data while another request was in progress. This is not supported.");
             }
         }
 
@@ -251,7 +251,7 @@ class CocktailData {
                 console.warn("Attempted to pull data while a pull request was already in progress. Ignoring...");
                 return this;
             } else {
-                throw new Error("Attempted to pull data while a push request was in progress. This is not supported.");
+                throw new Error("Attempted to pull data while another request was in progress. This is not supported.");
             }
         }
 
@@ -301,7 +301,7 @@ class CocktailData {
                 console.warn("Attempted to duplicate data while a duplicate request was already in progress. Ignoring...");
                 return this;
             } else {
-                throw new Error("Attempted to duplicate data while a push request was in progress. This is not supported.");
+                throw new Error("Attempted to duplicate data while another request was in progress. This is not supported.");
             }
         }
 
@@ -334,7 +334,7 @@ class CocktailData {
                 console.warn("Attempted to delete data while a delete request was already in progress. Ignoring...");
                 return this;
             } else {
-                throw new Error("Attempted to delete data while a push request was in progress. This is not supported.");
+                throw new Error("Attempted to delete data while another request was in progress. This is not supported.");
             }
         }
 
