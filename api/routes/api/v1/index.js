@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { findAll, findWhereEqual, findWhereContains, countAll, countWhereEqual, countWhereContains, updateOne, createRecipe, Recipe } = require('lib/mongo');
+const { escapeRegex, findAll, findWhereEqual, findWhereContains, countAll, countWhereEqual, countWhereContains, updateOne, createRecipe, deleteOne, Recipe } = require('lib/mongo');
 const { sendResponse, errorResponse } = require('lib/misc');
 
 function convertKey(key) {
@@ -80,46 +80,46 @@ router.get("/recipes/all/list-:prop/distinct", async (req, res) => {
 });
 
 router.get("/recipes/:key-equals/:value", async (req, res) => {
-	const result = await findWhereEqual(Recipe, convertKey(req.params.key), req.params.value, true);
+	const result = await findWhereEqual(Recipe, convertKey(req.params.key), escapeRegex(req.params.value), true);
 	sendResponse(res, result);
 });
 
 router.get("/recipes/:key-equals/:value/list-:prop", async (req, res) => {
-	const docs = await findWhereEqual(Recipe, convertKey(req.params.key), req.params.value, true);
+	const docs = await findWhereEqual(Recipe, convertKey(req.params.key), escapeRegex(req.params.value), true);
 	const result = extractProps(res, req.params.prop, docs);
 	sendResponse(res, result);
 });
 
 router.get("/recipes/:key-equals/:value/list-:prop/distinct", async (req, res) => {
-	const docs = await findWhereEqual(Recipe, convertKey(req.params.key), req.params.value, true);
+	const docs = await findWhereEqual(Recipe, convertKey(req.params.key), escapeRegex(req.params.value), true);
 	const result = extractProps(res, req.params.prop, docs, true);
 	sendResponse(res, result);
 });
 
 router.get("/recipes/:key-equals/:value/count", async (req, res) => {
-	const result = await countWhereEqual(Recipe, convertKey(req.params.key), req.params.value, true);
+	const result = await countWhereEqual(Recipe, convertKey(req.params.key), escapeRegex(req.params.value), true);
 	sendResponse(res, result);
 });
 
 router.get("/recipes/:key-contains/:value", async (req, res) => {
-	const result = await findWhereContains(Recipe, convertKey(req.params.key), req.params.value, true);
+	const result = await findWhereContains(Recipe, convertKey(req.params.key), escapeRegex(req.params.value), true);
 	sendResponse(res, result);
 });
 
 router.get("/recipes/:key-contains/:value/list-:prop", async (req, res) => {
-	const docs = await findWhereContains(Recipe, convertKey(req.params.key), req.params.value, true);
+	const docs = await findWhereContains(Recipe, convertKey(req.params.key), escapeRegex(req.params.value), true);
 	const result = extractProps(res, req.params.prop, docs);
 	sendResponse(res, result); 
 });
 
 router.get("/recipes/:key-contains/:value/list-:prop/distinct", async (req, res) => {
-	const docs = await findWhereContains(Recipe, convertKey(req.params.key), req.params.value, true);
+	const docs = await findWhereContains(Recipe, convertKey(req.params.key), escapeRegex(req.params.value), true);
 	const result = extractProps(res, req.params.prop, docs, true);
 	sendResponse(res, result);
 });
 
 router.get("/recipes/:key-contains/:value/count", async (req, res) => {
-	const result = await countWhereContains(Recipe, convertKey(req.params.key), req.params.value, true);
+	const result = await countWhereContains(Recipe, convertKey(req.params.key), escapeRegex(req.params.value), true);
 	sendResponse(res, result);
 });
 
@@ -135,6 +135,49 @@ router.post("/recipes/update/by-id/:id", async (req, res) => {
 
 router.post("/recipes/create", async (req, res) => {
 	const result = await createRecipe(req.body);
+	sendResponse(res, result);
+});
+
+router.post("/recipes/duplicate/by-name/:name", async (req, res) => {
+	const allDocs = await findAll(Recipe);
+	const existingNames = extractProps(res, "name", allDocs);
+	let newName = req.params.name;
+
+	while (existingNames.includes(newName)) {
+		newName += " (Copy)";
+	}
+
+	const original = (await findWhereEqual(Recipe, "name", escapeRegex(req.params.name), true))[0];
+	const newDoc = {
+		...original._doc,
+		name: newName
+	};
+
+	const result = await createRecipe(newDoc);
+	sendResponse(res, result);
+});
+
+router.post("/recipes/duplicate/by-id/:id", async (req, res) => {
+	const allDocs = await findAll(Recipe);
+	const existingNames = extractProps(res, "name", allDocs);
+	const original = (await findWhereEqual(Recipe, "_id", req.params.id, true))[0];
+
+	let newName = original.name;
+	while (existingNames.includes(newName)) {
+		newName += " (Copy)";
+	}
+	
+	const result = await createRecipe({ ...original, name: newName });
+	sendResponse(res, result);
+});
+
+router.post("/recipes/delete/by-name/:name", async (req, res) => {
+	const result = await deleteOne(Recipe, { name: escapeRegex(req.params.name) });
+	sendResponse(res, result);
+});
+
+router.post("/recipes/delete/by-id/:id", async (req, res) => {
+	const result = await deleteOne(Recipe, { _id: req.params.id });
 	sendResponse(res, result);
 });
 

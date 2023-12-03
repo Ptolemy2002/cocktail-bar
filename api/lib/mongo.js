@@ -4,7 +4,11 @@ const { errorResponse } = require('lib/misc');
 require('models/Recipe');
 const Recipe = mongoose.model('recipes');
 
-function accentInsensitive(string = '') {   
+function escapeRegex(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
+function accentInsensitive(string = '') {
     const accentPatterns = [
         "(a|á|à|ä|â)", "(A|Á|À|Ä|Â)",
         "(e|é|è|ë|ê)", "(E|É|È|Ë|Ê)",
@@ -39,7 +43,7 @@ function transformQueryAccentInsensitive(query) {
 
         let value = query[key];
         if (typeof value === "string") {
-            query[key] = new RegExp(accentInsensitive(value));
+            query[key] = new RegExp(accentInsensitive(value), "i");
         } else if (value instanceof RegExp) {
             query[key] = new RegExp(accentInsensitive(value.source), value.flags);
         }
@@ -180,15 +184,43 @@ function tryFunc(func) {
 }
 
 async function createRecipe(recipeData) {
-    // Delete the _id if it exists
-    if (recipeData.hasOwnProperty("_id")) {
-        delete recipeData._id;
-    }
-    
+    recipeData._id = new mongoose.Types.ObjectId();
+    recipeData.isNew = true;
     return await Recipe.create(recipeData);
 }
 
+function deleteFunction(fun) {
+    return async (collection, query={}, args={}) => {
+        if (args.caseInsensitive) {
+            query = transformQueryCaseInsensitive(query);
+        }
+
+        if (args.matchWhole) {
+            query = transformQueryMatchWhole(query);
+        }
+
+        if (!args.accentSensitive) {
+            query = transformQueryAccentInsensitive(query);
+        }
+
+        // Verify that each id is a valid ObjectId
+        Object.keys(query).forEach((key) => {
+            if (key === "_id" && !mongoose.isValidObjectId(query[key])) {
+                const err = new TypeError(`Invalid ObjectId: ${query[key]}`);
+                err.status = 400;
+                throw err;
+            }
+        });
+
+        return await collection[fun](query);
+    }
+}
+
+const deleteOne = deleteFunction("deleteOne");
+const deleteAll = deleteFunction("deleteMany");
+
 module.exports = {
+    "escapeRegex": escapeRegex,
     "accentInsensitive": accentInsensitive,
     "transformQueryCaseInsensitive": tryFunc(transformQueryCaseInsensitive),
     "transformQueryAccentInsensitive": tryFunc(transformQueryAccentInsensitive),
@@ -207,6 +239,8 @@ module.exports = {
     "updateOne": tryFunc(updateOne),
     "updateMany": tryFunc(updateMany),
     "createRecipe": tryFunc(createRecipe),
+    "deleteOne": tryFunc(deleteOne),
+    "deleteAll": tryFunc(deleteAll),
     
     Recipe
 };

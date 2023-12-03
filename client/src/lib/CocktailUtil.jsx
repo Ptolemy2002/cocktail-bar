@@ -14,6 +14,8 @@ class CocktailData {
     requestError = null;
     _push = null;
     _pull = null;
+    _duplicate = null;
+    _delete = null;
 
     previousStates = [];
     _stateIndex = 0;
@@ -113,11 +115,13 @@ class CocktailData {
         return result;
     }
 
-    static createFromJSON(cocktailState, _push, _pull) {
+    static createFromJSON(cocktailState, _push, _pull, _duplicate, _delete) {
         const result = new CocktailData();
         result.fromJSON(cocktailState).checkpoint();
         result._push = _push;
         result._pull = _pull;
+        result._duplicate = _duplicate;
+        result._delete = _delete;
         return result;
     }
 
@@ -223,14 +227,13 @@ class CocktailData {
         this.requestInProgress = true;
         this._push({
             body: this.toJSON(),
-            onSuccess: () => {
+            onSuccess: (data) => {
                 this.checkpoint();
                 this.requestInProgress = false;
-                if (onSuccess) onSuccess();
+                if (onSuccess) onSuccess(data);
             },
 
             onFailure: (err) => {
-                console.error(err);
                 this.requestError = err;
                 this.requestFailed = true;
                 this.requestInProgress = false;
@@ -263,7 +266,6 @@ class CocktailData {
                     if (data.length === 0) {
                         const err = new Error("No data returned from server.");
                         err.is404 = true;
-                        console.error(err);
                         this.requestError = err;
                         this.requestFailed = true;
                         this.requestInProgress = false;
@@ -278,11 +280,76 @@ class CocktailData {
 
                 this.checkpoint();
                 this.requestInProgress = false;
-                if (onSuccess) onSuccess();
+                if (onSuccess) onSuccess(data);
             },
 
             onFailure: (err) => {
-                console.error(err);
+                this.requestError = err;
+                this.requestFailed = true;
+                this.requestInProgress = false;
+                if (onFailure) onFailure(err);
+            }
+        });
+
+        return this;
+    }
+
+    duplicate(onSuccess, onFailure) {
+        if (!this._duplicate) throw new TypeError("Duplicate function not set.");
+        if (this.requestInProgress) {
+            if (this.lastRequest === "duplicate") {
+                console.warn("Attempted to duplicate data while a duplicate request was already in progress. Ignoring...");
+                return this;
+            } else {
+                throw new Error("Attempted to duplicate data while a push request was in progress. This is not supported.");
+            }
+        }
+
+        this.lastRequest = "duplicate";
+        this.requestError = null;
+        this.requestFailed = false;
+        this.requestInProgress = true;
+
+        this._duplicate({
+            onSuccess: (data) => {
+                this.requestInProgress = false;
+                if (onSuccess) onSuccess(data);
+            },
+
+            onFailure: (err) => {
+                this.requestError = err;
+                this.requestFailed = true;
+                this.requestInProgress = false;
+                if (onFailure) onFailure(err);
+            }
+        });
+
+        return this;
+    }
+
+    delete(onSuccess, onFailure) {
+        if (!this._delete) throw new TypeError("Delete function not set.");
+        if (this.requestInProgress) {
+            if (this.lastRequest === "delete") {
+                console.warn("Attempted to delete data while a delete request was already in progress. Ignoring...");
+                return this;
+            } else {
+                throw new Error("Attempted to delete data while a push request was in progress. This is not supported.");
+            }
+        }
+
+        this.lastRequest = "delete";
+        this.requestError = null;
+        this.requestFailed = false;
+        this.requestInProgress = true;
+
+        this._delete({
+            onSuccess: (data) => {
+                this.requestInProgress = false;
+                if (onSuccess) onSuccess(data);
+            },
+
+            onFailure: (err) => {
                 this.requestError = err;
                 this.requestFailed = true;
                 this.requestInProgress = false;
@@ -315,6 +382,30 @@ class CocktailData {
 
     pushSuccessful() {
         return !this.requestInProgress && !this.requestFailed && this.lastRequest === "push";
+    }
+
+    duplicateInProgress() {
+        return this.requestInProgress && this.lastRequest === "duplicate";
+    }
+
+    duplicateFailed() {
+        return this.requestFailed && this.lastRequest === "duplicate";
+    }
+
+    duplicateSuccessful() {
+        return !this.requestInProgress && !this.requestFailed && this.lastRequest === "duplicate";
+    }
+
+    deleteInProgress() {
+        return this.requestInProgress && this.lastRequest === "delete";
+    }
+
+    deleteFailed() {
+        return this.requestFailed && this.lastRequest === "delete";
+    }
+
+    deleteSuccessful() {
+        return !this.requestInProgress && !this.requestFailed && this.lastRequest === "delete";
     }
 
     isPlaceholderImage() {

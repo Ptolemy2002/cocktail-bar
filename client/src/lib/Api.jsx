@@ -17,6 +17,7 @@ function useApi(path, args={}) {
 
     const _onFailure = args.onFailure || null;
     function onFailure(err) {
+        console.error(err);
         setData(null);
         setFailed(true);
         setCompleted(true);

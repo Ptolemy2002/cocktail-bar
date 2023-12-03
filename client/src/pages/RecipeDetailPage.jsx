@@ -20,7 +20,19 @@ function RecipeDetailPage() {
         delaySend: true
     })[2];
 
-    const _cocktailData = useRef(CocktailData.createFromJSON({name: name}, _push, _pull));
+    const _duplicate = useApi("recipes/duplicate/by-name/" + encodeURIComponent(name), {
+        method: "POST",
+        // This prevents immediately sending the request - Use the cocktailData.push() function instead
+        delaySend: true,
+    })[2];
+
+    const _delete = useApi("recipes/delete/by-name/" + encodeURIComponent(name), {
+        method: "POST",
+        // This prevents immediately sending the request - Use the cocktailData.push() function instead
+        delaySend: true,
+    })[2];
+
+    const _cocktailData = useRef(CocktailData.createFromJSON({name: name}, _push, _pull, _duplicate, _delete));
     const cocktailData = _cocktailData.current;
 
     document.title = `${cocktailData.name} | Cocktail Bar`;
@@ -48,19 +60,43 @@ function RecipeDetailPage() {
             </div>
         );
     } else {
-        let pushInfoElement = null;
+        let requestInfoElement = null;
 
         if (cocktailData.pushInProgress()) {
-            pushInfoElement = (
+            requestInfoElement = (
                 <p className="text-info">Updating cocktail data...</p>
             );
         } else if (cocktailData.pushFailed()) {
-            pushInfoElement = (
+            requestInfoElement = (
                 <p className="text-danger">Failed to update cocktail data. Error details logged to console.</p>
             );
-        } else if (cocktailData.lastRequest === "push") {
-            pushInfoElement = (
+        } else if (cocktailData.pushSuccessful()) {
+            requestInfoElement = (
                 <p className="text-success">Successfully updated cocktail data.</p>
+            );
+        } else if (cocktailData.deleteInProgress()) {
+            requestInfoElement = (
+                <p className="text-info">Deleting cocktail...</p>
+            );
+        } else if (cocktailData.deleteFailed()) {
+            requestInfoElement = (
+                <p className="text-danger">Failed to delete cocktail. Error details logged to console.</p>
+            );
+        } else if (cocktailData.deleteSuccessful()) {
+            requestInfoElement = (
+                <p className="text-success">Successfully deleted cocktail.</p>
+            );
+        } else if (cocktailData.duplicateInProgress()) {
+            requestInfoElement = (
+                <p className="text-info">Duplicating cocktail...</p>
+            );
+        } else if (cocktailData.duplicateFailed()) {
+            requestInfoElement = (
+                <p className="text-danger">Failed to duplicate cocktail. Error details logged to console.</p>
+            );
+        } else if (cocktailData.duplicateSuccessful()) {
+            requestInfoElement = (
+                <p className="text-success">Successfully duplicated cocktail.</p>
             );
         }
 
@@ -68,7 +104,7 @@ function RecipeDetailPage() {
             return (
                 <div className="RecipeDetailPage container">
                     <h1>{cocktailData.name}</h1>
-                    {pushInfoElement}
+                    {requestInfoElement}
                     <RecipeDetailEdit cocktailData={cocktailData} exit={() => setEditMode(false)} />
                 </div>
             );
@@ -84,7 +120,7 @@ function RecipeDetailPage() {
                             </p>
                         ) : null
                     }
-                    {pushInfoElement}
+                    {requestInfoElement}
 
                     <div className="btns-hor mb-3">
                         <button
@@ -112,6 +148,28 @@ function RecipeDetailPage() {
                             }}
                         >
                             Publish
+                        </button>
+
+                        <button
+                            className="btn btn-outline-secondary"
+                            onClick={() => {
+                                cocktailData.duplicate((data) => {
+                                    window.location.href = `/recipe/${encodeURIComponent(data.name)}`;
+                                });
+                            }}
+                        >
+                            Publish as Duplicate
+                        </button>
+
+                        <button
+                            className="btn btn-outline-secondary"
+                            onClick={() => {
+                                cocktailData.delete(() => {
+                                    window.location.href = "/";
+                                });
+                            }
+                        }>
+                            Delete
                         </button>
                     </div>
     
