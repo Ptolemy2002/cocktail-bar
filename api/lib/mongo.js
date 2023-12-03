@@ -103,20 +103,20 @@ const findOne = findFunction("findOne");
 const countAll = findFunction("countDocuments");
 
 function whereEqual(fun) {
-    return (collection, key, value, caseInsensitive=false) => {
+    return (collection, key, value, caseInsensitive=false, accentSensitive=false) => {
         const query = {};
         query[key] = value;
         
-        return fun(collection, query, { caseInsensitive, matchWhole: true });
+        return fun(collection, query, { caseInsensitive, accentSensitive, matchWhole: true });
     };
 }
 
 function whereContains(fun) {
-    return (collection, key, value, caseInsensitive=false) => {
+    return (collection, key, value, caseInsensitive=false, accentSensitive=false) => {
         const query = {};
         query[key] = value;
         
-        return fun(collection, query, { caseInsensitive, matchWhole: false });
+        return fun(collection, query, { caseInsensitive, accentSensitive, matchWhole: false });
     };
 }
 
@@ -169,8 +169,30 @@ function updateFunction(fun) {
     }
 }
 
+function updateWhereEqual(fun) {
+    return (collection, key, value, update, caseInsensitive=false, accentSensitive=false) => {
+        const query = {};
+        query[key] = value;
+
+        return fun(collection, query, update, { caseInsensitive, accentSensitive, matchWhole: true });
+    }
+}
+
+function updateWhereContains(fun) {
+    return (collection, key, value, update, caseInsensitive=false, accentSensitive=false) => {
+        const query = {};
+        query[key] = value;
+
+        return fun(collection, query, update, { caseInsensitive, accentSensitive, matchWhole: false });
+    }
+}
+
 const updateOne = updateFunction("updateOne");
 const updateMany = updateFunction("updateMany");
+const updateOneWhereEqual = updateWhereEqual(updateOne);
+const updateOneWhereContains = updateWhereContains(updateOne);
+const updateManyWhereEqual = updateWhereEqual(updateMany);
+const updateManyWhereContains = updateWhereContains(updateMany);
 
 function tryFunc(func) {
     return async (...args) => {
@@ -217,7 +239,11 @@ function deleteFunction(fun) {
 }
 
 const deleteOne = deleteFunction("deleteOne");
-const deleteAll = deleteFunction("deleteMany");
+const deleteMany = deleteFunction("deleteMany");
+const deleteOneWhereEqual = whereEqual(deleteOne);
+const deleteOneWhereContains = whereContains(deleteOne);
+const deleteManyWhereEqual = whereEqual(deleteMany);
+const deleteManyWhereContains = whereContains(deleteMany);
 
 module.exports = {
     "escapeRegex": escapeRegex,
@@ -238,9 +264,17 @@ module.exports = {
     "list": tryFunc(list),
     "updateOne": tryFunc(updateOne),
     "updateMany": tryFunc(updateMany),
+    "updateOneWhereEqual": tryFunc(updateOneWhereEqual),
+    "updateOneWhereContains": tryFunc(updateOneWhereContains),
+    "updateManyWhereEqual": tryFunc(updateManyWhereEqual),
+    "updateManyWhereContains": tryFunc(updateManyWhereContains),
     "createRecipe": tryFunc(createRecipe),
     "deleteOne": tryFunc(deleteOne),
-    "deleteAll": tryFunc(deleteAll),
+    "deleteMany": tryFunc(deleteMany),
+    "deleteOneWhereEqual": tryFunc(deleteOneWhereEqual),
+    "deleteOneWhereContains": tryFunc(deleteOneWhereContains),
+    "deleteManyWhereEqual": tryFunc(deleteManyWhereEqual),
+    "deleteManyWhereContains": tryFunc(deleteManyWhereContains),
     
     Recipe
 };

@@ -443,6 +443,96 @@
           }
         }
       }
+    },
+    "/recipes/duplicate/by-name/{name}": {
+      "post": {
+        "description": "Duplicate a Recipe with the specified name (case sensitive).",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          }
+        }
+      }
+    },
+    "/recipes/duplicate/by-id/{id}": {
+      "post": {
+        "description": "Duplicate a Recipe with the specified id.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          },
+          "400": {
+            "description": "Invalid id format specified in the request. Response body contains error details."
+          }
+        }
+      }
+    },
+    "/recipes/delete/by-name/{name}": {
+      "post": {
+        "description": "Delete a Recipe with the specified name (case sensitive).",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          }
+        }
+      }
+    },
+    "/recipes/delete/by-id/{id}": {
+      "post": {
+        "description": "Delete a Recipe with the specified id.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          },
+          "400": {
+            "description": "Invalid id format specified in the request. Response body contains error details."
+          }
+        }
+      }
     }
   }
 }
