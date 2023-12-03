@@ -416,6 +416,30 @@
           },
           "500": {
             "description": "Internal Server Error. Response body contains error details."
+          },
+          "400": {
+            "description": "Invalid id format specified in the request. Response body contains error details."
+          }
+        }
+      }
+    },
+    "/recipes/create": {
+      "post": {
+        "description": "Create a new Recipe. Data is specified in the request body.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
           }
         }
       }

@@ -301,12 +301,20 @@ class CocktailData {
         return this.requestFailed && this.lastRequest === "pull";
     }
 
+    pullSuccessful() {
+        return !this.requestInProgress && !this.requestFailed && this.lastRequest === "pull";
+    }
+
     pushInProgress() {
         return this.requestInProgress && this.lastRequest === "push";
     }
 
     pushFailed() {
         return this.requestFailed && this.lastRequest === "push";
+    }
+
+    pushSuccessful() {
+        return !this.requestInProgress && !this.requestFailed && this.lastRequest === "push";
     }
 
     isPlaceholderImage() {

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { findAll, findWhereEqual, findWhereContains, countAll, countWhereEqual, countWhereContains, updateOne, Recipe } = require('lib/mongo');
+const { findAll, findWhereEqual, findWhereContains, countAll, countWhereEqual, countWhereContains, updateOne, createRecipe, Recipe } = require('lib/mongo');
 const { sendResponse, errorResponse } = require('lib/misc');
 
 function convertKey(key) {
@@ -130,6 +130,11 @@ router.post("/recipes/update/by-name/:name", async (req, res) => {
 
 router.post("/recipes/update/by-id/:id", async (req, res) => {
 	const result = await updateOne(Recipe, { _id: req.params.id }, req.body);
+	sendResponse(res, result);
+});
+
+router.post("/recipes/create", async (req, res) => {
+	const result = await createRecipe(req.body);
 	sendResponse(res, result);
 });
 

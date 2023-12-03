@@ -179,6 +179,15 @@ function tryFunc(func) {
     }
 }
 
+async function createRecipe(recipeData) {
+    // Delete the _id if it exists
+    if (recipeData.hasOwnProperty("_id")) {
+        delete recipeData._id;
+    }
+    
+    return await Recipe.create(recipeData);
+}
+
 module.exports = {
     "accentInsensitive": accentInsensitive,
     "transformQueryCaseInsensitive": tryFunc(transformQueryCaseInsensitive),
@@ -197,6 +206,7 @@ module.exports = {
     "list": tryFunc(list),
     "updateOne": tryFunc(updateOne),
     "updateMany": tryFunc(updateMany),
+    "createRecipe": tryFunc(createRecipe),
     
     Recipe
 };
