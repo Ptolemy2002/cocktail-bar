@@ -56,7 +56,7 @@ function RecipeDetailPage() {
         return (
             <div className="RecipeDetailPage container">
                 <h1>{name}</h1>
-                <p>Failed to retrieve cocktail data. Error details logged to console.</p>
+                <p className="text-danger">Failed to retrieve cocktail data. Error details logged to console.</p>
             </div>
         );
     } else {
@@ -365,7 +365,7 @@ function RecipeDetailEdit(props) {
             );
         } else if (imageListStatus.failed) {
             imageListElement = (
-                <p>Failed to retrieve image options. Error details logged to console.</p>
+                <p className="text-danger">Failed to retrieve image options. Error details logged to console.</p>
             );
         } else {
             const imageOptions = imageList.map((image, i) => {
@@ -400,7 +400,7 @@ function RecipeDetailEdit(props) {
             );
         } else if (categoryListStatus.failed) {
             categoryListElement = (
-                <p>Failed to retrieve category options. Error details logged to console.</p>
+                <p className="text-danger">Failed to retrieve category options. Error details logged to console.</p>
             );
         } else {
             const categoryOptions = categoryList.map((category, i) => {
@@ -432,7 +432,7 @@ function RecipeDetailEdit(props) {
             );
         } else if (glassListStatus.failed) {
             glassListElement = (
-                <p>Failed to retrieve glass options. Error details logged to console.</p>
+                <p className="text-danger">Failed to retrieve glass options. Error details logged to console.</p>
             );
         } else {
             const glassOptions = glassList.map((glass, i) => {
@@ -464,7 +464,7 @@ function RecipeDetailEdit(props) {
             );
         } else if (garnishListStatus.failed) {
             garnishListElement = (
-                <p>Failed to retrieve garnish options. Error details logged to console.</p>
+                <p className="text-danger">Failed to retrieve garnish options. Error details logged to console.</p>
             );
         } else {
             const garnishOptions = garnishList.map((garnish, i) => {

@@ -1,6 +1,6 @@
 import { matchRoutes, useLocation } from "react-router-dom";
 import  HomePage from "src/pages/HomePage";
-import GalleryPage from "src/pages/GalleryPage";
+import RecipeGalleryPage from "src/pages/RecipeGalleryPage";
 import RecipeDetailPage from "src/pages/RecipeDetailPage";
 
 const routes = [
@@ -11,9 +11,9 @@ const routes = [
     },
 
     {
-      path: "/gallery",
-      navigationText: "Gallery",
-      element: <GalleryPage />
+      path: "/recipe-gallery",
+      navigationText: "Recipe Gallery",
+      element: <RecipeGalleryPage />
     },
 
     {

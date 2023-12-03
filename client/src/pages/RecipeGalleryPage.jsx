@@ -4,8 +4,8 @@ import { Link } from "react-router-dom";
 import { CocktailData } from "src/lib/CocktailUtil";
 import CocktailImage from "src/components/CocktailImage";
 
-function GalleryPage() {
-    document.title = "Gallery | Cocktail Bar";
+function RecipeGalleryPage() {
+    document.title = "Recipe Gallery | Cocktail Bar";
     
     const [cocktails, cocktailsStatus, refresh] = useApi("recipes/all", {
         onFailure: console.error,
@@ -28,7 +28,7 @@ function GalleryPage() {
         return (
             <div className="GalleryPage container">
                 <h2>Gallery</h2>
-                <p>Failed to retrieve cocktails. Error details logged to console.</p>
+                <p className="text-danger">Failed to retrieve cocktails. Error details logged to console.</p>
             </div>
         );
     } else {
@@ -98,4 +98,4 @@ function CocktailCard(props) {
     );
 }
 
-export default GalleryPage;
+export default RecipeGalleryPage;
