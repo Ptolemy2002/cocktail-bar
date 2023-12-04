@@ -186,4 +186,14 @@ router.post("/recipes/delete/by-id/:id", async (req, res) => {
 	sendResponse(res, result);
 });
 
+router.get("/recipes/get/by-name/:name", async (req, res) => {
+	const result = await findWhereEqual(Recipe, "name", escapeRegex(req.params.name), false, true);
+	sendResponse(res, result);
+});
+
+router.get("/recipes/get/by-id/:id", async (req, res) => {
+	const result = await findWhereEqual(Recipe, "_id", req.params.id, false, true);
+	sendResponse(res, result);
+});
+
 module.exports = router;

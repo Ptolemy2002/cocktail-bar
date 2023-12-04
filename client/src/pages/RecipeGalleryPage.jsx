@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import { useApi } from "src/lib/Api";
 import { Link } from "react-router-dom";
 import { CocktailData } from "src/lib/CocktailUtil";
@@ -7,15 +7,16 @@ import CocktailImage from "src/components/CocktailImage";
 function RecipeGalleryPage() {
     document.title = "Recipe Gallery | Cocktail Bar";
     
-    const [cocktails, cocktailsStatus, refresh] = useApi("recipes/all", {
-        onFailure: console.error,
-        onSuccess: (data) => {
-            // Sort Alphabetically by name
-            data.sort((a, b) => {
-                return a.name.localeCompare(b.name);
-            });
-        }
-    });
+    const [cocktails, cocktailsStatus, sendCocktailRequest] = useApi("recipes/all", true, (a, b) => a.name.localeCompare(b.name));
+
+    function refresh() {
+        sendCocktailRequest({
+            method: "GET",
+        });
+    }
+
+    // Refresh the cocktail list on first load
+    useEffect(refresh, []);
 
     if (!cocktailsStatus.completed) {
         return (

@@ -1,7 +1,10 @@
+const { useEffect, useState } = require("react");
+const { useApi } = require("src/lib/Api");
+
 class CocktailData {
     id = null;
     _name = "Unknown Cocktail";
-    _image = "Shaker.png";
+    _image = "Shaker.jpg";
     _category = "Unknown Category";
     _glass = "Unknown Glass";
     _garnish = "None";
@@ -107,11 +110,13 @@ class CocktailData {
         this.dirty = true;
     }
 
-    static createFromID(id, _push, _pull) {
+    static createFromID(id, _push, _pull, _duplicate, _delete) {
         const result = new CocktailData();
         result.id = id;
         result._push = _push;
         result._pull = _pull;
+        result._duplicate = _duplicate;
+        result._delete = _delete;
         return result;
     }
 
@@ -226,6 +231,7 @@ class CocktailData {
         this.requestFailed = false;
         this.requestInProgress = true;
         this._push({
+            method: "POST",
             body: this.toJSON(),
             onSuccess: (data) => {
                 this.checkpoint();
@@ -272,7 +278,7 @@ class CocktailData {
                         if (onFailure) onFailure(err);
                         return;
                     }
-
+                    
                     this.fromJSON(data[0]);
                 } else {
                     this.fromJSON(data);
@@ -311,6 +317,7 @@ class CocktailData {
         this.requestInProgress = true;
 
         this._duplicate({
+            method: "POST",
             onSuccess: (data) => {
                 this.requestInProgress = false;
                 if (onSuccess) onSuccess(data);
@@ -344,6 +351,7 @@ class CocktailData {
         this.requestInProgress = true;
 
         this._delete({
+            method: "POST",
             onSuccess: (data) => {
                 this.requestInProgress = false;
                 if (onSuccess) onSuccess(data);
@@ -610,4 +618,31 @@ class SpecialIngredientData extends I_IngredientData {
     }
 }
 
-export { CocktailData, IngredientData, SpecialIngredientData };
+function useCocktailData(value, primaryKey="name") {
+    const _push = useApi(`recipes/update/by-${primaryKey}/${encodeURIComponent(value)}`)[2];
+    const _pull = useApi(`recipes/get/by-${primaryKey}/${encodeURIComponent(value)}`)[2];
+    const _duplicate = useApi(`recipes/duplicate/by-${primaryKey}/${encodeURIComponent(value)}`)[2];
+    const _delete = useApi(`recipes/delete/by-${primaryKey}/${encodeURIComponent(value)}`)[2];
+
+    const data = {};
+    data[primaryKey] = value;
+    const [cocktailData] = useState(
+        primaryKey === "id" ? (
+            CocktailData.createFromID(value, _push, _pull, _duplicate, _delete)
+        ) :
+        // else
+        (
+            CocktailData.createFromJSON(data, _push, _pull, _duplicate, _delete)
+        )
+    );
+
+    // Start pulling data on first load
+    useEffect(() => {
+        cocktailData.pull();
+    }, []);
+
+    return cocktailData;
+}
+
+
+export { CocktailData, IngredientData, SpecialIngredientData, useCocktailData };

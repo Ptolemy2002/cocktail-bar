@@ -1,47 +1,17 @@
 import React, {useEffect, useLayoutEffect, useState, useRef} from "react";
 import { useApi } from "src/lib/Api";
 import { useParams } from "react-router-dom";
-import { CocktailData, IngredientData, SpecialIngredientData } from "src/lib/CocktailUtil";
+import { CocktailData, useCocktailData, IngredientData, SpecialIngredientData } from "src/lib/CocktailUtil";
 import NotFoundPage from "src/pages/NotFoundPage";
 import { nanoid } from "nanoid";
 import CocktailImage from "src/components/CocktailImage";
 
 function RecipeDetailPage() {
     const { name } = useParams();
-
-    const _pull = useApi("recipes/name-equals/" + encodeURIComponent(name), {
-        // This prevents immediately sending the request - Use the cocktailData.pull() function instead
-        delaySend: true
-    })[2];
-
-    const _push = useApi("recipes/update/by-name/" + encodeURIComponent(name), {
-        method: "POST",
-        // This prevents immediately sending the request - Use the cocktailData.push() function instead
-        delaySend: true
-    })[2];
-
-    const _duplicate = useApi("recipes/duplicate/by-name/" + encodeURIComponent(name), {
-        method: "POST",
-        // This prevents immediately sending the request - Use the cocktailData.push() function instead
-        delaySend: true,
-    })[2];
-
-    const _delete = useApi("recipes/delete/by-name/" + encodeURIComponent(name), {
-        method: "POST",
-        // This prevents immediately sending the request - Use the cocktailData.push() function instead
-        delaySend: true,
-    })[2];
-
-    const _cocktailData = useRef(CocktailData.createFromJSON({name: name}, _push, _pull, _duplicate, _delete));
-    const cocktailData = _cocktailData.current;
+    const cocktailData = useCocktailData(name);
 
     document.title = `${cocktailData.name} | Cocktail Bar`;
     const [editMode, setEditMode] = useState(false);
-
-    // Pull the cocktail data when the component is first mounted
-    useEffect(() => {
-        cocktailData.pull();
-    }, []);
 
     // If lastRequest is null, the pull has not been started yet, but will be soon
     if ((cocktailData.pullInProgress()) || cocktailData.lastRequest === null) {
@@ -52,7 +22,7 @@ function RecipeDetailPage() {
             </div>
         );
     } else if (cocktailData.pullFailed()) {
-        if (cocktailData.requestError.is404) return <NotFoundPage />;
+        if (cocktailData.requestError?.is404) return <NotFoundPage />;
         return (
             <div className="RecipeDetailPage container">
                 <h1>{name}</h1>
@@ -234,38 +204,18 @@ function RecipeDetailEdit(props) {
     const [preparation, setPreparation] = useState(data.preparation);
     const preparationTextBox = useRef(null);
 
-    const [imageList, imageListStatus, imageListRefresh] = useApi("recipes/all/list-image/distinct", {
-        onSuccess: (data) => {
-            // Sort the data alphabetically
-            data.sort((a, b) => {
-                return a.localeCompare(b);
-            });
-        },
-    });
-    const [categoryList, categoryListStatus, categoryListRefresh] = useApi("recipes/all/list-category/distinct", {
-        onSuccess: (data) => {
-            // Sort the data alphabetically
-            data.sort((a, b) => {
-                return a.localeCompare(b);
-            });
-        }
-    });
-    const [glassList, glassListStatus, glassListRefresh] = useApi("recipes/all/list-glass/distinct", {
-        onSuccess: (data) => {
-            // Sort the data alphabetically
-            data.sort((a, b) => {
-                return a.localeCompare(b);
-            });
-        }
-    });
-    const [garnishList, garnishListStatus, garnishListRefresh] = useApi("recipes/all/list-garnish/distinct", {
-        onSuccess: (data) => {
-            // Sort the data alphabetically
-            data.sort((a, b) => {
-                return a.localeCompare(b);
-            });
-        }
-    });
+    const [imageList, imageListStatus, imageListRefresh] = useApi("recipes/all/list-image/distinct", true);
+    const [categoryList, categoryListStatus, categoryListRefresh] = useApi("recipes/all/list-category/distinct", true);
+    const [glassList, glassListStatus, glassListRefresh] = useApi("recipes/all/list-glass/distinct", true);
+    const [garnishList, garnishListStatus, garnishListRefresh] = useApi("recipes/all/list-garnish/distinct", true);
+
+    // Refresh the lists when the component is first mounted
+    useEffect(() => {
+        imageListRefresh();
+        categoryListRefresh();
+        glassListRefresh();
+        garnishListRefresh();
+    }, []);
 
     const [prevImage, setPrevImage] = useState(image);
     const [customImage, _setCustomImage] = useState(false);
