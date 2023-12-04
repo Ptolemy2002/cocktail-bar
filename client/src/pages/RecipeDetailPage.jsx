@@ -1,7 +1,7 @@
 import React, {useEffect, useLayoutEffect, useState, useRef} from "react";
 import { useApi } from "src/lib/Api";
 import { useParams } from "react-router-dom";
-import { CocktailData, useCocktailData, IngredientData, SpecialIngredientData } from "src/lib/CocktailUtil";
+import { useCocktailData, IngredientData, SpecialIngredientData } from "src/lib/CocktailUtil";
 import NotFoundPage from "src/pages/NotFoundPage";
 import { nanoid } from "nanoid";
 import CocktailImage from "src/components/CocktailImage";
