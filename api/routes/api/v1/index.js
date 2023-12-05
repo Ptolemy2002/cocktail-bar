@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { escapeRegex, findAll, findWhereEqual, findWhereContains, countAll, countWhereEqual, countWhereContains, updateOneWhereEqual, createRecipe, deleteOneWhereEqual, Recipe } = require('lib/mongo');
+const { recipeKeyType, escapeRegex, findAll, findWhereEqual, findWhereContains, countAll, countWhereEqual, countWhereContains, updateOneWhereEqual, createRecipe, deleteOneWhereEqual, Recipe } = require('lib/mongo');
 const { sendResponse, errorResponse } = require('lib/misc');
+const { keyType } = require('../../../lib/mongo');
 
 function convertKey(key) {
 	switch (key) {
@@ -81,46 +82,98 @@ router.get("/recipes/all/list-:prop/distinct", async (req, res) => {
 });
 
 router.get("/recipes/:key-equals/:value", async (req, res) => {
-	const result = await findWhereEqual(Recipe, convertKey(req.params.key), escapeRegex(req.params.value), true);
+	const key = convertKey(req.params.key);
+	let result;
+	if (keyType(Recipe, key) === "String") {
+		result = await findWhereEqual(Recipe, key, escapeRegex(req.params.value), true);
+	} else {
+		result = await findWhereEqual(Recipe, key, req.params.value, true);
+	}
 	sendResponse(res, result);
 });
 
 router.get("/recipes/:key-equals/:value/list-:prop", async (req, res) => {
-	const docs = await findWhereEqual(Recipe, convertKey(req.params.key), escapeRegex(req.params.value), true);
+	const key = convertKey(req.params.key);
+	let docs;
+	if (keyType(Recipe, key) === "String") {
+		docs = await findWhereEqual(Recipe, key, escapeRegex(req.params.value), true);
+	} else {
+		docs = await findWhereEqual(Recipe, key, req.params.value, true);
+	}
 	const result = extractProps(res, req.params.prop, docs);
 	sendResponse(res, result);
 });
 
 router.get("/recipes/:key-equals/:value/list-:prop/distinct", async (req, res) => {
-	const docs = await findWhereEqual(Recipe, convertKey(req.params.key), escapeRegex(req.params.value), true);
+	const key = convertKey(req.params.key);
+	let docs;
+	if (keyType(Recipe, key) === "String") {
+		docs = await findWhereEqual(Recipe, key, escapeRegex(req.params.value), true);
+	} else {
+		docs = await findWhereEqual(Recipe, key, req.params.value, true);
+	}
 	const result = extractProps(res, req.params.prop, docs, true);
 	sendResponse(res, result);
 });
 
 router.get("/recipes/:key-equals/:value/count", async (req, res) => {
-	const result = await countWhereEqual(Recipe, convertKey(req.params.key), escapeRegex(req.params.value), true);
+	const key = convertKey(req.params.key);
+	let result;
+	if (keyType(Recipe, key) === "String") {
+		result = await countWhereEqual(Recipe, key, escapeRegex(req.params.value), true);
+	} else {
+		result = await countWhereEqual(Recipe, key, req.params.value, true);
+	}
 	sendResponse(res, result);
 });
 
 router.get("/recipes/:key-contains/:value", async (req, res) => {
-	const result = await findWhereContains(Recipe, convertKey(req.params.key), escapeRegex(req.params.value), true);
+	const key = convertKey(req.params.key);
+	if (keyType(Recipe, key) !== "String") {
+		sendResponse(res, errorResponse(new TypeError(
+			"Key type is not String. A contains query can only be performed on String keys."
+		)), { errorStatus: 400 });
+		return;
+	}
+	const result = await findWhereContains(Recipe, key, escapeRegex(req.params.value), true);
 	sendResponse(res, result);
 });
 
 router.get("/recipes/:key-contains/:value/list-:prop", async (req, res) => {
-	const docs = await findWhereContains(Recipe, convertKey(req.params.key), escapeRegex(req.params.value), true);
+	const key = convertKey(req.params.key);
+	if (keyType(Recipe, key) !== "String") {
+		sendResponse(res, errorResponse(new TypeError(
+			"Key type is not String. A contains query can only be performed on String keys."
+		)), { errorStatus: 400 });
+		return;
+	}
+	const docs = await findWhereContains(Recipe, key, escapeRegex(req.params.value), true);
 	const result = extractProps(res, req.params.prop, docs);
 	sendResponse(res, result); 
 });
 
 router.get("/recipes/:key-contains/:value/list-:prop/distinct", async (req, res) => {
-	const docs = await findWhereContains(Recipe, convertKey(req.params.key), escapeRegex(req.params.value), true);
+	const key = convertKey(req.params.key);
+	if (keyType(Recipe, key) !== "String") {
+		sendResponse(res, errorResponse(new TypeError(
+			"Key type is not String. A contains query can only be performed on String keys."
+		)), { errorStatus: 400 });
+		return;
+	}
+	const docs = await findWhereContains(Recipe, key, escapeRegex(req.params.value), true);
 	const result = extractProps(res, req.params.prop, docs, true);
 	sendResponse(res, result);
 });
 
 router.get("/recipes/:key-contains/:value/count", async (req, res) => {
-	const result = await countWhereContains(Recipe, convertKey(req.params.key), escapeRegex(req.params.value), true);
+	const key = convertKey(req.params.key);
+	if (keyType(Recipe, key) !== "String") {
+		sendResponse(res, errorResponse(new TypeError(
+			"Key type is not String. A contains query can only be performed on String keys."
+		)), { errorStatus: 400 });
+		return;
+	}
+	const result = await countWhereContains(Recipe, key, escapeRegex(req.params.value), true);
 	sendResponse(res, result);
 });
 

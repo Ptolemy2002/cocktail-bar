@@ -4,6 +4,11 @@ const { errorResponse } = require('lib/misc');
 require('models/Recipe');
 const Recipe = mongoose.model('recipes');
 
+function keyType(collection, key) {
+    if (key === "_id") return mongoose.Types.ObjectId;
+    return collection.schema.path(key).instance;
+}
+
 function escapeRegex(string) {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
@@ -24,9 +29,10 @@ function accentInsensitive(string = '') {
     return string;
 }
 
-function transformQueryCaseInsensitive(query) {
+function transformQueryCaseInsensitive(collection, query) {
     for (let key in query) {
         if (key === "_id") continue;
+        if (keyType(collection, key) !== "String") continue;
         
         let value = query[key];
         if (typeof value === "string") {
@@ -37,9 +43,10 @@ function transformQueryCaseInsensitive(query) {
     return query;
 }
 
-function transformQueryAccentInsensitive(query) {
+function transformQueryAccentInsensitive(collection, query) {
     for (let key in query) {
         if (key === "_id") continue;
+        if (keyType(collection, key) !== "String") continue;
 
         let value = query[key];
         if (typeof value === "string") {
@@ -52,9 +59,10 @@ function transformQueryAccentInsensitive(query) {
     return query;
 }
 
-function transformQueryMatchWhole(query) {
+function transformQueryMatchWhole(collection, query) {
     for (let key in query) {
         if (key === "_id") continue;
+        if (keyType(collection, key) !== "String") continue;
 
         let value = query[key];
         if (value instanceof RegExp) {
@@ -74,15 +82,15 @@ function transformQueryMatchWhole(query) {
 function findFunction(fun) {
 	return async (collection, query={}, args={}) => {
         if (args.caseInsensitive) {
-            query = transformQueryCaseInsensitive(query);
+            query = transformQueryCaseInsensitive(collection, query);
         }
 
         if (args.matchWhole) {
-            query = transformQueryMatchWhole(query);
+            query = transformQueryMatchWhole(collection, query);
         }
 
         if (!args.accentSensitive) {
-            query = transformQueryAccentInsensitive(query);
+            query = transformQueryAccentInsensitive(collection, query);
         }
 
         // Verify that each id is a valid ObjectId
@@ -140,15 +148,15 @@ async function list(collection, field) {
 function updateFunction(fun) {
     return async (collection, query={}, update={}, args={}) => {
         if (args.caseInsensitive) {
-            query = transformQueryCaseInsensitive(query);
+            query = transformQueryCaseInsensitive(collection, query);
         }
 
         if (args.matchWhole) {
-            query = transformQueryMatchWhole(query);
+            query = transformQueryMatchWhole(collection, query);
         }
 
         if (!args.accentSensitive) {
-            query = transformQueryAccentInsensitive(query);
+            query = transformQueryAccentInsensitive(collection, query);
         }
 
         // Verify that each id is a valid ObjectId
@@ -214,15 +222,15 @@ async function createRecipe(recipeData) {
 function deleteFunction(fun) {
     return async (collection, query={}, args={}) => {
         if (args.caseInsensitive) {
-            query = transformQueryCaseInsensitive(query);
+            query = transformQueryCaseInsensitive(collection, query);
         }
 
         if (args.matchWhole) {
-            query = transformQueryMatchWhole(query);
+            query = transformQueryMatchWhole(collection, query);
         }
 
         if (!args.accentSensitive) {
-            query = transformQueryAccentInsensitive(query);
+            query = transformQueryAccentInsensitive(collection, query);
         }
 
         // Verify that each id is a valid ObjectId
@@ -246,6 +254,7 @@ const deleteManyWhereEqual = whereEqual(deleteMany);
 const deleteManyWhereContains = whereContains(deleteMany);
 
 module.exports = {
+    "keyType": keyType,
     "escapeRegex": escapeRegex,
     "accentInsensitive": accentInsensitive,
     "transformQueryCaseInsensitive": tryFunc(transformQueryCaseInsensitive),

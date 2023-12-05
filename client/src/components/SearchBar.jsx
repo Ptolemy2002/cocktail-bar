@@ -6,14 +6,19 @@ function SearchBar(props) {
     const [matchWhole, setMatchWhole] = useState(props.matchWhole ? props.matchWhole === "true" : false);
 
     function handleQueryChange(event) {
+        if (category === "amount" && isNaN(event.target.value)) return;
         setQuery(event.target.value);
     }
 
     function handleCategoryChange(event) {
         setCategory(event.target.value);
+        if (event.target.value === "amount") {
+            setMatchWhole(true);
+        }
     }
 
     function handleMatchWholeChange(event) {
+        if (category === "amount" && !event.target.checked) return;
         setMatchWhole(event.target.checked);
     }
 
@@ -21,8 +26,21 @@ function SearchBar(props) {
         window.location.href = "/recipe-gallery?query=" + query + "&category=" + category + "&matchWhole=" + matchWhole;
     }
 
+    function handleKeyUp(event) {
+        if (event.key === "Enter") {
+            redirect();
+        }
+    }
+
     return (
         <div className="search-bar input-group">
+            {
+                category === "amount" ?
+                <p>
+                    "Ingredient Amount" is a number, therefore you must enter a number in the search bar and use the
+                    "Match Whole Prompt" option.
+                </p> : null
+            }
             <div className="form-outline">
                 <input 
                     type="search"
@@ -31,6 +49,7 @@ function SearchBar(props) {
                     placeholder="Search"
                     value={query}
                     onChange={handleQueryChange}
+                    onKeyUp={handleKeyUp}
                 />
 
                 <div className="search-bar-options">

@@ -18,13 +18,13 @@ function RecipeGalleryPage() {
     let path = "recipes/all";
     if (query && category) {
         if (category === "general") {
-            if (matchWhole) {
+            if (matchWhole === "true") {
                 path = `recipes/search-whole/${encodeURIComponent(query)}`;
             } else {
                 path = `recipes/search/${encodeURIComponent(query)}`;
             }
         } else {
-            if (matchWhole) {
+            if (matchWhole === "true") {
                 path = `recipes/${category}-equals/${query}`;
             } else {
                 path = `recipes/${category}-contains/${query}`;
@@ -47,6 +47,9 @@ function RecipeGalleryPage() {
         return (
             <div className="GalleryPage container">
                 <h2>Gallery</h2>
+                <SearchBar id="gallery-search" query={query} category={category} matchWhole={matchWhole} />
+                <Spacer />
+                
                 <p>Retrieving cocktails...</p>
             </div>
         );
@@ -54,6 +57,9 @@ function RecipeGalleryPage() {
         return (
             <div className="GalleryPage container">
                 <h2>Gallery</h2>
+                <SearchBar id="gallery-search" query={query} category={category} matchWhole={matchWhole} />
+                <Spacer />
+
                 <p className="text-danger">Failed to retrieve cocktails. Error details logged to console.</p>
             </div>
         );
@@ -73,6 +79,7 @@ function RecipeGalleryPage() {
                 <h1>Gallery</h1>
                 <SearchBar id="gallery-search" query={query} category={category} matchWhole={matchWhole} />
                 <Spacer />
+
                 <p>{cocktails.length} result(s)</p>
 
                 <button
