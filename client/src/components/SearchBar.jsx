@@ -3,7 +3,7 @@ import React, {useState} from "react";
 function SearchBar(props) {
     const [query, setQuery] = useState(props.query || "");
     const [category, setCategory] = useState(props.category || "general");
-    const [matchWhole, setMatchWhole] = useState(props.matchWhole ? props.matchWhole === "true" : false);
+    const [matchWhole, setMatchWhole] = useState(props.matchWhole || false);
 
     function handleQueryChange(event) {
         if (category === "amount" && isNaN(event.target.value)) return;
@@ -14,6 +14,8 @@ function SearchBar(props) {
         setCategory(event.target.value);
         if (event.target.value === "amount") {
             setMatchWhole(true);
+        } else if (event.target.value === "general") {
+            setMatchWhole(false);
         }
     }
 
@@ -23,7 +25,19 @@ function SearchBar(props) {
     }
 
     function redirect() {
-        window.location.href = "/recipe-gallery?query=" + query + "&category=" + category + "&matchWhole=" + matchWhole;
+        let href = "/recipe-gallery?";
+        if (query) {
+            href += `query=${encodeURIComponent(query)}&`;
+        }
+        if (category) {
+            href += `category=${encodeURIComponent(category)}&`;
+        }
+        if (matchWhole) {
+            href += `matchWhole=${encodeURIComponent(matchWhole)}`;
+        }
+
+        href = href.replace(/&$/, "");
+        window.location.href = href;
     }
 
     function handleKeyUp(event) {
@@ -35,11 +49,19 @@ function SearchBar(props) {
     return (
         <div className="search-bar input-group">
             {
-                category === "amount" ?
-                <p>
-                    "Ingredient Amount" is a number, therefore you must enter a number in the search bar and use the
-                    "Match Whole Prompt" option.
-                </p> : null
+                category === "amount" ? (
+                    <p>
+                        "Ingredient Amount" is a number, therefore you must enter a number in the search bar and use the
+                        "Match Whole Prompt" option.
+                    </p>
+                ):
+                category === "general" ? (
+                    <p>
+                        "General Search" uses a smart text search algorithm that does not support the "Match Whole Prompt" option.
+                    </p>
+                ):
+                // Else
+                null
             }
             <div className="form-outline">
                 <input 
@@ -72,16 +94,22 @@ function SearchBar(props) {
                         <option value="special">By Special Ingredient</option>
                     </select>
 
-                    <div className="form-check">
-                        <input
-                            type="checkbox"
-                            className="form-check-input"
-                            id="match-whole"
-                            checked={matchWhole}
-                            onChange={handleMatchWholeChange}
-                        />
-                        <label className="form-check-label" htmlFor="match-whole">Match Whole Prompt</label>
-                    </div>
+                    {
+                        category !== "amount" && category !== "general" ? (
+                            <div className="form-check">
+                                <input
+                                    type="checkbox"
+                                    className="form-check-input"
+                                    id="match-whole"
+                                    checked={matchWhole}
+                                    onChange={handleMatchWholeChange}
+                                />
+                                <label className="form-check-label" htmlFor="match-whole">Match Whole Prompt</label>
+                            </div>
+                        ):
+                        // Else
+                        null
+                    }
                 </div>
             </div>
 

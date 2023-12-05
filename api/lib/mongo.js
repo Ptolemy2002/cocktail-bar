@@ -253,6 +253,32 @@ const deleteOneWhereContains = whereContains(deleteOne);
 const deleteManyWhereEqual = whereEqual(deleteMany);
 const deleteManyWhereContains = whereContains(deleteMany);
 
+async function search(collection, index, query) {
+    const includeMap = {};
+    for (let key in collection.schema.paths) {
+        includeMap[key] = 1;
+    }
+
+    return await collection.aggregate([{
+        $search: {
+            index,
+            text: {
+                query,
+                path: {
+                    wildcard: "*"
+                }
+            }
+        }
+    }, {
+        $project: {
+            ...includeMap,
+            _score: {
+                $meta: "searchScore"
+            }
+        }
+    }]);
+}
+
 module.exports = {
     "keyType": keyType,
     "escapeRegex": escapeRegex,
@@ -284,6 +310,7 @@ module.exports = {
     "deleteOneWhereContains": tryFunc(deleteOneWhereContains),
     "deleteManyWhereEqual": tryFunc(deleteManyWhereEqual),
     "deleteManyWhereContains": tryFunc(deleteManyWhereContains),
+    "search": tryFunc(search),
     
     Recipe
 };

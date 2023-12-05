@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { recipeKeyType, escapeRegex, findAll, findWhereEqual, findWhereContains, countAll, countWhereEqual, countWhereContains, updateOneWhereEqual, createRecipe, deleteOneWhereEqual, Recipe } = require('lib/mongo');
+const { keyType, escapeRegex, findAll, findWhereEqual, findWhereContains,
+		countAll, countWhereEqual, countWhereContains, updateOneWhereEqual, createRecipe,
+		deleteOneWhereEqual, search, Recipe } = require('lib/mongo');
 const { sendResponse, errorResponse } = require('lib/misc');
-const { keyType } = require('../../../lib/mongo');
 
 function convertKey(key) {
 	switch (key) {
@@ -247,6 +248,11 @@ router.get("/recipes/get/by-name/:name", async (req, res) => {
 
 router.get("/recipes/get/by-id/:id", async (req, res) => {
 	const result = await findWhereEqual(Recipe, "_id", req.params.id, false, true);
+	sendResponse(res, result);
+});
+
+router.get("/recipes/search/:query", async (req, res) => {
+	const result = await search(Recipe, "default", req.params.query);
 	sendResponse(res, result);
 });
 

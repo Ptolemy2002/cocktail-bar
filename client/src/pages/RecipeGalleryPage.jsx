@@ -13,18 +13,14 @@ function RecipeGalleryPage() {
     const queryParams = useQuery();
     const query = queryParams.get("query");
     const category = queryParams.get("category");
-    const matchWhole = queryParams.get("matchWhole");
+    const matchWhole = queryParams.get("matchWhole") === "true";
 
     let path = "recipes/all";
     if (query && category) {
         if (category === "general") {
-            if (matchWhole === "true") {
-                path = `recipes/search-whole/${encodeURIComponent(query)}`;
-            } else {
-                path = `recipes/search/${encodeURIComponent(query)}`;
-            }
+            path = `recipes/search/${encodeURIComponent(query)}`;
         } else {
-            if (matchWhole === "true") {
+            if (matchWhole) {
                 path = `recipes/${category}-equals/${query}`;
             } else {
                 path = `recipes/${category}-contains/${query}`;
@@ -32,11 +28,21 @@ function RecipeGalleryPage() {
         }
     }
 
-    const [cocktails, cocktailsStatus, sendCocktailRequest] = useApi(path, true, (a, b) => a.name.localeCompare(b.name));
+    const [cocktails, cocktailsStatus, sendCocktailRequest] = useApi(path, true, (a, b) => {
+        if (a._score && b._score) {
+            if (a._score !== b._score) {
+                return b._score - a._score;
+            } else {
+                return a.name.localeCompare(b.name);
+            }
+        }
+
+        return a.name.localeCompare(b.name);
+    });
 
     function refresh() {
         sendCocktailRequest({
-            method: "GET",
+            method: "GET"
         });
     }
 

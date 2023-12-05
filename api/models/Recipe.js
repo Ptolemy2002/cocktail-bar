@@ -23,4 +23,14 @@ const RecipeSchema = new Schema({
 	preparation: String
 });
 
+// Create the Index
+RecipeSchema.index({
+	name: 'default',
+	definition: {
+		mappings: {
+			dynamic: true
+		}
+	}
+});
+
 module.exports = mongoose.model('recipes', RecipeSchema);
