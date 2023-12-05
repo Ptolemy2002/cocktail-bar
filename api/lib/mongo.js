@@ -93,7 +93,7 @@ function findFunction(fun) {
                 throw err;
             }
         });
-
+        
         return await collection[fun](query);
     }
 }

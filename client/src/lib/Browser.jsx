@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { matchRoutes, useLocation } from "react-router-dom";
 import  HomePage from "src/pages/HomePage";
 import RecipeGalleryPage from "src/pages/RecipeGalleryPage";
@@ -31,4 +32,9 @@ const useCurrentPath = () => {
   return route?.path
 }
 
-export { useCurrentPath, routes }
+function useQuery() {
+  const location = useLocation();
+  return useMemo(() => new URLSearchParams(location.search), [location]);
+}
+
+export { useCurrentPath, useQuery, routes }

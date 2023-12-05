@@ -1,4 +1,7 @@
 import React, {useEffect} from "react";
+import SearchBar from "src/components/SearchBar";
+import Spacer from "src/components/Spacer";
+import { useQuery } from "src/lib/Browser";
 import { useApi } from "src/lib/Api";
 import { Link } from "react-router-dom";
 import { CocktailData } from "src/lib/CocktailUtil";
@@ -7,7 +10,29 @@ import CocktailImage from "src/components/CocktailImage";
 function RecipeGalleryPage() {
     document.title = "Recipe Gallery | Cocktail Bar";
     
-    const [cocktails, cocktailsStatus, sendCocktailRequest] = useApi("recipes/all", true, (a, b) => a.name.localeCompare(b.name));
+    const queryParams = useQuery();
+    const query = queryParams.get("query");
+    const category = queryParams.get("category");
+    const matchWhole = queryParams.get("matchWhole");
+
+    let path = "recipes/all";
+    if (query && category) {
+        if (category === "general") {
+            if (matchWhole) {
+                path = `recipes/search-whole/${encodeURIComponent(query)}`;
+            } else {
+                path = `recipes/search/${encodeURIComponent(query)}`;
+            }
+        } else {
+            if (matchWhole) {
+                path = `recipes/${category}-equals/${query}`;
+            } else {
+                path = `recipes/${category}-contains/${query}`;
+            }
+        }
+    }
+
+    const [cocktails, cocktailsStatus, sendCocktailRequest] = useApi(path, true, (a, b) => a.name.localeCompare(b.name));
 
     function refresh() {
         sendCocktailRequest({
@@ -46,6 +71,8 @@ function RecipeGalleryPage() {
         return (
             <div className="GalleryPage container">
                 <h1>Gallery</h1>
+                <SearchBar id="gallery-search" query={query} category={category} matchWhole={matchWhole} />
+                <Spacer />
                 <p>{cocktails.length} result(s)</p>
 
                 <button

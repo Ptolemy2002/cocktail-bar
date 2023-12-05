@@ -10,6 +10,7 @@ function convertKey(key) {
 		case "unit": return "ingredients.unit";
 		case "amount": return "ingredients.amount";
 		case "special": return "ingredients.special";
+		case "label": return "ingredients.label";
 		default: return key;
 	}
 }

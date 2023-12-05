@@ -74,13 +74,13 @@ function useApi(path, sort=false, sortFunc=null) {
             };
         }
 
-        const fullPath = path;
+        let fullPath = path;
         if (queryParams) {
             const queryString = Object.keys(queryParams).map((key) => {
                 return encodeURIComponent(key) + "=" + encodeURIComponent(queryParams[key]);
             }).join("&");
 
-            path += "?" + queryString;
+            fullPath += "?" + queryString;
         }
 
         fetch(`${root}/api/v1/${fullPath}`, options)

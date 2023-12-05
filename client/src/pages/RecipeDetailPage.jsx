@@ -14,7 +14,7 @@ function RecipeDetailPage() {
     const [editMode, setEditMode] = useState(false);
 
     // If lastRequest is null, the pull has not been started yet, but will be soon
-    if ((cocktailData.pullInProgress()) || cocktailData.lastRequest === null) {
+    if (cocktailData.pullInProgress() || cocktailData.lastRequest === null) {
         return (
             <div className="RecipeDetailPage container">
                 <h1>{name}</h1>
