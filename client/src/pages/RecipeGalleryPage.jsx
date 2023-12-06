@@ -1,7 +1,7 @@
 import React, {useEffect} from "react";
 import SearchBar from "src/components/SearchBar";
 import Spacer from "src/components/Spacer";
-import { useQuery } from "src/lib/Browser";
+import { useCurrentPath, useQuery } from "src/lib/Browser";
 import { useApi } from "src/lib/Api";
 import { Link } from "react-router-dom";
 import { CocktailData } from "src/lib/CocktailUtil";
@@ -10,6 +10,7 @@ import CocktailImage from "src/components/CocktailImage";
 function RecipeGalleryPage() {
     document.title = "Recipe Gallery | Cocktail Bar";
     
+    const currentPath = useCurrentPath();
     const queryParams = useQuery();
     const query = queryParams.get("query");
     const category = queryParams.get("category");
@@ -49,11 +50,67 @@ function RecipeGalleryPage() {
     // Refresh the cocktail list on first load
     useEffect(refresh, []);
 
+    const searchCategories = [
+        {
+            value: "general",
+            text: "General Search",
+            info: `
+                "General Search" uses a smart text search algorithm that does not support the "Match Whole Prompt" option.
+            `,
+            matchWholeOverride: false
+        },
+        {
+            value: "name",
+            text: "By Name"
+        },
+        {
+            value: "image",
+            text: "By Image"
+        },
+        {
+            value: "category",
+            text: "By Category"
+        },
+        {
+            value: "glass",
+            text: "By Glass"
+        },
+        {
+            value: "garnish",
+            text: "By Garnish"
+        },
+        {
+            value: "preparation",
+            text: "By Preparation Instructions"
+        },
+        {
+            value: "ingredient",
+            text: "By Ingredient Name"
+        },
+        {
+            value: "unit",
+            text: "By Ingredient Unit"
+        },
+        {
+            value: "amount",
+            text: "By Ingredient Amount",
+            info: `
+                "Ingredient Amount" is a number, so you can only enter a number in the search bar and
+                must match the whole prompt.
+            `,
+            matchWholeOverride: true,
+            number: true
+        }
+    ];
+
     if (!cocktailsStatus.completed) {
         return (
-            <div className="GalleryPage container">
-                <h2>Gallery</h2>
-                <SearchBar id="gallery-search" query={query} category={category} matchWhole={matchWhole} />
+            <div className="RecipeGalleryPage container">
+                <h2>Recipe Gallery</h2>
+                <SearchBar id="gallery-search"
+                    query={query} category={category} matchWhole={matchWhole}
+                    destinationPath={currentPath} categories={searchCategories}
+                />
                 <Spacer />
                 
                 <p>Retrieving cocktails...</p>
@@ -61,9 +118,12 @@ function RecipeGalleryPage() {
         );
     } else if (cocktailsStatus.failed) {
         return (
-            <div className="GalleryPage container">
-                <h2>Gallery</h2>
-                <SearchBar id="gallery-search" query={query} category={category} matchWhole={matchWhole} />
+            <div className="RecipeGalleryPage container">
+                <h2>Recipe Gallery</h2>
+                <SearchBar id="gallery-search"
+                    query={query} category={category} matchWhole={matchWhole}
+                    destinationPath={currentPath} categories={searchCategories}
+                />
                 <Spacer />
 
                 <p className="text-danger">Failed to retrieve cocktails. Error details logged to console.</p>
@@ -81,9 +141,12 @@ function RecipeGalleryPage() {
         });
 
         return (
-            <div className="GalleryPage container">
-                <h1>Gallery</h1>
-                <SearchBar id="gallery-search" query={query} category={category} matchWhole={matchWhole} />
+            <div className="RecipeGalleryPage container">
+                <h1>Recipe Gallery</h1>
+                <SearchBar id="gallery-search"
+                    query={query} category={category} matchWhole={matchWhole}
+                    destinationPath={currentPath} categories={searchCategories}
+                />
                 <Spacer />
 
                 <p>{cocktails.length} result(s)</p>

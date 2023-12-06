@@ -5,8 +5,12 @@ function SearchBar(props) {
     const [category, setCategory] = useState(props.category || "general");
     const [matchWhole, setMatchWhole] = useState(props.matchWhole || false);
 
+    const infoMap = {};
+    const matchWholeOverrideMap = {};
+    const numberMap = {};
+
     function handleQueryChange(event) {
-        if (category === "amount" && isNaN(event.target.value)) return;
+        if (numberMap[category] && isNaN(event.target.value)) return;
         setQuery(event.target.value);
     }
 
@@ -20,12 +24,12 @@ function SearchBar(props) {
     }
 
     function handleMatchWholeChange(event) {
-        if (category === "amount" && !event.target.checked) return;
+        if (matchWholeOverrideMap[category] && event.target.checked !== !!matchWholeOverrideMap[category]) return;
         setMatchWhole(event.target.checked);
     }
 
     function redirect() {
-        let href = "/recipe-gallery?";
+        let href = props.destinationPath + "?";
         if (query) {
             href += `query=${encodeURIComponent(query)}&`;
         }
@@ -46,18 +50,30 @@ function SearchBar(props) {
         }
     }
 
+    const optionElements = (props.categories || []).map((o) => {
+        if (o.hasOwnProperty("info")) {
+            infoMap[o.value] = o.info;
+        }
+
+        if (o.hasOwnProperty("matchWholeOverride")) {
+            matchWholeOverrideMap[o.value] = o.matchWholeOverride;
+        }
+
+        if (o.hasOwnProperty("number")) {
+            numberMap[o.value] = o.number;
+        }
+
+        return (
+            <option key={o.value} value={o.value}>{o.text}</option>
+        );
+    });
+
     return (
         <div className="search-bar input-group">
             {
-                category === "amount" ? (
+                infoMap.hasOwnProperty(category) ? (
                     <p>
-                        "Ingredient Amount" is a number, therefore you must enter a number in the search bar and use the
-                        "Match Whole Prompt" option.
-                    </p>
-                ):
-                category === "general" ? (
-                    <p>
-                        "General Search" uses a smart text search algorithm that does not support the "Match Whole Prompt" option.
+                        {infoMap[category]}
                     </p>
                 ):
                 // Else
@@ -75,27 +91,20 @@ function SearchBar(props) {
                 />
 
                 <div className="search-bar-options">
-                    <select
-                        className="form-select"
-                        value={category}
-                        onChange={handleCategoryChange}
-                    >
-                        <option value="general">General Search</option>
-                        <option value="name">By Name</option>
-                        <option value="image">By Image</option>
-                        <option value="category">By Category</option>
-                        <option value="glass">By Glass</option>
-                        <option value="garnish">By Garnish</option>
-                        <option value="preparation">By Preparation Instructions</option>
-                        <option value="ingredient">By Ingredient Name</option>
-                        <option value="unit">By Ingredient Unit</option>
-                        <option value="amount">By Ingredient Amount</option>
-                        <option value="label">By Ingredient Label</option>
-                        <option value="special">By Special Ingredient</option>
-                    </select>
+                    {
+                        props.staticCategory ? null : (
+                            <select
+                                className="form-select"
+                                value={category}
+                                onChange={handleCategoryChange}
+                            >
+                                {optionElements}
+                            </select>
+                        )
+                    }
 
                     {
-                        category !== "amount" && category !== "general" ? (
+                        (!props.staticMatchWhole && !matchWholeOverrideMap.hasOwnProperty(category)) ? (
                             <div className="form-check">
                                 <input
                                     type="checkbox"

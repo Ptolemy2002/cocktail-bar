@@ -3,6 +3,7 @@ import { matchRoutes, useLocation } from "react-router-dom";
 import  HomePage from "src/pages/HomePage";
 import RecipeGalleryPage from "src/pages/RecipeGalleryPage";
 import RecipeDetailPage from "src/pages/RecipeDetailPage";
+import IngredientGalleryPage from "src/pages/IngredientGalleryPage";
 
 const routes = [
     {
@@ -15,6 +16,12 @@ const routes = [
       path: "/recipe-gallery",
       navigationText: "Recipe Gallery",
       element: <RecipeGalleryPage />
+    },
+
+    {
+      path: "/ingredient-gallery",
+      navigationText: "Ingredient Gallery",
+      element: <IngredientGalleryPage />
     },
 
     {

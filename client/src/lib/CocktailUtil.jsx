@@ -619,20 +619,18 @@ class SpecialIngredientData extends I_IngredientData {
 }
 
 function useCocktailData(value, primaryKey="name") {
-    const _push = useApi(`recipes/update/by-${primaryKey}/${encodeURIComponent(value)}`)[2];
-    const _pull = useApi(`recipes/get/by-${primaryKey}/${encodeURIComponent(value)}`)[2];
-    const _duplicate = useApi(`recipes/duplicate/by-${primaryKey}/${encodeURIComponent(value)}`)[2];
-    const _delete = useApi(`recipes/delete/by-${primaryKey}/${encodeURIComponent(value)}`)[2];
+    const _push = useApi(`recipes/update/by-exact-${primaryKey}/${encodeURIComponent(value)}`)[2];
+    const _pull = useApi(`recipes/get/by-exact-${primaryKey}/${encodeURIComponent(value)}`)[2];
+    const _duplicate = useApi(`recipes/duplicate/by-exact-${primaryKey}/${encodeURIComponent(value)}`)[2];
+    const _delete = useApi(`recipes/delete/by-exact-${primaryKey}/${encodeURIComponent(value)}`)[2];
 
-    const data = {};
-    data[primaryKey] = value;
     const [cocktailData] = useState(
         primaryKey === "id" ? (
             CocktailData.createFromID(value, _push, _pull, _duplicate, _delete)
         ) :
         // else
         (
-            CocktailData.createFromJSON(data, _push, _pull, _duplicate, _delete)
+            CocktailData.createFromJSON({[primaryKey]: value}, _push, _pull, _duplicate, _delete)
         )
     );
 

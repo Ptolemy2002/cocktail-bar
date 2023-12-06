@@ -178,12 +178,12 @@ router.get("/recipes/:key-contains/:value/count", async (req, res) => {
 	sendResponse(res, result);
 });
 
-router.post("/recipes/update/by-name/:name", async (req, res) => {
+router.post("/recipes/update/by-exact-name/:name", async (req, res) => {
 	const result = await updateOneWhereEqual(Recipe, "name", escapeRegex(req.params.name), req.body, false, true);
 	sendResponse(res, result);
 });
 
-router.post("/recipes/update/by-id/:id", async (req, res) => {
+router.post("/recipes/update/by-exact-id/:id", async (req, res) => {
 	const result = await updateOneWhereEqual(Recipe, "_id", req.params.id, req.body, false, true);
 	sendResponse(res, result);
 });
@@ -193,9 +193,8 @@ router.post("/recipes/create", async (req, res) => {
 	sendResponse(res, result);
 });
 
-router.post("/recipes/duplicate/by-name/:name", async (req, res) => {
-	const allDocs = await findAll(Recipe);
-	const existingNames = extractProps(res, "name", allDocs);
+router.post("/recipes/duplicate/by-exact-name/:name", async (req, res) => {
+	const existingNames = await Recipe.distinct("name");
 	
 	let newName = req.params.name;
 	while (existingNames.includes(newName)) {
@@ -212,9 +211,8 @@ router.post("/recipes/duplicate/by-name/:name", async (req, res) => {
 	sendResponse(res, result);
 });
 
-router.post("/recipes/duplicate/by-id/:id", async (req, res) => {
-	const allDocs = await findAll(Recipe);
-	const existingNames = extractProps(res, "name", allDocs);
+router.post("/recipes/duplicate/by-exact-id/:id", async (req, res) => {
+	const existingNames = await Recipe.distinct("name");
 	const original = (await findWhereEqual(Recipe, "_id", req.params.id))[0];
 
 	let newName = original.name;
@@ -231,22 +229,22 @@ router.post("/recipes/duplicate/by-id/:id", async (req, res) => {
 	sendResponse(res, result);
 });
 
-router.post("/recipes/delete/by-name/:name", async (req, res) => {
+router.post("/recipes/delete/by-exact-name/:name", async (req, res) => {
 	const result = await deleteOneWhereEqual(Recipe, "name", escapeRegex(req.params.name), false, true);
 	sendResponse(res, result);
 });
 
-router.post("/recipes/delete/by-id/:id", async (req, res) => {
+router.post("/recipes/delete/by-exact-id/:id", async (req, res) => {
 	const result = await deleteOneWhereEqual(Recipe, "_id", req.params.id, false, true);
 	sendResponse(res, result);
 });
 
-router.get("/recipes/get/by-name/:name", async (req, res) => {
+router.get("/recipes/get/by-exact-name/:name", async (req, res) => {
 	const result = await findWhereEqual(Recipe, "name", escapeRegex(req.params.name), false, true);
 	sendResponse(res, result);
 });
 
-router.get("/recipes/get/by-id/:id", async (req, res) => {
+router.get("/recipes/get/by-exact-id/:id", async (req, res) => {
 	const result = await findWhereEqual(Recipe, "_id", req.params.id, false, true);
 	sendResponse(res, result);
 });
