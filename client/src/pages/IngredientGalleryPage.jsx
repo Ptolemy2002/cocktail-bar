@@ -112,11 +112,13 @@ function IngredientGalleryPage() {
 function IngredientCard(props) {
     const [recipeNames, recipeNamesStatus, sendRecipeNamesRequest] = useApi(`recipes/ingredient-equals/${encodeURIComponent(props.name)}/list-name`, true);
 
-    useEffect(() => {
+    function refresh() {
         sendRecipeNamesRequest({
             method: "GET"
         });
-    }, []);
+    }
+
+    useEffect(refresh, []);
 
     let ingredientNamesText;
     if (!recipeNamesStatus.completed) {
@@ -170,6 +172,10 @@ function IngredientCard(props) {
                 >
                     View Recipes
                 </Link>
+                <Spacer height="0.5rem" />
+                <button className="btn btn-outline-secondary" onClick={refresh}>
+                    Refresh
+                </button>   
             </div>
         </div>
     );
