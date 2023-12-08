@@ -128,10 +128,12 @@ function IngredientCard(props) {
         let text = "";
         for (let i = 0; i < Math.min(3, recipeNames.length); i++) {
             if (i > 0) {
-                if (i === recipeNames.length - 1 && i === 1) {
-                    text += " and ";
-                } else if (i === recipeNames.length - 1 && i === 2) {
-                    text += ", and ";
+                if (i === recipeNames.length - 1) {
+                    if (i === 1) {
+                        text += " and ";
+                    } else {
+                        text += ", and ";
+                    }
                 } else {
                     text += ", ";
                 }
