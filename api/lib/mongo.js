@@ -10,7 +10,7 @@ function keyType(collection, key) {
 }
 
 function escapeRegex(string) {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function accentInsensitive(string = '') {
@@ -20,7 +20,7 @@ function accentInsensitive(string = '') {
         "(i|í|ì|ï|î)", "(I|Í|Ì|Ï|Î)",
         "(o|ó|ò|ö|ô)", "(O|Ó|Ò|Ö|Ô)",
         "(u|ú|ù|ü|û)", "(U|Ú|Ù|Ü|Û)"
-    ]
+    ];
     
     accentPatterns.forEach((pattern) => {
         string = string.replaceAll(new RegExp(pattern, "g"), pattern);
@@ -37,6 +37,8 @@ function transformQueryCaseInsensitive(collection, query) {
         let value = query[key];
         if (typeof value === "string") {
             query[key] = new RegExp(value, "i");
+        } else if (value instanceof RegExp && !value.flags.includes("i")) {
+            query[key] = new RegExp(value.source, value.flags + "i");
         }
     }
 

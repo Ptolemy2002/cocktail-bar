@@ -31,7 +31,7 @@ function SearchBar(props) {
     function redirect() {
         let href = props.destinationPath + "?";
         if (query) {
-            href += `query=${encodeURIComponent(query)}&`;
+            href += `query=${encodeURIComponent(query.trim())}&`;
         }
         if (category) {
             href += `category=${encodeURIComponent(category)}&`;

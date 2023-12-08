@@ -3,6 +3,7 @@ import SearchBar from "src/components/SearchBar";
 import Spacer from "src/components/Spacer";
 import { useCurrentPath, useQuery } from "src/lib/Browser";
 import { useApi } from "src/lib/Api";
+import { transformRegex } from "src/lib/Regex";
 import { Link } from "react-router-dom";
 
 function IngredientGalleryPage() {
@@ -57,12 +58,11 @@ function IngredientGalleryPage() {
     } else {
         const shownIngredients = ingredients.filter((ingredient) => {
             if (query) {
-                let regex;
-                if (matchWhole) {
-                    regex = new RegExp(`^${query}$`, "i");
-                } else {
-                    regex = new RegExp(query, "i");
-                }
+                let regex = transformRegex(query, {
+                    accentInsensitive: true,
+                    caseInsensitive: true,
+                    matchWhole: matchWhole
+                });
 
                 if (!regex.test(ingredient)) return false;
             }
@@ -110,10 +110,64 @@ function IngredientGalleryPage() {
 }
 
 function IngredientCard(props) {
+    const [ingredientNames, ingredientNamesStatus, sendIngredientNamesRequest] = useApi(`recipes/ingredient-equals/${encodeURIComponent(props.name)}/list-name`, true);
+
+    useEffect(() => {
+        sendIngredientNamesRequest({
+            method: "GET"
+        });
+    }, []);
+
+    let ingredientNamesElement;
+    if (!ingredientNamesStatus.completed) {
+        ingredientNamesElement = "Retrieving Recipes with this ingredient...";
+    } else if (ingredientNamesStatus.failed) {
+        ingredientNamesElement = "Failed to retrieve recipes with this ingredient. Error details logged to console.";
+    } else {
+        // List the first 3 by name
+        let text = "";
+        for (let i = 0; i < Math.min(3, ingredientNames.length); i++) {
+            if (i > 0) {
+                if (i === ingredientNames.length - 1 && i === 1) {
+                    text += " and ";
+                } else if (i === ingredientNames.length - 1 && i === 2) {
+                    text += ", and ";
+                } else {
+                    text += ", ";
+                }
+            }
+            text += `"${ingredientNames[i]}"`;
+        }
+
+        // If the length is greater than 3, add an indicator that there are more
+        if (ingredientNames.length > 3) {
+            text += ", and " + (ingredientNames.length - 3) + " more";
+        }
+
+        ingredientNamesElement = text;
+    }
+
     return (
         <div className="card">
             <div className="card-body">
                 <h5 className="card-title">{props.name}</h5>
+
+                <p className="card-text">
+                    <b>Used in: </b>
+                    {ingredientNamesElement}
+                </p>
+
+                <Link
+                    key="view-ingredients"
+                    to={`/recipe-gallery?query=${props.name}&category=ingredient&matchWhole=true`}
+                    className="btn btn-outline-secondary"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="bottom"
+                    title="Click for recipes that use this ingredient"
+                    role="button"
+                >
+                    View Recipes
+                </Link>
             </div>
         </div>
     );

@@ -7,6 +7,59 @@ import { Link } from "react-router-dom";
 import { CocktailData } from "src/lib/CocktailUtil";
 import CocktailImage from "src/components/CocktailImage";
 
+const searchCategories = [
+    {
+        value: "general",
+        text: "General Search",
+        info: `
+            "General Search" uses a smart text search algorithm that does not support the "Match Whole Prompt" option.
+        `,
+        matchWholeOverride: false
+    },
+    {
+        value: "name",
+        text: "By Name"
+    },
+    {
+        value: "image",
+        text: "By Image"
+    },
+    {
+        value: "category",
+        text: "By Category"
+    },
+    {
+        value: "glass",
+        text: "By Glass"
+    },
+    {
+        value: "garnish",
+        text: "By Garnish"
+    },
+    {
+        value: "preparation",
+        text: "By Preparation Instructions"
+    },
+    {
+        value: "ingredient",
+        text: "By Ingredient Name"
+    },
+    {
+        value: "unit",
+        text: "By Ingredient Unit"
+    },
+    {
+        value: "amount",
+        text: "By Ingredient Amount",
+        info: `
+            "Ingredient Amount" is a number, so you can only enter a number in the search bar and
+            must match the whole prompt.
+        `,
+        matchWholeOverride: true,
+        number: true
+    }
+];
+
 function RecipeGalleryPage() {
     document.title = "Recipe Gallery | Cocktail Bar";
     
@@ -49,59 +102,6 @@ function RecipeGalleryPage() {
 
     // Refresh the cocktail list on first load
     useEffect(refresh, []);
-
-    const searchCategories = [
-        {
-            value: "general",
-            text: "General Search",
-            info: `
-                "General Search" uses a smart text search algorithm that does not support the "Match Whole Prompt" option.
-            `,
-            matchWholeOverride: false
-        },
-        {
-            value: "name",
-            text: "By Name"
-        },
-        {
-            value: "image",
-            text: "By Image"
-        },
-        {
-            value: "category",
-            text: "By Category"
-        },
-        {
-            value: "glass",
-            text: "By Glass"
-        },
-        {
-            value: "garnish",
-            text: "By Garnish"
-        },
-        {
-            value: "preparation",
-            text: "By Preparation Instructions"
-        },
-        {
-            value: "ingredient",
-            text: "By Ingredient Name"
-        },
-        {
-            value: "unit",
-            text: "By Ingredient Unit"
-        },
-        {
-            value: "amount",
-            text: "By Ingredient Amount",
-            info: `
-                "Ingredient Amount" is a number, so you can only enter a number in the search bar and
-                must match the whole prompt.
-            `,
-            matchWholeOverride: true,
-            number: true
-        }
-    ];
 
     if (!cocktailsStatus.completed) {
         return (
