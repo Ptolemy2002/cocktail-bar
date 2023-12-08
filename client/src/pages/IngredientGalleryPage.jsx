@@ -118,11 +118,11 @@ function IngredientCard(props) {
         });
     }, []);
 
-    let ingredientNamesElement;
+    let ingredientNamesText;
     if (!recipeNamesStatus.completed) {
-        ingredientNamesElement = "Retrieving Recipes with this ingredient...";
+        ingredientNamesText = "Retrieving Recipes with this ingredient...";
     } else if (recipeNamesStatus.failed) {
-        ingredientNamesElement = "Failed to retrieve recipes with this ingredient. Error details logged to console.";
+        ingredientNamesText = "Failed to retrieve recipes with this ingredient. Error details logged to console.";
     } else {
         // List the first 3 by name
         let text = "";
@@ -146,7 +146,7 @@ function IngredientCard(props) {
             text += ", and " + (recipeNames.length - 3) + " more";
         }
 
-        ingredientNamesElement = text;
+        ingredientNamesText = text;
     }
 
     return (
@@ -156,11 +156,11 @@ function IngredientCard(props) {
 
                 <p className="card-text">
                     <b>Used in: </b>
-                    {ingredientNamesElement}
+                    {ingredientNamesText}
                 </p>
 
                 <Link
-                    key="view-ingredients"
+                    key="view-recipes"
                     to={`/recipe-gallery?query=${props.name}&category=ingredient&matchWhole=true`}
                     className="btn btn-outline-secondary"
                     data-bs-toggle="tooltip"
