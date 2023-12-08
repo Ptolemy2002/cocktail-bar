@@ -161,7 +161,7 @@ function IngredientCard(props) {
 
                 <Link
                     key="view-recipes"
-                    to={`/recipe-gallery?query=${props.name}&category=ingredient&matchWhole=true`}
+                    to={`/recipe-gallery?query=${encodeURIComponent(props.name)}&category=ingredient&matchWhole=true`}
                     className="btn btn-outline-secondary"
                     data-bs-toggle="tooltip"
                     data-bs-placement="bottom"
