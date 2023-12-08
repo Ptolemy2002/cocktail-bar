@@ -52,8 +52,8 @@ class CocktailData {
     }
 
     set name(value) {
+        if (this._name !== value) this.dirty = true;
         this._name = value;
-        this.dirty = true;
     }
 
     get image() {
@@ -61,8 +61,8 @@ class CocktailData {
     }
 
     set image(value) {
+        if (this._image !== value) this.dirty = true;
         this._image = value;
-        this.dirty = true;
     }
 
     get category() {
@@ -70,8 +70,8 @@ class CocktailData {
     }
 
     set category(value) {
+        if (this._category !== value) this.dirty = true;
         this._category = value;
-        this.dirty = true;
     }
 
     get glass() {
@@ -79,8 +79,8 @@ class CocktailData {
     }
 
     set glass(value) {
+        if (this._glass !== value) this.dirty = true;
         this._glass = value;
-        this.dirty = true;
     }
 
     get garnish() {
@@ -88,8 +88,8 @@ class CocktailData {
     }
 
     set garnish(value) {
+        if (this._garnish !== value) this.dirty = true;
         this._garnish = value;
-        this.dirty = true;
     }
 
     get ingredients() {
@@ -97,8 +97,8 @@ class CocktailData {
     }
 
     set ingredients(value) {
+        if (this._ingredients !== value) this.dirty = true;
         this._ingredients = value;
-        this.dirty = true;
     }
 
     get preparation() {
@@ -106,8 +106,8 @@ class CocktailData {
     }
 
     set preparation(value) {
+        if (this._preparation !== value) this.dirty = true;
         this._preparation = value;
-        this.dirty = true;
     }
 
     static createFromID(id, _push, _pull, _duplicate, _delete) {
@@ -507,8 +507,8 @@ class IngredientData extends I_IngredientData {
     }
 
     set name(value) {
+        if (this._name !== value) this.dirty = true;
         this._name = value;
-        this.dirty = true;
     }
 
     get amount() {
@@ -516,8 +516,8 @@ class IngredientData extends I_IngredientData {
     }
 
     set amount(value) {
+        if (this._amount !== value) this.dirty = true;
         this._amount = value;
-        this.dirty = true;
     }
 
     get unit() {
@@ -525,8 +525,8 @@ class IngredientData extends I_IngredientData {
     }
 
     set unit(value) {
+        if (this._unit !== value) this.dirty = true;
         this._unit = value;
-        this.dirty = true;
     }
 
     get label() {
@@ -534,8 +534,8 @@ class IngredientData extends I_IngredientData {
     }
 
     set label(value) {
+        if (this._label !== value) this.dirty = true;
         this._label = value;
-        this.dirty = true;
     }
 
     static createFromJSON(ingredientState) {
@@ -579,8 +579,8 @@ class SpecialIngredientData extends I_IngredientData {
     }
 
     set text(value) {
+        if (this._text !== value) this.dirty = true;
         this._text = value;
-        this.dirty = true;
     }
 
     static createFromJSON(ingredientState) {
