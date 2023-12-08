@@ -110,38 +110,38 @@ function IngredientGalleryPage() {
 }
 
 function IngredientCard(props) {
-    const [ingredientNames, ingredientNamesStatus, sendIngredientNamesRequest] = useApi(`recipes/ingredient-equals/${encodeURIComponent(props.name)}/list-name`, true);
+    const [recipeNames, recipeNamesStatus, sendRecipeNamesRequest] = useApi(`recipes/ingredient-equals/${encodeURIComponent(props.name)}/list-name`, true);
 
     useEffect(() => {
-        sendIngredientNamesRequest({
+        sendRecipeNamesRequest({
             method: "GET"
         });
     }, []);
 
     let ingredientNamesElement;
-    if (!ingredientNamesStatus.completed) {
+    if (!recipeNamesStatus.completed) {
         ingredientNamesElement = "Retrieving Recipes with this ingredient...";
-    } else if (ingredientNamesStatus.failed) {
+    } else if (recipeNamesStatus.failed) {
         ingredientNamesElement = "Failed to retrieve recipes with this ingredient. Error details logged to console.";
     } else {
         // List the first 3 by name
         let text = "";
-        for (let i = 0; i < Math.min(3, ingredientNames.length); i++) {
+        for (let i = 0; i < Math.min(3, recipeNames.length); i++) {
             if (i > 0) {
-                if (i === ingredientNames.length - 1 && i === 1) {
+                if (i === recipeNames.length - 1 && i === 1) {
                     text += " and ";
-                } else if (i === ingredientNames.length - 1 && i === 2) {
+                } else if (i === recipeNames.length - 1 && i === 2) {
                     text += ", and ";
                 } else {
                     text += ", ";
                 }
             }
-            text += `"${ingredientNames[i]}"`;
+            text += `"${recipeNames[i]}"`;
         }
 
         // If the length is greater than 3, add an indicator that there are more
-        if (ingredientNames.length > 3) {
-            text += ", and " + (ingredientNames.length - 3) + " more";
+        if (recipeNames.length > 3) {
+            text += ", and " + (recipeNames.length - 3) + " more";
         }
 
         ingredientNamesElement = text;
