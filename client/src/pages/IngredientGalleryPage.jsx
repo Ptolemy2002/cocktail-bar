@@ -3,7 +3,7 @@ import SearchBar from "src/components/SearchBar";
 import Spacer from "src/components/Spacer";
 import { useCurrentPath, useQuery } from "src/lib/Browser";
 import { useApi } from "src/lib/Api";
-import { transformRegex } from "src/lib/Regex";
+import { escapeRegex, transformRegex } from "src/lib/Regex";
 import { Link } from "react-router-dom";
 
 function IngredientGalleryPage() {
@@ -58,12 +58,12 @@ function IngredientGalleryPage() {
     } else {
         const shownIngredients = ingredients.filter((ingredient) => {
             if (query) {
-                let regex = transformRegex(query, {
+                let regex = transformRegex(escapeRegex(query), {
                     accentInsensitive: true,
                     caseInsensitive: true,
                     matchWhole: matchWhole
                 });
-
+                
                 if (!regex.test(ingredient)) return false;
             }
 

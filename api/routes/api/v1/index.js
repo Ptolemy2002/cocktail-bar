@@ -196,7 +196,14 @@ router.post("/recipes/create", async (req, res) => {
 router.post("/recipes/duplicate/by-exact-name/:name", async (req, res) => {
 	const existingNames = await Recipe.distinct("name");
 	
-	let newName = req.params.name;
+
+	let newName;
+	if (req.body.name) {
+		newName = req.body.name;
+	} else {
+		newName = req.params.name;
+	}
+
 	while (existingNames.includes(newName)) {
 		newName += " (Copy)";
 	}
@@ -204,7 +211,8 @@ router.post("/recipes/duplicate/by-exact-name/:name", async (req, res) => {
 	const original = (await findWhereEqual(Recipe, "name", escapeRegex(req.params.name), false, true))[0];
 	const newDoc = {
 		...original._doc,
-		name: newName
+		...(req.body || {}),
+		name: newName,
 	};
 
 	const result = await createRecipe(newDoc);
@@ -215,13 +223,19 @@ router.post("/recipes/duplicate/by-exact-id/:id", async (req, res) => {
 	const existingNames = await Recipe.distinct("name");
 	const original = (await findWhereEqual(Recipe, "_id", req.params.id))[0];
 
-	let newName = original.name;
+	let newName;
+	if (req.body.name) {
+		newName = req.body.name;
+	} else {
+		newName = original.name;
+	}
 	while (existingNames.includes(newName)) {
 		newName += " (Copy)";
 	}
 	
 	const newDoc = {
 		...original._doc,
+		...(req.body || {}),
 		name: newName
 	};
 

@@ -318,6 +318,7 @@ class CocktailData {
 
         this._duplicate({
             method: "POST",
+            body: this.toJSON(),
             onSuccess: (data) => {
                 this.requestInProgress = false;
                 if (onSuccess) onSuccess(data);
@@ -439,15 +440,15 @@ class I_IngredientData {
     }
 
     toJSON() {
-        return {};
+        throw new Error("Not implemented.");
     }
 
     fromJSON(ingredientState) {
-        return this;
+        throw new Error("Not implemented.");
     }
 
     clone() {
-        return new IngredientData();
+        throw new Error("Not implemented.");
     }
 
     undo(steps = 1) {
@@ -544,9 +545,7 @@ class IngredientData extends I_IngredientData {
     }
 
     toJSON() {
-        const result = super.toJSON();
         return {
-            ...result,
             ingredient: this.name,
             amount: this.amount,
             unit: this.unit
@@ -554,7 +553,6 @@ class IngredientData extends I_IngredientData {
     }
 
     fromJSON(ingredientState) {
-        super.fromJSON(ingredientState);
         if (ingredientState.hasOwnProperty("ingredient")) this.name = ingredientState.ingredient;
         if (ingredientState.hasOwnProperty("amount")) this.amount = ingredientState.amount;
         if (ingredientState.hasOwnProperty("unit")) this.unit = ingredientState.unit;
@@ -592,17 +590,12 @@ class SpecialIngredientData extends I_IngredientData {
     }
 
     toJSON() {
-        const result = super.toJSON();
-
         return {
-            ...result,
             special: this.text
         };
     }
 
     fromJSON(ingredientState) {
-        super.fromJSON(ingredientState);
-
         if (ingredientState.hasOwnProperty("special")) this.text = ingredientState.special;
 
         this.previousState = this.toJSON();
