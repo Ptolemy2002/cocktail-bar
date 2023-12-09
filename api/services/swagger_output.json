@@ -56,7 +56,7 @@
     },
     "/recipes/all/list-{prop}": {
       "get": {
-        "description": "List all values stored under the specified property.",
+        "description": "List all values stored under the specified property in all Recipes.",
         "parameters": [
           {
             "name": "prop",
@@ -80,7 +80,7 @@
     },
     "/recipes/all/list-{prop}/distinct": {
       "get": {
-        "description": "List all distinct values stored under the specified property.",
+        "description": "List all distinct values stored under the specified property in all Recipes.",
         "parameters": [
           {
             "name": "prop",
@@ -444,7 +444,7 @@
         }
       }
     },
-    "/recipes/duplicate/by-name/{name}": {
+    "/recipes/duplicate/by-exact-name/{name}": {
       "post": {
         "description": "Duplicate a Recipe with the specified name (case sensitive).",
         "parameters": [
@@ -465,7 +465,7 @@
         }
       }
     },
-    "/recipes/duplicate/by-id/{id}": {
+    "/recipes/duplicate/by-exact-id/{id}": {
       "post": {
         "description": "Duplicate a Recipe with the specified id.",
         "parameters": [
@@ -489,7 +489,7 @@
         }
       }
     },
-    "/recipes/delete/by-name/{name}": {
+    "/recipes/delete/by-exact-name/{name}": {
       "post": {
         "description": "Delete a Recipe with the specified name (case sensitive).",
         "parameters": [
@@ -510,7 +510,7 @@
         }
       }
     },
-    "/recipes/delete/by-id/{id}": {
+    "/recipes/delete/by-exact-id/{id}": {
       "post": {
         "description": "Delete a Recipe with the specified id.",
         "parameters": [
@@ -534,7 +534,7 @@
         }
       }
     },
-    "/recipes/get/by-name/{name}": {
+    "/recipes/get/by-exact-name/{name}": {
       "get": {
         "description": "Get the Recipe with the specified name (case sensitive).",
         "parameters": [
@@ -555,7 +555,7 @@
         }
       }
     },
-    "/recipes/get/by-id/{id}": {
+    "/recipes/get/by-exact-id/{id}": {
       "get": {
         "description": "Get the Recipe with the specified id.",
         "parameters": [
@@ -568,16 +568,88 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/Recipe"
-            }
+            "description": "OK"
           },
           "500": {
             "description": "Internal Server Error. Response body contains error details."
           },
           "400": {
             "description": "Invalid id format specified in the request. Response body contains error details."
+          }
+        }
+      }
+    },
+    "/recipes/search/{query}": {
+      "get": {
+        "description": "Use the MongoDB Atlas Search feature to search for Recipes involving the specified query and return details on all those documents. Each document returned has a _score property indicating the relevance.",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          }
+        }
+      }
+    },
+    "/recipes/search/{query}/list-{prop}": {
+      "get": {
+        "description": "Use the MongoDB Atlas Search feature to search for Recipes involving the specified query and return a list of all values stored under the specified property in those documents. Each object returned has a _score property indicating the relevance of the most relevant document it came from and a value property containing the actual value.",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "prop",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Invalid property name specified in the request. Response body contains error details."
+          },
+          "500": {
+            "description": "Internal Server Error. Response body contains error details."
+          }
+        }
+      }
+    },
+    "/recipes/search/{query}/list-{prop}/distinct": {
+      "get": {
+        "description": "Use the MongoDB Atlas Search feature to search for Recipes involving the specified query and return a list of all distinct values stored under the specified property in those documents. Each object returned has a _score property indicating the relevance of the most relevant document it came from and a value property containing the actual value.",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "prop",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
           }
         }
       }

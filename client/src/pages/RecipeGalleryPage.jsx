@@ -4,7 +4,7 @@ import Spacer from "src/components/Spacer";
 import { useCurrentPath, useQuery } from "src/lib/Browser";
 import { useApi } from "src/lib/Api";
 import { Link } from "react-router-dom";
-import { CocktailData } from "src/lib/CocktailUtil";
+import { useCocktailData } from "src/lib/CocktailUtil";
 import CocktailImage from "src/components/CocktailImage";
 
 const searchCategories = [
@@ -13,6 +13,7 @@ const searchCategories = [
         text: "General Search",
         info: `
             "General Search" uses a smart text search algorithm that does not support the "Match Whole Prompt" option.
+            In addition, results will be sorted by relevance, not alphabetically.
         `,
         matchWholeOverride: false
     },
@@ -69,33 +70,33 @@ function RecipeGalleryPage() {
     const category = queryParams.get("category");
     const matchWhole = queryParams.get("matchWhole") === "true";
 
-    let path = "recipes/all";
+    let path = "recipes/all/list-name/distinct";
     if (query && category) {
         if (category === "general") {
-            path = `recipes/search/${encodeURIComponent(query)}`;
+            path = `recipes/search/${encodeURIComponent(query)}/list-name/distinct`;
         } else {
             if (matchWhole) {
-                path = `recipes/${category}-equals/${query}`;
+                path = `recipes/${category}-equals/${encodeURIComponent(query)}/list-name/distinct`;
             } else {
-                path = `recipes/${category}-contains/${query}`;
+                path = `recipes/${category}-contains/${encodeURIComponent(query)}/list-name/distinct`;
             }
         }
     }
 
-    const [cocktails, cocktailsStatus, sendCocktailRequest] = useApi(path, true, (a, b) => {
-        if (a._score && b._score) {
+    const [cocktailNames, cocktailNamesStatus, sendCocktailNamesRequest] = useApi(path, true, (a, b) => {
+        if (a.type === "search-result" && b.type === "search-result") {
             if (a._score !== b._score) {
                 return b._score - a._score;
             } else {
-                return a.name.localeCompare(b.name);
+                return a.value.localeCompare(b.value);
             }
         }
 
-        return a.name.localeCompare(b.name);
+        return a.localeCompare(b);
     });
 
     function refresh() {
-        sendCocktailRequest({
+        sendCocktailNamesRequest({
             method: "GET"
         });
     }
@@ -103,7 +104,7 @@ function RecipeGalleryPage() {
     // Refresh the cocktail list on first load
     useEffect(refresh, []);
 
-    if (!cocktailsStatus.completed) {
+    if (!cocktailNamesStatus.completed) {
         return (
             <div className="RecipeGalleryPage container">
                 <h2>Recipe Gallery</h2>
@@ -116,7 +117,7 @@ function RecipeGalleryPage() {
                 <p>Retrieving cocktails...</p>
             </div>
         );
-    } else if (cocktailsStatus.failed) {
+    } else if (cocktailNamesStatus.failed) {
         return (
             <div className="RecipeGalleryPage container">
                 <h2>Recipe Gallery</h2>
@@ -130,11 +131,12 @@ function RecipeGalleryPage() {
             </div>
         );
     } else {
-        const cocktailCards = cocktails.map((cocktail, i) => {
+        const cocktailCards = cocktailNames.map((name, i) => {
+            if (name.type === "search-result") name = name.value;
             return (
                 <div key={"col-" + i} className="col col-12 col-md-6 col-lg-4 col-xl-3">
-                    <CocktailCard key={cocktail.name}
-                        cocktailData={CocktailData.createFromJSON(cocktail)}
+                    <CocktailCard key={name}
+                        name={name}
                     />
                 </div>
             );
@@ -149,7 +151,7 @@ function RecipeGalleryPage() {
                 />
                 <Spacer />
 
-                <p>{cocktails.length} result(s)</p>
+                <p>{cocktailNames.length} result(s)</p>
 
                 <button
                     className="btn btn-outline-secondary mb-3"
@@ -169,37 +171,78 @@ function RecipeGalleryPage() {
 }
 
 function CocktailCard(props) {
-    const data = props.cocktailData;
-    const altText = data.isPlaceholderImage() ? "Placeholder image" : `Image of a "${data.name}" cocktail`;
+    const data = useCocktailData(props.name);
 
-    return (
-        <div className="card">
-            <CocktailImage className="card-img-top" src={data.image} alt={altText} />
+    function refresh() {
+        data.pull();
+    }
 
-            <div className="card-body">
-                <h5 className="card-title">{data.name}</h5>
-                <h6 className="card-subtitle mb-2 text-muted">{data.category}</h6>
-
-                <p className="card-text">
-                    <b>Glass:</b> {data.glass} <br />
-                    <b>Garnish:</b> {data.garnish} <br />
-                    <b>Ingredient Count:</b> {data.ingredients.length}
-                </p>
-
-                <Link
-                    key="view-recipe"
-                    to={`/recipe/${data.name}`}
-                    className="btn btn-outline-secondary"
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="bottom"
-                    title="Click for the full recipe and to make edits"
-                    role="button"
-                >
-                    View Recipe
-                </Link>
+    if (data.pullInProgress()) {
+        return (
+            <div className="card">
+                <div className="card-body">
+                    <h5 className="card-title">{props.name}</h5>
+                    <p className="card-text">
+                        Retrieving recipe...
+                    </p>
+                </div>
             </div>
-        </div>
-    );
+        );
+    } else if (data.pullFailed()) {
+        return (
+            <div className="card">
+                <div className="card-body">
+                    <h5 className="card-title">{props.name}</h5>
+                    <p className="card-text">
+                        <span className="text-danger">Failed to retrieve recipe. Error details logged to console.</span>
+                    </p>
+                    <button
+                        className="btn btn-outline-secondary"
+                        onClick={refresh}
+                    >
+                        Refresh
+                    </button>
+                </div>
+            </div>
+        );
+    } else {
+        const altText = data.isPlaceholderImage() ? "Placeholder image" : `Image of a "${data.name}" cocktail`;
+        return (
+            <div className="card">
+                <CocktailImage className="card-img-top" src={data.image} alt={altText} />
+
+                <div className="card-body">
+                    <h5 className="card-title">{data.name}</h5>
+                    <h6 className="card-subtitle mb-2 text-muted">{data.category}</h6>
+
+                    <p className="card-text">
+                        <b>Glass:</b> {data.glass} <br />
+                        <b>Garnish:</b> {data.garnish} <br />
+                        <b>Ingredient Count:</b> {data.ingredients.length}
+                    </p>
+
+                    <Link
+                        key="view-recipe"
+                        to={`/recipe/${data.name}`}
+                        className="btn btn-outline-secondary"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        title="Click for the full recipe and to make edits"
+                        role="button"
+                    >
+                        View Recipe
+                    </Link>
+                    <Spacer height="0.5rem" />
+                    <button
+                        className="btn btn-outline-secondary"
+                        onClick={refresh}
+                    >
+                        Refresh
+                    </button>
+                </div>
+            </div>
+        );
+    }
 }
 
 export default RecipeGalleryPage;

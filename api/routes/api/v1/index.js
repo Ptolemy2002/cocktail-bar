@@ -17,11 +17,11 @@ function convertKey(key) {
 	}
 }
 
-function extractProps(res, prop, docs, distinct=false) {
+function extractProps(res, prop, docs, distinct=false, includeScore=false) {
 	if (docs._isError) sendResponse(res, docs);
-
 	if (prop === "id") prop = "_id";
 
+	let result;
 	switch (prop) {
 		case "_id":
 		case "name":
@@ -30,30 +30,61 @@ function extractProps(res, prop, docs, distinct=false) {
 		case "garnish":
 		case "image":
 		case "glass": {
-			let result = docs.map(doc => doc[prop]);
-			if (distinct) {
-				result = [...new Set(result)];
-			}
-
-			return result.filter(i => i !== undefined);
+			result = docs.map(doc => {
+				if (includeScore) {
+					return {
+						type: "search-result",
+						_score: doc._score,
+						value: doc[prop]
+					};
+				} else {
+					return doc[prop]
+				}
+			});
+			break;
 		}
 		case "unit":
 		case "amount":
 		case "special":
 		case "ingredient": {
 			// Get ingredients from all recipes and flatten the array
-			let result = docs.map(doc => doc.ingredients.map(ingredient => ingredient[prop])).flat();
-
-			if (distinct) {
-				result = [...new Set(result)];
-			}
-
-			return result.filter(i => i !== undefined);
+			result = docs.map(doc => doc.ingredients.map(ingredient => {
+				if (includeScore) {
+					return {
+						type: "search-result",
+						_score: doc._score,
+						value: ingredient[prop]
+					};
+				} else {
+					return ingredient[prop];
+				}
+			})).flat();
+			break;
 		}
 		default: {
 			sendResponse(res, errorResponse(new SyntaxError(`Invalid property name: ${prop}`)), { errorStatus: 400 });
+			return;
 		}
 	}
+
+	if (distinct) {
+		if (includeScore) {
+			result = result.filter((item, index, self) => {
+				return self.findIndex(i => i.value === item.value) === index;
+			});
+		} else {
+			result = result.filter((item, index, self) => {
+				return self.indexOf(item) === index;
+			});
+		}
+	}
+
+	if (includeScore) {
+		result = result.filter(i => i.value !== undefined);
+	} else {
+		result = result.filter(i => i !== undefined);
+	}
+	return result;
 }
 
 router.get("/", (req, res) => {
@@ -265,6 +296,18 @@ router.get("/recipes/get/by-exact-id/:id", async (req, res) => {
 
 router.get("/recipes/search/:query", async (req, res) => {
 	const result = await search(Recipe, "default", req.params.query);
+	sendResponse(res, result);
+});
+
+router.get("/recipes/search/:query/list-:prop", async (req, res) => {
+	const docs = await search(Recipe, "default", req.params.query);
+	const result = extractProps(res, req.params.prop, docs, false, true);
+	sendResponse(res, result);
+});
+
+router.get("/recipes/search/:query/list-:prop/distinct", async (req, res) => {
+	const docs = await search(Recipe, "default", req.params.query);
+	const result = extractProps(res, req.params.prop, docs, true, true);
 	sendResponse(res, result);
 });
 
