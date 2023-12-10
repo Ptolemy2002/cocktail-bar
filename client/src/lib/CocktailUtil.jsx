@@ -212,6 +212,8 @@ class CocktailData {
         this.dirty = false;
         this.stateIndex = this.previousStates.length - 1;
 
+        this.ingredients.forEach(ingredient => ingredient.checkpoint());
+
         return this;
     }
 
