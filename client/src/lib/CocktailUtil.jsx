@@ -3,13 +3,13 @@ const { useApi } = require("src/lib/Api");
 
 class CocktailData {
     id = null;
-    _name = "Unknown Cocktail";
-    _image = "Shaker.jpg";
-    _category = "Unknown Category";
-    _glass = "Unknown Glass";
-    _garnish = "None";
-    _ingredients = [];
-    _preparation = "None";
+    name = "Unknown Cocktail";
+    image = "Shaker.jpg";
+    category = "Unknown Category";
+    glass = "Unknown Glass";
+    garnish = "None";
+    ingredients = [];
+    preparation = "None";
 
     lastRequest = null;
     requestInProgress = false;
@@ -22,7 +22,6 @@ class CocktailData {
 
     previousStates = [];
     _stateIndex = 0;
-    _dirty = false;
 
     get stateIndex() {
         return this._stateIndex;
@@ -36,78 +35,8 @@ class CocktailData {
         }
     }
 
-    get dirty() {
-        return this._dirty || this.ingredients.some(ingredient => ingredient.dirty);
-    }
-
-    set dirty(value) {
-        this._dirty = value;
-    }
-
-    queryInProgress = null;
-    queryError = null;
-
-    get name() {
-        return this._name;
-    }
-
-    set name(value) {
-        if (this._name !== value) this.dirty = true;
-        this._name = value;
-    }
-
-    get image() {
-        return this._image;
-    }
-
-    set image(value) {
-        if (this._image !== value) this.dirty = true;
-        this._image = value;
-    }
-
-    get category() {
-        return this._category;
-    }
-
-    set category(value) {
-        if (this._category !== value) this.dirty = true;
-        this._category = value;
-    }
-
-    get glass() {
-        return this._glass;
-    }
-
-    set glass(value) {
-        if (this._glass !== value) this.dirty = true;
-        this._glass = value;
-    }
-
-    get garnish() {
-        return this._garnish;
-    }
-
-    set garnish(value) {
-        if (this._garnish !== value) this.dirty = true;
-        this._garnish = value;
-    }
-
-    get ingredients() {
-        return this._ingredients;
-    }
-
-    set ingredients(value) {
-        if (this._ingredients !== value) this.dirty = true;
-        this._ingredients = value;
-    }
-
-    get preparation() {
-        return this._preparation;
-    }
-
-    set preparation(value) {
-        if (this._preparation !== value) this.dirty = true;
-        this._preparation = value;
+    isDirty() {
+        return !this.jsonEquals(this.currentCheckpoint());
     }
 
     static createFromID(id, _push, _pull, _duplicate, _delete) {
@@ -167,20 +96,43 @@ class CocktailData {
         return this;
     }
 
+    jsonEquals(cocktailState) {
+        cocktailState = cocktailState || {};
+        if (cocktailState.hasOwnProperty("_id") && this.id !== cocktailState._id) return false;
+        if (cocktailState.hasOwnProperty("name") && this.name !== cocktailState.name) return false;
+        if (cocktailState.hasOwnProperty("image") && this.image !== cocktailState.image) return false;
+        if (cocktailState.hasOwnProperty("category") && this.category !== cocktailState.category) return false;
+        if (cocktailState.hasOwnProperty("glass") && this.glass !== cocktailState.glass) return false;
+        if (cocktailState.hasOwnProperty("garnish") && this.garnish !== cocktailState.garnish) return false;
+        if (cocktailState.hasOwnProperty("preparation") && this.preparation !== cocktailState.preparation) return false;
+
+        if (cocktailState.hasOwnProperty("ingredients")) {
+            if (cocktailState.ingredients.length !== this.ingredients.length) return false;
+
+            for (let i = 0; i < cocktailState.ingredients.length; i++) {
+                if (!this.ingredients[i].jsonEquals(cocktailState.ingredients[i])) return false;
+            }
+        }
+
+        return true;
+    }
+
     clone() {
         return CocktailData.createFromJSON(this.toJSON(), this._push, this._pull);
+    }
+
+    currentCheckpoint() {
+        return this.previousStates[this.stateIndex] || {};
     }
 
     undo(steps = 1) {
         if (this.stateIndex >= steps) {
             this.stateIndex -= steps;
-            this.fromJSON(this.previousStates[this.stateIndex]);
         } else {
             this.stateIndex = 0;
-            this.fromJSON(this.previousStates[this.stateIndex]);
         }
 
-        this.dirty = false;
+        this.fromJSON(this.currentCheckpoint());
 
         return this;
     }
@@ -188,13 +140,11 @@ class CocktailData {
     redo(steps = 1) {
         if (this.stateIndex < this.previousStates.length - steps) {
             this.stateIndex += steps;
-            this.fromJSON(this.previousStates[this.stateIndex]);
         } else {
             this.stateIndex = this.previousStates.length - 1;
-            this.fromJSON(this.previousStates[this.stateIndex]);
         }
 
-        this.dirty = false;
+        this.fromJSON(this.currentCheckpoint());
 
         return this;
     }
@@ -209,7 +159,6 @@ class CocktailData {
         }
 
         this.previousStates.push(this.toJSON());
-        this.dirty = false;
         this.stateIndex = this.previousStates.length - 1;
 
         this.ingredients.forEach(ingredient => ingredient.checkpoint());
@@ -427,7 +376,6 @@ class CocktailData {
 class I_IngredientData {
     previousStates = [];
     _stateIndex = 0;
-    dirty = false;
 
     get stateIndex() {
         return this._stateIndex;
@@ -439,6 +387,10 @@ class I_IngredientData {
         } else {
             throw new RangeError(`State index ${value} is out of range. Min: 0, Max: ${this.previousStates.length - 1}`);
         }
+    }
+
+    isDirty() {
+        return !this.jsonEquals(this.currentCheckpoint());
     }
 
     toJSON() {
@@ -453,16 +405,18 @@ class I_IngredientData {
         throw new Error("Not implemented.");
     }
 
+    currentCheckpoint() {
+        return this.previousStates[this.stateIndex] || {};
+    }
+
     undo(steps = 1) {
         if (this.stateIndex >= steps) {
             this.stateIndex -= steps;
-            this.fromJSON(this.previousStates[this.stateIndex]);
         } else {
             this.stateIndex = 0;
-            this.fromJSON(this.previousStates[this.stateIndex]);
         }
 
-        this.dirty = false;
+        this.fromJSON(this.currentCheckpoint());
 
         return this;
     }
@@ -470,13 +424,11 @@ class I_IngredientData {
     redo(steps = 1) {
         if (this.stateIndex < this.previousStates.length - steps) {
             this.stateIndex += steps;
-            this.fromJSON(this.previousStates[this.stateIndex]);
         } else {
             this.stateIndex = this.previousStates.length - 1;
-            this.fromJSON(this.previousStates[this.stateIndex]);
         }
 
-        this.dirty = false;
+        this.fromJSON(this.currentCheckpoint());
 
         return this;
     }
@@ -491,7 +443,6 @@ class I_IngredientData {
         }
 
         this.previousStates.push(this.toJSON());
-        this.dirty = false;
         this.stateIndex = this.previousStates.length - 1;
 
         return this;
@@ -499,46 +450,10 @@ class I_IngredientData {
 }
 
 class IngredientData extends I_IngredientData {
-    _name = "Unknown Ingredient";
-    _label = null;
-    _amount = 0;
-    _unit = "oz";
-
-    get name() {
-        return this._name;
-    }
-
-    set name(value) {
-        if (this._name !== value) this.dirty = true;
-        this._name = value;
-    }
-
-    get amount() {
-        return this._amount;
-    }
-
-    set amount(value) {
-        if (this._amount !== value) this.dirty = true;
-        this._amount = value;
-    }
-
-    get unit() {
-        return this._unit;
-    }
-
-    set unit(value) {
-        if (this._unit !== value) this.dirty = true;
-        this._unit = value;
-    }
-
-    get label() {
-        return this._label;
-    }
-
-    set label(value) {
-        if (this._label !== value) this.dirty = true;
-        this._label = value;
-    }
+    name = "Unknown Ingredient";
+    label = null;
+    amount = 0;
+    unit = "oz";
 
     static createFromJSON(ingredientState) {
         const result = new IngredientData();
@@ -547,11 +462,15 @@ class IngredientData extends I_IngredientData {
     }
 
     toJSON() {
-        return {
+        const result = {
             ingredient: this.name,
             amount: this.amount,
             unit: this.unit
         };
+
+        if (this.label) result.label = this.label;
+
+        return result;
     }
 
     fromJSON(ingredientState) {
@@ -564,6 +483,17 @@ class IngredientData extends I_IngredientData {
         return this;
     }
 
+    jsonEquals(ingredientState) {
+        ingredientState = ingredientState || {};
+        if (ingredientState.hasOwnProperty("ingredient") && this.name !== ingredientState.ingredient) return false;
+        if (ingredientState.hasOwnProperty("amount") && this.amount !== ingredientState.amount) return false;
+        if (ingredientState.hasOwnProperty("unit") && this.unit !== ingredientState.unit) return false;
+        if (ingredientState.hasOwnProperty("label") && this.label !== ingredientState.label) return false;
+
+        return true;
+    }
+
+
     clone() {
         return IngredientData.createFromJSON(this.toJSON());
     }
@@ -574,16 +504,7 @@ class IngredientData extends I_IngredientData {
 }
 
 class SpecialIngredientData extends I_IngredientData {
-    _text = "";
-
-    get text() {
-        return this._text;
-    }
-
-    set text(value) {
-        if (this._text !== value) this.dirty = true;
-        this._text = value;
-    }
+    text = "";
 
     static createFromJSON(ingredientState) {
         const result = new SpecialIngredientData();
@@ -602,6 +523,13 @@ class SpecialIngredientData extends I_IngredientData {
 
         this.previousState = this.toJSON();
         return this;
+    }
+
+    jsonEquals(ingredientState) {
+        ingredientState = ingredientState || {};
+        if (ingredientState.hasOwnProperty("special") && this.text !== ingredientState.special) return false;
+
+        return true;
     }
 
     clone() {

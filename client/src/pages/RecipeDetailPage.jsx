@@ -83,7 +83,7 @@ function RecipeDetailPage() {
                 <div className="RecipeDetailPage container">
                     <h1>{cocktailData.name}</h1>
                     {
-                        (cocktailData.dirty && !cocktailData.pushFailed()) ? (
+                        (cocktailData.isDirty() && !cocktailData.pushFailed()) ? (
                             <p className="text-warning">
                                 This cocktail has unpublished changes that will be lost if you refresh the page or click the refresh button.
                                 Click the "Publish" button to publish them.
