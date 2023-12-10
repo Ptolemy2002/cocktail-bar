@@ -177,7 +177,8 @@ function CocktailCard(props) {
         data.pull();
     }
 
-    if (data.pullInProgress()) {
+    // If lastRequest is null, the pull has not been started yet, but will be soon
+    if (data.pullInProgress() || data.lastRequest === null) {
         return (
             <div className="card">
                 <div className="card-body">
@@ -207,6 +208,7 @@ function CocktailCard(props) {
         );
     } else {
         const altText = data.isPlaceholderImage() ? "Placeholder image" : `Image of a "${data.name}" cocktail`;
+
         return (
             <div className="card">
                 <CocktailImage className="card-img-top" src={data.image} alt={altText} />

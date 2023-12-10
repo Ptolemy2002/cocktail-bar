@@ -34,7 +34,7 @@ function RecipeDetailPage() {
 
         if (cocktailData.pushInProgress()) {
             requestInfoElement = (
-                <p className="text-info">Updating cocktail data...</p>
+                <p className="text-info">Updating cocktail data... Other operations will be unavailable until this operation completes.</p>
             );
         } else if (cocktailData.pushFailed()) {
             requestInfoElement = (
@@ -46,7 +46,7 @@ function RecipeDetailPage() {
             );
         } else if (cocktailData.deleteInProgress()) {
             requestInfoElement = (
-                <p className="text-info">Deleting cocktail...</p>
+                <p className="text-info">Deleting cocktail... Other operations will be unavailable until this operation completes.</p>
             );
         } else if (cocktailData.deleteFailed()) {
             requestInfoElement = (
@@ -58,7 +58,7 @@ function RecipeDetailPage() {
             );
         } else if (cocktailData.duplicateInProgress()) {
             requestInfoElement = (
-                <p className="text-info">Duplicating cocktail...</p>
+                <p className="text-info">Duplicating cocktail... Other operations will be unavailable until this operation completes.</p>
             );
         } else if (cocktailData.duplicateFailed()) {
             requestInfoElement = (
@@ -96,9 +96,16 @@ function RecipeDetailPage() {
                         <button
                             className="btn btn-outline-secondary"
                             onClick={() => cocktailData.pull()}
-                            disabled={cocktailData.pullInProgress() || cocktailData.pushInProgress()}
+                            disabled={cocktailData.requestInProgress}
                         >
-                            Refresh
+                            {
+                                cocktailData.pullInProgress() ?
+                                    "Refreshing...":
+                                cocktailData.requestInProgress ?
+                                    "Unavailable":
+                                // Else
+                                "Refresh"
+                            }
                         </button>
 
                         <button
@@ -116,8 +123,18 @@ function RecipeDetailPage() {
                                     window.location.href = `/recipe/${encodeURIComponent(cocktailData.name)}`;
                                 });
                             }}
+                            disabled={cocktailData.requestInProgress || !cocktailData.isDirty()}
                         >
-                            Publish
+                            {
+                                cocktailData.pushInProgress() ?
+                                    "Publishing...":
+                                cocktailData.requestInProgress ?
+                                    "Unavailable":
+                                !cocktailData.isDirty() ?
+                                    "No Changes":
+                                // Else
+                                "Publish"
+                            }
                         </button>
 
                         <button
@@ -127,8 +144,16 @@ function RecipeDetailPage() {
                                     window.location.href = `/recipe/${encodeURIComponent(data.name)}`;
                                 });
                             }}
+                            disabled={cocktailData.requestInProgress}
                         >
-                            Publish as Duplicate
+                            {
+                                cocktailData.duplicateInProgress() ?
+                                    "Duplicating...":
+                                cocktailData.requestInProgress ?
+                                    "Unavailable":
+                                // Else
+                                "Publish as Duplicate"
+                            }
                         </button>
 
                         <button
@@ -137,9 +162,17 @@ function RecipeDetailPage() {
                                 cocktailData.delete(() => {
                                     window.location.href = "/";
                                 });
+                            }}
+                            disabled={cocktailData.requestInProgress}
+                        >
+                            {
+                                cocktailData.deleteInProgress() ?
+                                    "Deleting...":
+                                cocktailData.requestInProgress ?
+                                    "Unavailable":
+                                // Else
+                                "Delete"
                             }
-                        }>
-                            Delete
                         </button>
                     </div>
     
