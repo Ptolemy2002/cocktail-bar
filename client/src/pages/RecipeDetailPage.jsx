@@ -266,45 +266,22 @@ function RecipeDetailEdit(props) {
         }
     }, []);
 
-    function setCustomCategory(value) {
-        _setCustomCategory(value);
-        if (value) {
-            setPrevCategory(category);
-            setCategory("");
-        } else {
-            setCategory(prevCategory);
-        }
+    function customPropertySetter(customSetter, valueSetter, prevSetter, prevValue, defaultValue) {
+        return (value) => {
+            customSetter(value);
+            if (value) {
+                prevSetter(prevValue);
+                valueSetter(defaultValue);
+            } else {
+                valueSetter(prevValue);
+            }
+        };
     }
 
-    function setCustomGlass(value) {
-        _setCustomGlass(value);
-        if (value) {
-            setPrevGlass(glass);
-            setGlass("");
-        } else {
-            setGlass(prevGlass);
-        }
-    }
-
-    function setCustomGarnish(value) {
-        _setCustomGarnish(value);
-        if (value) {
-            setPrevGarnish(garnish);
-            setGarnish("");
-        } else {
-            setGarnish(prevGarnish);
-        }
-    }
-
-    function setCustomImage(value) {
-        _setCustomImage(value);
-        if (value) {
-            setPrevImage(image);
-            setImage("");
-        } else {
-            setImage(prevImage);
-        }
-    }
+    const setCustomCategory = customPropertySetter(_setCustomCategory, setCategory, setPrevCategory, prevCategory, "");
+    const setCustomGlass = customPropertySetter(_setCustomGlass, setGlass, setPrevGlass, prevGlass, "");
+    const setCustomGarnish = customPropertySetter(_setCustomGarnish, setGarnish, setPrevGarnish, prevGarnish, "");
+    const setCustomImage = customPropertySetter(_setCustomImage, setImage, setPrevImage, prevImage, "");
 
     function save() {
         data.name = name;
@@ -316,160 +293,135 @@ function RecipeDetailEdit(props) {
         data.preparation = preparation;
     }
 
-    function nameChanged(event) {
-        setName(event.target.value);
+    function changedHandler(setter) {
+        return (event) => {
+            setter(event.target.value);
+        };
     }
 
-    function imageChanged(event) {
-        setImage(event.target.value);
-    }
+    const nameChanged = changedHandler(setName);
+    const imageChanged = changedHandler(setImage);
+    const categoryChanged = changedHandler(setCategory);
+    const glassChanged = changedHandler(setGlass);
+    const garnishChanged = changedHandler(setGarnish);
+    const preparationChanged = changedHandler(setPreparation);
 
-    function categoryChanged(event) {
-        setCategory(event.target.value);
-    }
-
-    function glassChanged(event) {
-        setGlass(event.target.value);
-    }
-
-    function garnishChanged(event) {
-        setGarnish(event.target.value);
-    }
-
-    function preparationChanged(event) {
-        setPreparation(event.target.value);
-    }
-
-    let imageListElement = null;
-    if (!customImage) {
-        if (!imageListStatus.completed) {
-            imageListElement = (
-                <p>Retrieving image options...</p>
-            );
-        } else if (imageListStatus.failed) {
-            imageListElement = (
-                <p className="text-danger">Failed to retrieve image options. Error details logged to console.</p>
-            );
-        } else {
-            const imageOptions = imageList.map((image, i) => {
+    function customOrPickedListElement(custom, choice, list, listStatus, changedHandler, inProgressMessage, failedMessage, choiceLabel, inputLabel, inputPlaceholder) {
+        if (!custom) {
+            if (!listStatus.completed) {
                 return (
-                    <option key={"image-option-" + i} value={image}>{image}</option>
+                    <p>{inProgressMessage}</p>
                 );
-            });
+            } else if (listStatus.failed) {
+                return (
+                    <p className="text-danger">{failedMessage}</p>
+                );
+            } else {
+                const options = list.map((item, i) => {
+                    return (
+                        <option key={"option-" + i} value={item}>{item}</option>
+                    );
+                });
 
-            imageListElement = (
+                return (
+                    <div className="mb-1">
+                        {choiceLabel}
+                        <select className="form-control mb-1" value={choice} onChange={changedHandler}>
+                            {options}
+                        </select>
+                    </div>
+                );
+            }
+        } else {
+            return (
                 <div className="mb-1">
-                    Choose an image
-                    <select className="form-control mb-1" value={image} onChange={imageChanged}>
-                        {imageOptions}
-                    </select>
+                    {inputLabel}
+                    <input type="text" placeholder={inputPlaceholder} className="form-control mb-1" value={choice} onChange={changedHandler} />
                 </div>
             );
         }
-    } else {
-        imageListElement = (
-            <div className="mb-1">
-                If your image source is a URL, prepend the URL with "url-" (without quotes). <br />
-                <input type="text" placeholder="Enter Image Here" className="form-control" value={image} onChange={imageChanged} />
+    }
+
+    const imageListElement = customOrPickedListElement(
+        customImage, image, imageList, imageListStatus, imageChanged,
+        "Retrieving image options...",
+        "Failed to retrieve image options. Error details logged to console.",
+        "Choose an image",
+        "If your image source is a URL, prepend the URL with \"url-\" (without quotes).",
+        "Enter Image Here"
+    );
+
+    const categoryListElement = customOrPickedListElement(
+        customCategory, category, categoryList, categoryListStatus, categoryChanged,
+        "Retrieving category options...",
+        "Failed to retrieve category options. Error details logged to console.",
+        "Choose a category",
+        null,
+        "Enter Category Here"
+    );
+
+    const glassListElement = customOrPickedListElement(
+        customGlass, glass, glassList, glassListStatus, glassChanged,
+        "Retrieving glass options...",
+        "Failed to retrieve glass options. Error details logged to console.",
+        "Choose a glass",
+        null,
+        "Enter Glass Here"
+    );
+
+    const garnishListElement = customOrPickedListElement(
+        customGarnish, garnish, garnishList, garnishListStatus, garnishChanged,
+        "Retrieving garnish options...",
+        "Failed to retrieve garnish options. Error details logged to console.",
+        "Choose a garnish",
+        null,
+        "Enter Garnish Here"
+    );
+
+    function existingOrCustomOptionsElement(custom, customSetter, refreshHandler, existingMessage, customMessage, refreshMessage) {
+        return (
+            <div className="btns-hor">
+                <button className="btn btn-outline-secondary" onClick={() => customSetter(!custom)}>
+                    {custom ? existingMessage : customMessage}
+                </button>
+                {
+                    custom ? null : (
+                        <button className="btn btn-outline-secondary" onClick={refreshHandler}>
+                            {refreshMessage}
+                        </button>
+                    )
+                }
             </div>
         );
     }
 
-    let categoryListElement = null;
-    if (!customCategory) {
-        if (!categoryListStatus.completed) {
-            categoryListElement = (
-                <p>Retrieving category options...</p>
-            );
-        } else if (categoryListStatus.failed) {
-            categoryListElement = (
-                <p className="text-danger">Failed to retrieve category options. Error details logged to console.</p>
-            );
-        } else {
-            const categoryOptions = categoryList.map((category, i) => {
-                return (
-                    <option key={"category-option-" + i} value={category}>{category}</option>
-                );
-            });
+    const imageCustomOptionsElement = existingOrCustomOptionsElement(
+        customImage, setCustomImage, imageListRefresh,
+        "Use Existing Image",
+        "Use Custom Image",
+        "Refresh Image Options"
+    );
 
-            categoryListElement = (
-                <div className="mb-1">
-                    Choose a category
-                    <select className="form-control mb-1" value={category} onChange={categoryChanged}>
-                        {categoryOptions}
-                    </select>
-                </div>
-            );
-        }
-    } else {
-        categoryListElement = (
-            <input type="text" placeholder="Enter Category Here" className="form-control mb-1" value={category} onChange={categoryChanged} />
-        );
-    }
+    const categoryCustomOptionsElement = existingOrCustomOptionsElement(
+        customCategory, setCustomCategory, categoryListRefresh,
+        "Use Existing Category",
+        "Use Custom Category",
+        "Refresh Category Options"
+    );
 
-    let glassListElement = null;
-    if (!customGlass) {
-        if (!glassListStatus.completed) {
-            glassListElement = (
-                <p>Retrieving glass options...</p>
-            );
-        } else if (glassListStatus.failed) {
-            glassListElement = (
-                <p className="text-danger">Failed to retrieve glass options. Error details logged to console.</p>
-            );
-        } else {
-            const glassOptions = glassList.map((glass, i) => {
-                return (
-                    <option key={"glass-option-" + i} value={glass}>{glass}</option>
-                );
-            });
+    const glassCustomOptionsElement = existingOrCustomOptionsElement(
+        customGlass, setCustomGlass, glassListRefresh,
+        "Use Existing Glass",
+        "Use Custom Glass",
+        "Refresh Glass Options"
+    );
 
-            glassListElement = (
-                <div className="mb-1">
-                    Choose a glass
-                    <select className="form-control mb-1" value={glass} onChange={glassChanged}>
-                        {glassOptions}
-                    </select>
-                </div>
-            );
-        }
-    } else {
-        glassListElement = (
-            <input type="text" placeholder="Enter Glass Here" className="form-control mb-1" value={glass} onChange={glassChanged} />
-        );
-    }
-
-    let garnishListElement = null;
-    if (!customGarnish) {
-        if (!garnishListStatus.completed) {
-            garnishListElement = (
-                <p>Retrieving garnish options...</p>
-            );
-        } else if (garnishListStatus.failed) {
-            garnishListElement = (
-                <p className="text-danger">Failed to retrieve garnish options. Error details logged to console.</p>
-            );
-        } else {
-            const garnishOptions = garnishList.map((garnish, i) => {
-                return (
-                    <option key={"garnish-option-" + i} value={garnish}>{garnish}</option>
-                );
-            });
-
-            garnishListElement = (
-                <div className="mb-1">
-                    Choose a garnish
-                    <select className="form-control mb-1" value={garnish} onChange={garnishChanged}>
-                        {garnishOptions}
-                    </select>
-                </div>
-            );
-        }
-    } else {
-        garnishListElement = (
-            <input type="text" placeholder="Enter Garnish Here" className="form-control mb-1" value={garnish} onChange={garnishChanged} />
-        );
-    }
+    const garnishCustomOptionsElement = existingOrCustomOptionsElement(
+        customGarnish, setCustomGarnish, garnishListRefresh,
+        "Use Existing Garnish",
+        "Use Custom Garnish",
+        "Refresh Garnish Options"
+    );
 
     return (
         <div className="recipe-detail-container">
@@ -482,67 +434,23 @@ function RecipeDetailEdit(props) {
             <div className="form-group mb-3">
                 <label htmlFor="image"><h6>Image</h6></label>
                 {imageListElement}
-                <div className="btns-hor">
-                    <button className="btn btn-outline-secondary" onClick={() => setCustomImage(!customImage)}>
-                        {customImage ? "Use Existing Image" : "Use Custom Image"}
-                    </button>
-                    {
-                        customImage ? null : (
-                            <button className="btn btn-outline-secondary" onClick={imageListRefresh}>
-                                Refresh Image Options
-                            </button>
-                        )
-                    }
-                </div>
+                {imageCustomOptionsElement}
             </div>
 
             <div className="form-group mb-3">
                 <label htmlFor="category"><h6>Category</h6></label>
                 {categoryListElement}
-                <div className="btns-hor">
-                    <button className="btn btn-outline-secondary" onClick={() => setCustomCategory(!customCategory)}>
-                        {customCategory ? "Use Existing Category" : "Use Custom Category"}
-                    </button>
-                    {
-                        customCategory ? null : (
-                            <button className="btn btn-outline-secondary" onClick={categoryListRefresh}>
-                                Refresh Category Options
-                            </button>
-                        )
-                    }
-                </div>
+                {categoryCustomOptionsElement}
             </div>
             <div className="form-group mb-3">
                 <label htmlFor="glass"><h6>Glass</h6></label>
                 {glassListElement}
-                <div className="btns-hor">
-                    <button className="btn btn-outline-secondary" onClick={() => setCustomGlass(!customGlass)}>
-                        {customGlass ? "Use Existing Glass" : "Use Custom Glass"}
-                    </button>
-                    {
-                        customGlass ? null : (
-                            <button className="btn btn-outline-secondary" onClick={glassListRefresh}>
-                                Refresh Glass Options
-                            </button>
-                        )
-                    }
-                </div>
+                {glassCustomOptionsElement}
             </div>
             <div className="form-group mb-3">
                 <label htmlFor="garnish"><h6>Garnish</h6></label>
                 {garnishListElement}
-                <div className="btns-hor">
-                    <button className="btn btn-outline-secondary" onClick={() => setCustomGarnish(!customGarnish)}>
-                        {customGarnish ? "Use Existing Garnish" : "Use Custom Garnish"}
-                    </button>
-                    {
-                        customGarnish ? null : (
-                            <button className="btn btn-outline-secondary" onClick={garnishListRefresh}>
-                                Refresh Garnish Options
-                            </button>
-                        )
-                    }
-                </div>
+                {garnishCustomOptionsElement}
             </div>
 
             <h2>Ingredients</h2>
@@ -554,15 +462,14 @@ function RecipeDetailEdit(props) {
             <h2>Options</h2>
             <div className="btns-hor">
                 <button className="btn btn-outline-secondary" onClick={() => {
-                    save();
-                    props.exit();
-                }}>
+                        save();
+                        props.exit();
+                    }}
+                >
                     Save Changes
                 </button>
 
-                <button className="btn btn-outline-secondary" onClick={() => {
-                    props.exit();
-                }}>
+                <button className="btn btn-outline-secondary" onClick={props.exit}>
                     Discard Changes
                 </button>
             </div>
@@ -661,61 +568,47 @@ function IngredientEdit(props) {
         }
     }
 
-    function labelChanged(event) {
-        setLabel(event.target.value);
-        ingredient.label = event.target.value;
+    function changedHandler(setter, property) {
+        return (event) => {
+            setter(event.target.value);
+            ingredient[property] = event.target.value;
+        };
     }
 
-    function nameChanged(event) {
-        setName(event.target.value);
-        ingredient.name = event.target.value;
-    }
+    const nameChanged = changedHandler(setName, "name");
+    const labelChanged = changedHandler(setLabel, "label");
+    const amountChanged = changedHandler(setAmount, "amount");
+    const unitChanged = changedHandler(setUnit, "unit");
+    const textChanged = changedHandler(setText, "text");
 
-    function amountChanged(event) {
-        setAmount(event.target.value);
-        ingredient.amount = event.target.value;
-    }
-
-    function unitChanged(event) {
-        setUnit(event.target.value);
-        ingredient.unit = event.target.value;
-    }
-
-    function textChanged(event) {
-        setText(event.target.value);
-        ingredient.text = event.target.value;
+    function propertyEditElement(property, value, changedHandler, label, placeholder) {
+        return (
+            <div className="form-group mb-1">
+                <label htmlFor={property}><h6>{label}</h6></label>
+                <input type="text" placeholder={placeholder} className="form-control" value={value} onChange={changedHandler} />
+            </div>
+        );
     }
 
     if (!ingredient.isSpecial()) {
+        const nameEditElement = propertyEditElement("name", name, nameChanged, "Name", "Enter Name Here");
+        const labelEditElement = propertyEditElement("label", label, labelChanged, "Label", "Enter Label Here");
+        const amountEditElement = propertyEditElement("amount", amount, amountChanged, "Amount", "Enter Amount Here");
+        const unitEditElement = propertyEditElement("unit", unit, unitChanged, "Unit", "Enter Unit Here");
+
         return (
             <div className="ingredient-edit">
-                <div className="form-group mb-1">
-                    <label htmlFor="name"><h6>Name</h6></label>
-                    <input type="text" placeholder="Enter Name Here" className="form-control" value={name} onChange={nameChanged} />
-                </div>
+                {nameEditElement}
 
                 <div className="form-check mb-1">
                     <input type="checkbox" className="form-check-input" id="use-label" checked={useLabel} onChange={labelCheckBoxChanged} ref={labelCheckBox} />
                     <label className="form-check-label" htmlFor="use-label">Use Label</label>
                 </div>
-
-                {
-                    useLabel ? (
-                        <div className="form-group mb-1">
-                            <label htmlFor="label"><h6>Label</h6></label>
-                            <input type="text" placeholder="Enter Label Here" className="form-control" value={label} onChange={labelChanged} />
-                        </div>
-                    ) : null
-                }
+                {useLabel ? labelEditElement : null}
                 
-                <div className="form-group mb-1">
-                    <label htmlFor="amount"><h6>Amount</h6></label>
-                    <input type="text" placeholder="Enter Amount Here" className="form-control" value={amount} onChange={amountChanged} />
-                </div>
-                <div className="form-group mb-1">
-                    <label htmlFor="unit"><h6>Unit</h6></label>
-                    <input type="text" placeholder="Enter Unit Here" className="form-control" value={unit} onChange={unitChanged} />
-                </div>
+                {amountEditElement}
+                {unitEditElement}
+
                 <div className="btns-hor">
                     <button className="btn btn-outline-secondary" onClick={removeIngredient}>
                         Remove Ingredient
@@ -740,12 +633,12 @@ function IngredientEdit(props) {
             </div>
         );
     } else {
+        const textEditElement = propertyEditElement("text", text, textChanged, "Text", "Enter Text Here");
+
         return (
             <div className="ingredient-edit">
-                <div className="form-group mb-1">
-                    <label htmlFor="name"><h6>Text</h6></label>
-                    <input type="text" placeholder="Enter Text Here" className="form-control" value={text} onChange={textChanged} />
-                </div>
+                {textEditElement}
+
                 <div className="btns-hor">
                     <button className="btn btn-outline-secondary" onClick={removeIngredient}>
                         Remove Ingredient
