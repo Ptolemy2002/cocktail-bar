@@ -7,8 +7,6 @@ import { escapeRegex, transformRegex } from "src/lib/Regex";
 import { Link } from "react-router-dom";
 
 function IngredientGalleryPage() {
-    document.title = "Ingredient Gallery | Cocktail Bar";
-    
     const currentPath = useCurrentPath();
     const queryParams = useQuery();
     const query = queryParams.get("query");
@@ -16,6 +14,12 @@ function IngredientGalleryPage() {
 
     let path = "recipes/all/list-ingredient/distinct";
     const [ingredients, ingredientsStatus, sendIngredientsRequest] = useApi(path, true, (a, b) => a.localeCompare(b));
+
+    if (query) {
+        document.title = `Ingredient search results for "${query}" | Cocktail Bar`;
+    } else {
+        document.title = "Ingredient Gallery | Cocktail Bar";
+    }
 
     function refresh() {
         sendIngredientsRequest({

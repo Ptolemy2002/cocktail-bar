@@ -480,6 +480,9 @@ function RecipeDetailEdit(props) {
 function IngredientEditList(props) {
     const ingredients = props.ingredients;
     const setIngredients = props.setIngredients;
+    const [ingredientNameList, ingredientNameListStatus, ingredientNameListRefresh] = useApi("recipes/all/list-ingredient/distinct", true);
+
+    useEffect(ingredientNameListRefresh, []);
 
     function addIngredient() {
         setIngredients(ingredients.concat(IngredientData.createFromJSON({})));
@@ -527,6 +530,9 @@ function IngredientEditList(props) {
                     isLastChild={i === ingredients.length - 1}
                     moveUp={ingredientUpHandler(i)}
                     moveDown={ingredientDownHandler(i)}
+                    nameList={ingredientNameList}
+                    nameListStatus={ingredientNameListStatus}
+                    nameListRefresh={ingredientNameListRefresh}
                 />
             </div>
         );
@@ -560,6 +566,20 @@ function IngredientEdit(props) {
     const [useLabel, setUseLabel] = useState(!!ingredient.label);
     const labelCheckBox = useRef(null);
 
+    const [nameList, nameListStatus, nameListRefresh] = [props.nameList, props.nameListStatus, props.nameListRefresh];
+    const [customName, _setCustomName] = useState(false);
+    const [prevName, setPrevName] = useState(name);
+
+    function setCustomName(value) {
+        _setCustomName(value);
+        if (value) {
+            setPrevName(name);
+            setName("");
+        } else {
+            setName(prevName);
+        }
+    }
+
     function labelCheckBoxChanged(event) {
         setUseLabel(event.target.checked);
         if (!event.target.checked) {
@@ -590,8 +610,75 @@ function IngredientEdit(props) {
         );
     }
 
+    function customOrPickedListElement(custom, choice, list, listStatus, changedHandler, inProgressMessage, failedMessage, choiceLabel, inputLabel, inputPlaceholder) {
+        if (!custom) {
+            if (!listStatus.completed) {
+                return (
+                    <p>{inProgressMessage}</p>
+                );
+            } else if (listStatus.failed) {
+                return (
+                    <p className="text-danger">{failedMessage}</p>
+                );
+            } else {
+                const options = list.map((item, i) => {
+                    return (
+                        <option key={"option-" + i} value={item}>{item}</option>
+                    );
+                });
+
+                return (
+                    <div className="mb-1">
+                        {choiceLabel}
+                        <select className="form-control mb-1" value={choice} onChange={changedHandler}>
+                            {options}
+                        </select>
+                    </div>
+                );
+            }
+        } else {
+            return (
+                <div className="mb-1">
+                    {inputLabel}
+                    <input type="text" placeholder={inputPlaceholder} className="form-control mb-1" value={choice} onChange={changedHandler} />
+                </div>
+            );
+        }
+    }
+
+    function existingOrCustomOptionsElement(custom, customSetter, refreshHandler, existingMessage, customMessage, refreshMessage) {
+        return (
+            <div className="btns-hor mb-2">
+                <button className="btn btn-outline-secondary" onClick={() => customSetter(!custom)}>
+                    {custom ? existingMessage : customMessage}
+                </button>
+                {
+                    custom ? null : (
+                        <button className="btn btn-outline-secondary" onClick={refreshHandler}>
+                            {refreshMessage}
+                        </button>
+                    )
+                }
+            </div>
+        );
+    }
+
     if (!ingredient.isSpecial()) {
-        const nameEditElement = propertyEditElement("name", name, nameChanged, "Name", "Enter Name Here");
+        const nameEditElement = customOrPickedListElement(
+            customName, name, nameList, nameListStatus, nameChanged,
+            "Retrieving ingredient name options...",
+            "Failed to retrieve ingredient name options. Error details logged to console.",
+            "Choose an ingredient name",
+            null,
+            "Enter Ingredient Name Here"
+        );
+        const nameOptionsElement = existingOrCustomOptionsElement(
+            customName, setCustomName, nameListRefresh,
+            "Use Existing Ingredient Name",
+            "Use Custom Ingredient Name",
+            "Refresh Ingredient Name Options"
+        );
+
         const labelEditElement = propertyEditElement("label", label, labelChanged, "Label", "Enter Label Here");
         const amountEditElement = propertyEditElement("amount", amount, amountChanged, "Amount", "Enter Amount Here");
         const unitEditElement = propertyEditElement("unit", unit, unitChanged, "Unit", "Enter Unit Here");
@@ -599,6 +686,7 @@ function IngredientEdit(props) {
         return (
             <div className="ingredient-edit">
                 {nameEditElement}
+                {nameOptionsElement}
 
                 <div className="form-check mb-1">
                     <input type="checkbox" className="form-check-input" id="use-label" checked={useLabel} onChange={labelCheckBoxChanged} ref={labelCheckBox} />

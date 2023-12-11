@@ -62,8 +62,6 @@ const searchCategories = [
 ];
 
 function RecipeGalleryPage() {
-    document.title = "Recipe Gallery | Cocktail Bar";
-    
     const currentPath = useCurrentPath();
     const queryParams = useQuery();
     const query = queryParams.get("query");
@@ -81,6 +79,10 @@ function RecipeGalleryPage() {
                 path = `recipes/${category}-contains/${encodeURIComponent(query)}/list-name/distinct`;
             }
         }
+
+        document.title = `Recipe search results for "${query}" | Cocktail Bar`;
+    } else {
+        document.title = "Recipe Gallery | Cocktail Bar";
     }
 
     const [cocktailNames, cocktailNamesStatus, sendCocktailNamesRequest] = useApi(path, true, (a, b) => {
