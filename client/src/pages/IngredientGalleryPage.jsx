@@ -5,6 +5,7 @@ import { useCurrentPath, useQuery } from "src/lib/Browser";
 import { useApi } from "src/lib/Api";
 import { escapeRegex, transformRegex } from "src/lib/Regex";
 import { Link } from "react-router-dom";
+import { listInPlainEnglish } from "src/lib/Misc";
 
 function IngredientGalleryPage() {
     const currentPath = useCurrentPath();
@@ -130,29 +131,7 @@ function IngredientCard(props) {
     } else if (recipeNamesStatus.failed) {
         ingredientNamesText = "Failed to retrieve recipes with this ingredient. Error details logged to console.";
     } else {
-        // List the first 3 by name
-        let text = "";
-        for (let i = 0; i < Math.min(3, recipeNames.length); i++) {
-            if (i > 0) {
-                if (i === recipeNames.length - 1) {
-                    if (i === 1) {
-                        text += " and ";
-                    } else {
-                        text += ", and ";
-                    }
-                } else {
-                    text += ", ";
-                }
-            }
-            text += `"${recipeNames[i]}"`;
-        }
-
-        // If the length is greater than 3, add an indicator that there are more
-        if (recipeNames.length > 3) {
-            text += ", and " + (recipeNames.length - 3) + " more";
-        }
-
-        ingredientNamesText = text;
+        ingredientNamesText = listInPlainEnglish(recipeNames.map((v) => `"${v}"`), 3);
     }
 
     return (

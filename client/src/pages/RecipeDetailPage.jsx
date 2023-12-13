@@ -11,7 +11,14 @@ function RecipeDetailPage() {
     const cocktailData = useCocktailData(name);
 
     document.title = `${cocktailData.name} | Cocktail Bar`;
-    const [editMode, setEditMode] = useState(false);
+    const [editMode, _setEditMode] = useState(false);
+
+    function setEditMode(v) {
+        _setEditMode(v);
+        if (v && !editMode) {
+            cocktailData.checkpoint();
+        }
+    }
 
     // If lastRequest is null, the pull has not been started yet, but will be soon
     if (cocktailData.pullInProgress() || cocktailData.lastRequest === null) {
@@ -75,7 +82,16 @@ function RecipeDetailPage() {
                 <div className="RecipeDetailPage container">
                     <h1>{cocktailData.name}</h1>
                     {requestInfoElement}
-                    <RecipeDetailEdit cocktailData={cocktailData} exit={() => setEditMode(false)} />
+                    <RecipeDetailEdit
+                        cocktailData={cocktailData}
+                        exit={() => {
+                            setEditMode(false);
+                        }}
+                        exitWithoutSaving={() => {
+                            cocktailData.revert();
+                            setEditMode(false);
+                        }}
+                    />
                 </div>
             );
         } else {
@@ -374,7 +390,7 @@ function RecipeDetailEdit(props) {
                     Save Changes
                 </button>
 
-                <button className="btn btn-outline-secondary" onClick={props.exit}>
+                <button className="btn btn-outline-secondary" onClick={props.exitWithoutSaving}>
                     Discard Changes
                 </button>
             </div>
@@ -483,7 +499,16 @@ function IngredientEdit(props) {
     }
 
     const setName = syncSetter("name", _setName);
-    const setAmount = syncSetter("amount", _setAmount);
+    const setAmount = function(v) {
+        // Unfinished values that wouldn't be valid numbers are converted to 0
+        if (v === "" || v === "-" || v === "+") {
+            _setAmount(0);
+            ingredient.amount = 0;
+        } else {
+            _setAmount(parseFloat(v));
+            ingredient.amount = parseFloat(v);
+        }
+    }
     const setUnit = syncSetter("unit", _setUnit);
     const setText = syncSetter("text", _setText);
     const setLabel = syncSetter("label", _setLabel);
@@ -544,9 +569,10 @@ function IngredientEdit(props) {
                     value={amount}
                     defaultValue="0"
                     number={true}
+                    min={0}
                     custom={true}
                     staticCustom={true}
-                    label="Amount"
+                    label="Amount (non-negative number)"
                     name="amount"
                     placeholder="Enter Amount Here"
                     setValue={setAmount}
@@ -635,8 +661,7 @@ function EditField(props) {
     
     function setValue(v) {
         _setValue(v);
-        props.setValue(v);
-        console.log("Set value to " + v);
+        if (props.setValue && !props.manualSave) props.setValue(v);
     }
 
     function setCustom(v) {
@@ -649,25 +674,64 @@ function EditField(props) {
         }
     }
 
+    function validate(v) {
+        if (props.number || props.integer) {
+            if (v === "") return true;
+            if (v === "-" && (props.min === undefined || props.min < 0)) return true;
+            if (v === "+" && (props.max === undefined || props.max >= 0)) return true;
+            if (isNaN(v) || isNaN(parseFloat(v))) return false;
+            if (props.integer && !Number.isInteger(v)) return false;
+            if (props.min !== undefined && v < props.min) return false;
+            if (props.max !== undefined && v > props.max) return false;
+        }
+
+        return true;
+    }
+
     function onChange(event) {
-        if (props.number && isNaN(event.target.value)) return;
+        if (!validate(event.target.value)) return;
         setValue(event.target.value);
     }
 
-    const optionsElement = !props.staticCustom ? (
+    const optionsElement = (
         <div className="btns-hor">
-            <button className="btn btn-outline-secondary" onClick={() => setCustom(!custom)}>
-                {custom ? props.existingMessage : props.customMessage}
-            </button>
+            {
+                !props.staticCustom ? (
+                    <button className="btn btn-outline-secondary" onClick={() => setCustom(!custom)}>
+                        {custom ? props.existingMessage : props.customMessage}
+                    </button>
+                ) : null
+            }
+            
             {
                 custom ? null : (
-                    <button className="btn btn-outline-secondary" onClick={props.refreshHandler}>
-                        {props.refreshMessage}
+                    <button
+                        className="btn btn-outline-secondary"
+                        onClick={props.refreshHandler}
+                        disabled={props.listStatus.inProgress}
+                    >
+                        {
+                            props.listStatus.inProgress ?
+                                "Unavailable":
+                            // Else
+                            props.refreshMessage
+                        }
                     </button>
                 )
             }
+
+            {
+                props.manualSave ? (
+                    <button 
+                        className="btn btn-outline-secondary"
+                        onClick={() => {if (props.setValue) props.setValue(value)}}
+                    >
+                        Save
+                    </button>
+                ) : null
+            }
         </div>
-    ) : null;
+    );
 
     if (custom) {
         return (
