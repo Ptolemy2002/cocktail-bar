@@ -9,9 +9,9 @@ const doc = {
 		title: "Cocktail Bar",
 		description: "Documentation of Coctail Bar API",
 	  },
-	  host: "localhost:8080",
+	  host: "api-dot-cit313-pbhenson-cocktail-bar.uc.r.appspot.com",
 	  basePath: "/api/v1",
-	  schemes: ["http", "https"],
+	  schemes: ["https"],
 	  consumes: ["application/json"],
 	  produces: ["application/json"],
 };
