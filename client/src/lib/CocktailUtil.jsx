@@ -478,8 +478,7 @@ class IngredientData extends I_IngredientData {
         if (ingredientState.hasOwnProperty("amount")) this.amount = ingredientState.amount;
         if (ingredientState.hasOwnProperty("unit")) this.unit = ingredientState.unit;
         if (ingredientState.hasOwnProperty("label")) this.label = ingredientState.label;
-
-        this.previousState = this.toJSON();
+        
         return this;
     }
 
@@ -521,7 +520,6 @@ class SpecialIngredientData extends I_IngredientData {
     fromJSON(ingredientState) {
         if (ingredientState.hasOwnProperty("special")) this.text = ingredientState.special;
 
-        this.previousState = this.toJSON();
         return this;
     }
 

@@ -250,15 +250,6 @@ function RecipeDetailEdit(props) {
         garnishListRefresh();
     }, []);
 
-    const [prevImage, setPrevImage] = useState(image);
-    const [customImage, _setCustomImage] = useState(false);
-    const [prevCategory, setPrevCategory] = useState(category);
-    const [customCategory, _setCustomCategory] = useState(false);
-    const [prevGlass, setPrevGlass] = useState(glass);
-    const [customGlass, _setCustomGlass] = useState(false);
-    const [prevGarnish, setPrevGarnish] = useState(garnish);
-    const [customGarnish, _setCustomGarnish] = useState(false);
-
     useLayoutEffect(() => {
         if (preparationTextBox.current) {
             preparationTextBox.current.style.height = "auto";
@@ -266,22 +257,9 @@ function RecipeDetailEdit(props) {
         }
     }, []);
 
-    function customPropertySetter(customSetter, valueSetter, prevSetter, prevValue, defaultValue) {
-        return (value) => {
-            customSetter(value);
-            if (value) {
-                prevSetter(prevValue);
-                valueSetter(defaultValue);
-            } else {
-                valueSetter(prevValue);
-            }
-        };
+    function preparationChanged(event) {
+        setPreparation(event.target.value);
     }
-
-    const setCustomCategory = customPropertySetter(_setCustomCategory, setCategory, setPrevCategory, prevCategory, "");
-    const setCustomGlass = customPropertySetter(_setCustomGlass, setGlass, setPrevGlass, prevGlass, "");
-    const setCustomGarnish = customPropertySetter(_setCustomGarnish, setGarnish, setPrevGarnish, prevGarnish, "");
-    const setCustomImage = customPropertySetter(_setCustomImage, setImage, setPrevImage, prevImage, "");
 
     function save() {
         data.name = name;
@@ -293,165 +271,92 @@ function RecipeDetailEdit(props) {
         data.preparation = preparation;
     }
 
-    function changedHandler(setter) {
-        return (event) => {
-            setter(event.target.value);
-        };
-    }
-
-    const nameChanged = changedHandler(setName);
-    const imageChanged = changedHandler(setImage);
-    const categoryChanged = changedHandler(setCategory);
-    const glassChanged = changedHandler(setGlass);
-    const garnishChanged = changedHandler(setGarnish);
-    const preparationChanged = changedHandler(setPreparation);
-
-    function customOrPickedListElement(custom, choice, list, listStatus, changedHandler, inProgressMessage, failedMessage, choiceLabel, inputLabel, inputPlaceholder) {
-        if (!custom) {
-            if (!listStatus.completed) {
-                return (
-                    <p>{inProgressMessage}</p>
-                );
-            } else if (listStatus.failed) {
-                return (
-                    <p className="text-danger">{failedMessage}</p>
-                );
-            } else {
-                const options = list.map((item, i) => {
-                    return (
-                        <option key={"option-" + i} value={item}>{item}</option>
-                    );
-                });
-
-                return (
-                    <div className="mb-1">
-                        {choiceLabel}
-                        <select className="form-control mb-1" value={choice} onChange={changedHandler}>
-                            {options}
-                        </select>
-                    </div>
-                );
-            }
-        } else {
-            return (
-                <div className="mb-1">
-                    {inputLabel}
-                    <input type="text" placeholder={inputPlaceholder} className="form-control mb-1" value={choice} onChange={changedHandler} />
-                </div>
-            );
-        }
-    }
-
-    const imageListElement = customOrPickedListElement(
-        customImage, image, imageList, imageListStatus, imageChanged,
-        "Retrieving image options...",
-        "Failed to retrieve image options. Error details logged to console.",
-        "Choose an image",
-        "If your image source is a URL, prepend the URL with \"url-\" (without quotes).",
-        "Enter Image Here"
-    );
-
-    const categoryListElement = customOrPickedListElement(
-        customCategory, category, categoryList, categoryListStatus, categoryChanged,
-        "Retrieving category options...",
-        "Failed to retrieve category options. Error details logged to console.",
-        "Choose a category",
-        null,
-        "Enter Category Here"
-    );
-
-    const glassListElement = customOrPickedListElement(
-        customGlass, glass, glassList, glassListStatus, glassChanged,
-        "Retrieving glass options...",
-        "Failed to retrieve glass options. Error details logged to console.",
-        "Choose a glass",
-        null,
-        "Enter Glass Here"
-    );
-
-    const garnishListElement = customOrPickedListElement(
-        customGarnish, garnish, garnishList, garnishListStatus, garnishChanged,
-        "Retrieving garnish options...",
-        "Failed to retrieve garnish options. Error details logged to console.",
-        "Choose a garnish",
-        null,
-        "Enter Garnish Here"
-    );
-
-    function existingOrCustomOptionsElement(custom, customSetter, refreshHandler, existingMessage, customMessage, refreshMessage) {
-        return (
-            <div className="btns-hor">
-                <button className="btn btn-outline-secondary" onClick={() => customSetter(!custom)}>
-                    {custom ? existingMessage : customMessage}
-                </button>
-                {
-                    custom ? null : (
-                        <button className="btn btn-outline-secondary" onClick={refreshHandler}>
-                            {refreshMessage}
-                        </button>
-                    )
-                }
-            </div>
-        );
-    }
-
-    const imageCustomOptionsElement = existingOrCustomOptionsElement(
-        customImage, setCustomImage, imageListRefresh,
-        "Use Existing Image",
-        "Use Custom Image",
-        "Refresh Image Options"
-    );
-
-    const categoryCustomOptionsElement = existingOrCustomOptionsElement(
-        customCategory, setCustomCategory, categoryListRefresh,
-        "Use Existing Category",
-        "Use Custom Category",
-        "Refresh Category Options"
-    );
-
-    const glassCustomOptionsElement = existingOrCustomOptionsElement(
-        customGlass, setCustomGlass, glassListRefresh,
-        "Use Existing Glass",
-        "Use Custom Glass",
-        "Refresh Glass Options"
-    );
-
-    const garnishCustomOptionsElement = existingOrCustomOptionsElement(
-        customGarnish, setCustomGarnish, garnishListRefresh,
-        "Use Existing Garnish",
-        "Use Custom Garnish",
-        "Refresh Garnish Options"
-    );
-
     return (
         <div className="recipe-detail-container">
             <h2>Properties</h2>
-            <div className="form-group mb-3">
-                <label htmlFor="name"><h6>Name</h6></label>
-                <input type="text" placeholder="Enter Name Here" className="form-control" value={name} onChange={nameChanged} />
-            </div>
+            <EditField
+                key="name-edit"
+                value={name}
+                defaultValue=""
+                custom={true}
+                staticCustom={true}
+                label="Name"
+                name="name"
+                placeholder="Enter Name Here"
+                setValue={setName}
+            />
 
-            <div className="form-group mb-3">
-                <label htmlFor="image"><h6>Image</h6></label>
-                {imageListElement}
-                {imageCustomOptionsElement}
-            </div>
+            <EditField
+                key="image-edit"
+                value={image}
+                defaultValue=""
+                list={imageList}
+                listStatus={imageListStatus}
+                refreshHandler={imageListRefresh}
+                label="Image"
+                name="image"
+                placeholder="Enter Image Here"
+                inProgressMessage="Retrieving image options..."
+                failedMessage="Failed to retrieve image options. Error details logged to console."
+                existingMessage="Use Existing Image"
+                customMessage="Use Custom Image"
+                refreshMessage="Refresh Image Options"
+                setValue={setImage}
+            />
 
-            <div className="form-group mb-3">
-                <label htmlFor="category"><h6>Category</h6></label>
-                {categoryListElement}
-                {categoryCustomOptionsElement}
-            </div>
-            <div className="form-group mb-3">
-                <label htmlFor="glass"><h6>Glass</h6></label>
-                {glassListElement}
-                {glassCustomOptionsElement}
-            </div>
-            <div className="form-group mb-3">
-                <label htmlFor="garnish"><h6>Garnish</h6></label>
-                {garnishListElement}
-                {garnishCustomOptionsElement}
-            </div>
+            <EditField
+                key="category-edit"
+                value={category}
+                defaultValue=""
+                list={categoryList}
+                listStatus={categoryListStatus}
+                refreshHandler={categoryListRefresh}
+                label="Category"
+                name="category"
+                placeholder="Enter Category Here"
+                inProgressMessage="Retrieving category options..."
+                failedMessage="Failed to retrieve category options. Error details logged to console."
+                existingMessage="Use Existing Category"
+                customMessage="Use Custom Category"
+                refreshMessage="Refresh Category Options"
+                setValue={setCategory}
+            />
+
+            <EditField
+                key="glass-edit"
+                value={glass}
+                defaultValue=""
+                list={glassList}
+                listStatus={glassListStatus}
+                refreshHandler={glassListRefresh}
+                label="Glass"
+                name="glass"
+                placeholder="Enter Glass Here"
+                inProgressMessage="Retrieving glass options..."
+                failedMessage="Failed to retrieve glass options. Error details logged to console."
+                existingMessage="Use Existing Glass"
+                customMessage="Use Custom Glass"
+                refreshMessage="Refresh Glass Options"
+                setValue={setGlass}
+            />
+
+            <EditField
+                key="garnish-edit"
+                value={garnish}
+                defaultValue=""
+                list={garnishList}
+                listStatus={garnishListStatus}
+                refreshHandler={garnishListRefresh}
+                label="Garnish"
+                name="garnish"
+                placeholder="Enter Garnish Here"
+                inProgressMessage="Retrieving garnish options..."
+                failedMessage="Failed to retrieve garnish options. Error details logged to console."
+                existingMessage="Use Existing Garnish"
+                customMessage="Use Custom Garnish"
+                refreshMessage="Refresh Garnish Options"
+                setValue={setGarnish}
+            />
 
             <h2>Ingredients</h2>
             <IngredientEditList ingredients={ingredients} setIngredients={setIngredients} />
@@ -558,144 +463,107 @@ function IngredientEdit(props) {
     const ingredient = props.ingredient;
     const removeIngredient = props.removeIngredient;
 
-    const [name, setName] = useState(ingredient.name);
-    const [amount, setAmount] = useState(ingredient.amount);
-    const [unit, setUnit] = useState(ingredient.unit);
-    const [text, setText] = useState(ingredient.text);
-    const [label, setLabel] = useState(ingredient.label);
-    const [useLabel, setUseLabel] = useState(!!ingredient.label);
+    const [name, _setName] = useState(ingredient.name);
+    const [amount, _setAmount] = useState(ingredient.amount);
+    const [unit, _setUnit] = useState(ingredient.unit);
+    const [text, _setText] = useState(ingredient.text);
+    const [label, _setLabel] = useState(ingredient.label);
+    const [useLabel, _setUseLabel] = useState(!!ingredient.label);
     const labelCheckBox = useRef(null);
 
-    const [nameList, nameListStatus, nameListRefresh] = [props.nameList, props.nameListStatus, props.nameListRefresh];
-    const [customName, _setCustomName] = useState(false);
-    const [prevName, setPrevName] = useState(name);
-
-    function setCustomName(value) {
-        _setCustomName(value);
-        if (value) {
-            setPrevName(name);
-            setName("");
-        } else {
-            setName(prevName);
-        }
+    function labelCheckBoxChanged() {
+        setUseLabel(!useLabel);
     }
 
-    function labelCheckBoxChanged(event) {
-        setUseLabel(event.target.checked);
-        if (!event.target.checked) {
-            setLabel(null);
-            ingredient.label = null;
-        }
-    }
-
-    function changedHandler(setter, property) {
-        return (event) => {
-            setter(event.target.value);
-            ingredient[property] = event.target.value;
+    function syncSetter(propertyName, setter) {
+        return (value) => {
+            setter(value);
+            ingredient[propertyName] = value;
         };
     }
 
-    const nameChanged = changedHandler(setName, "name");
-    const labelChanged = changedHandler(setLabel, "label");
-    const amountChanged = changedHandler(setAmount, "amount");
-    const unitChanged = changedHandler(setUnit, "unit");
-    const textChanged = changedHandler(setText, "text");
+    const setName = syncSetter("name", _setName);
+    const setAmount = syncSetter("amount", _setAmount);
+    const setUnit = syncSetter("unit", _setUnit);
+    const setText = syncSetter("text", _setText);
+    const setLabel = syncSetter("label", _setLabel);
 
-    function propertyEditElement(property, value, changedHandler, label, placeholder) {
-        return (
-            <div className="form-group mb-1">
-                <label htmlFor={property}><h6>{label}</h6></label>
-                <input type="text" placeholder={placeholder} className="form-control" value={value} onChange={changedHandler} />
-            </div>
-        );
-    }
-
-    function customOrPickedListElement(custom, choice, list, listStatus, changedHandler, inProgressMessage, failedMessage, choiceLabel, inputLabel, inputPlaceholder) {
-        if (!custom) {
-            if (!listStatus.completed) {
-                return (
-                    <p>{inProgressMessage}</p>
-                );
-            } else if (listStatus.failed) {
-                return (
-                    <p className="text-danger">{failedMessage}</p>
-                );
-            } else {
-                const options = list.map((item, i) => {
-                    return (
-                        <option key={"option-" + i} value={item}>{item}</option>
-                    );
-                });
-
-                return (
-                    <div className="mb-1">
-                        {choiceLabel}
-                        <select className="form-control mb-1" value={choice} onChange={changedHandler}>
-                            {options}
-                        </select>
-                    </div>
-                );
-            }
+    function setUseLabel(v) {
+        _setUseLabel(v);
+        if (v) {
+            setLabel("");
         } else {
-            return (
-                <div className="mb-1">
-                    {inputLabel}
-                    <input type="text" placeholder={inputPlaceholder} className="form-control mb-1" value={choice} onChange={changedHandler} />
-                </div>
-            );
+            setLabel(null);
         }
     }
 
-    function existingOrCustomOptionsElement(custom, customSetter, refreshHandler, existingMessage, customMessage, refreshMessage) {
-        return (
-            <div className="btns-hor mb-2">
-                <button className="btn btn-outline-secondary" onClick={() => customSetter(!custom)}>
-                    {custom ? existingMessage : customMessage}
-                </button>
-                {
-                    custom ? null : (
-                        <button className="btn btn-outline-secondary" onClick={refreshHandler}>
-                            {refreshMessage}
-                        </button>
-                    )
-                }
-            </div>
-        );
-    }
+    const [nameList, nameListStatus, nameListRefresh] = [props.nameList, props.nameListStatus, props.nameListRefresh];
 
     if (!ingredient.isSpecial()) {
-        const nameEditElement = customOrPickedListElement(
-            customName, name, nameList, nameListStatus, nameChanged,
-            "Retrieving ingredient name options...",
-            "Failed to retrieve ingredient name options. Error details logged to console.",
-            "Choose an ingredient name",
-            null,
-            "Enter Ingredient Name Here"
-        );
-        const nameOptionsElement = existingOrCustomOptionsElement(
-            customName, setCustomName, nameListRefresh,
-            "Use Existing Ingredient Name",
-            "Use Custom Ingredient Name",
-            "Refresh Ingredient Name Options"
-        );
-
-        const labelEditElement = propertyEditElement("label", label, labelChanged, "Label", "Enter Label Here");
-        const amountEditElement = propertyEditElement("amount", amount, amountChanged, "Amount", "Enter Amount Here");
-        const unitEditElement = propertyEditElement("unit", unit, unitChanged, "Unit", "Enter Unit Here");
-
         return (
             <div className="ingredient-edit">
-                {nameEditElement}
-                {nameOptionsElement}
+                <EditField
+                    key="name-edit"
+                    value={name}
+                    defaultValue=""
+                    list={nameList}
+                    listStatus={nameListStatus}
+                    refreshHandler={nameListRefresh}
+                    label="Name"
+                    name="name"
+                    placeholder="Enter Name Here"
+                    inProgressMessage="Retrieving ingredient name options..."
+                    failedMessage="Failed to retrieve ingredient name options. Error details logged to console."
+                    existingMessage="Use Existing Name"
+                    customMessage="Use Custom Name"
+                    refreshMessage="Refresh Name Options"
+                    setValue={setName}
+                />
 
                 <div className="form-check mb-1">
                     <input type="checkbox" className="form-check-input" id="use-label" checked={useLabel} onChange={labelCheckBoxChanged} ref={labelCheckBox} />
                     <label className="form-check-label" htmlFor="use-label">Use Label</label>
                 </div>
-                {useLabel ? labelEditElement : null}
+                {
+                    useLabel ? (
+                        <EditField
+                            key="label-edit"
+                            value={label}
+                            custom={true}
+                            staticCustom={true}
+                            label="Label"
+                            name="label"
+                            placeholder="Enter Label Here"
+                            setValue={setLabel}
+                        />
+                    ) : null
+                }
                 
-                {amountEditElement}
-                {unitEditElement}
+                <EditField
+                    key="amount-edit"
+                    value={amount}
+                    defaultValue="0"
+                    number={true}
+                    custom={true}
+                    staticCustom={true}
+                    label="Amount"
+                    name="amount"
+                    placeholder="Enter Amount Here"
+                    setValue={setAmount}
+                />
+
+                <EditField
+                    key="unit-edit"
+                    value={unit}
+                    defaultValue=""
+                    custom={true}
+                    staticCustom={true}
+                    label="Unit"
+                    name="unit"
+                    placeholder="Enter Unit Here"
+                    setValue={setUnit}
+                />
+
 
                 <div className="btns-hor">
                     <button className="btn btn-outline-secondary" onClick={removeIngredient}>
@@ -721,11 +589,18 @@ function IngredientEdit(props) {
             </div>
         );
     } else {
-        const textEditElement = propertyEditElement("text", text, textChanged, "Text", "Enter Text Here");
-
         return (
             <div className="ingredient-edit">
-                {textEditElement}
+                <EditField
+                    key="text-edit"
+                    value={text}
+                    custom={true}
+                    staticCustom={true}
+                    label="Text"
+                    name="text"
+                    placeholder="Enter Text Here"
+                    setValue={setText}
+                />
 
                 <div className="btns-hor">
                     <button className="btn btn-outline-secondary" onClick={removeIngredient}>
@@ -750,6 +625,84 @@ function IngredientEdit(props) {
                 </div>
             </div>
         );
+    }
+}
+
+function EditField(props) {
+    const [value, _setValue] = useState(props.value);
+    const [prevValue, setPrevValue] = useState(value);
+    const [custom, _setCustom] = useState(props.custom);
+    
+    function setValue(v) {
+        _setValue(v);
+        props.setValue(v);
+        console.log("Set value to " + v);
+    }
+
+    function setCustom(v) {
+        _setCustom(v);
+        if (v) {
+            setPrevValue(value);
+            setValue(props.defaultValue);
+        } else {
+            setValue(prevValue);
+        }
+    }
+
+    function onChange(event) {
+        if (props.number && isNaN(event.target.value)) return;
+        setValue(event.target.value);
+    }
+
+    const optionsElement = !props.staticCustom ? (
+        <div className="btns-hor">
+            <button className="btn btn-outline-secondary" onClick={() => setCustom(!custom)}>
+                {custom ? props.existingMessage : props.customMessage}
+            </button>
+            {
+                custom ? null : (
+                    <button className="btn btn-outline-secondary" onClick={props.refreshHandler}>
+                        {props.refreshMessage}
+                    </button>
+                )
+            }
+        </div>
+    ) : null;
+
+    if (custom) {
+        return (
+            <div className="form-group mb-1">
+                <label htmlFor={props.name}><h6>{props.label}</h6></label>
+                <input type="text" placeholder={props.placeholder} className="form-control" value={value} onChange={onChange} name={props.name} />
+                {optionsElement}
+            </div>
+        );
+    } else {
+        if (!props.listStatus.completed) {
+            return (
+                <p>{props.inProgressMessage}</p>
+            );
+        } else if (props.listStatus.failed) {
+            return (
+                <p className="text-danger">{props.failedMessage}</p>
+            );
+        } else {
+            const choices = props.list.map((item, i) => {
+                return (
+                    <option key={"option-" + i} value={item}>{item}</option>
+                );
+            });
+
+            return (
+                <div className="form-group mb-1">
+                    <label htmlFor={props.name}><h6>{props.label}</h6></label>
+                    <select className="form-control mb-1" value={value} onChange={onChange} name={props.name}>
+                        {choices}
+                    </select>
+                    {optionsElement}
+                </div>
+            );
+        }
     }
 }
 
