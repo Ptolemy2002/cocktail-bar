@@ -365,7 +365,7 @@
         }
       }
     },
-    "/recipes/update/by-name/{name}": {
+    "/recipes/update/by-exact-name/{name}": {
       "post": {
         "description": "Update a Recipe with the specified name. Data to update is specified in the request body.",
         "parameters": [
@@ -392,7 +392,7 @@
         }
       }
     },
-    "/recipes/update/by-id/{id}": {
+    "/recipes/update/by-exact-id/{id}": {
       "post": {
         "description": "Update a Recipe with the specified id. Data to update is specified in the request body.",
         "parameters": [
