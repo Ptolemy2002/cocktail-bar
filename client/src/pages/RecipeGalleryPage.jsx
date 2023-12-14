@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React from "react";
 import SearchBar from "src/components/SearchBar";
 import Spacer from "src/components/Spacer";
 import { useCurrentPath, useQuery } from "src/lib/Browser";
@@ -6,6 +6,7 @@ import { useApi } from "src/lib/Api";
 import { Link } from "react-router-dom";
 import { useCocktailData } from "src/lib/CocktailUtil";
 import CocktailImage from "src/components/CocktailImage";
+import { useMountEffect } from "src/lib/Misc";
 
 const searchCategories = [
     {
@@ -104,7 +105,7 @@ function RecipeGalleryPage() {
     }
 
     // Refresh the cocktail list on first load
-    useEffect(refresh, []);
+    useMountEffect(refresh);
 
     if (!cocktailNamesStatus.completed) {
         return (

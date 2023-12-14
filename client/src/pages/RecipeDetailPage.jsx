@@ -1,10 +1,11 @@
-import React, {useEffect, useLayoutEffect, useState, useRef} from "react";
+import React, {useState, useRef} from "react";
 import { useApi } from "src/lib/Api";
 import { useParams } from "react-router-dom";
 import { useCocktailData, IngredientData, SpecialIngredientData } from "src/lib/CocktailUtil";
 import NotFoundPage from "src/pages/NotFoundPage";
 import { nanoid } from "nanoid";
 import CocktailImage from "src/components/CocktailImage";
+import { useMountEffect } from "src/lib/Misc";
 
 function RecipeDetailPage() {
     const { name } = useParams();
@@ -259,19 +260,12 @@ function RecipeDetailEdit(props) {
     const [garnishList, garnishListStatus, garnishListRefresh] = useApi("recipes/all/list-garnish/distinct", true);
 
     // Refresh the lists when the component is first mounted
-    useEffect(() => {
+    useMountEffect(() => {
         imageListRefresh();
         categoryListRefresh();
         glassListRefresh();
         garnishListRefresh();
-    }, []);
-
-    useLayoutEffect(() => {
-        if (preparationTextBox.current) {
-            preparationTextBox.current.style.height = "auto";
-            preparationTextBox.current.style.height = (preparationTextBox.current.scrollHeight) + "px";
-        }
-    }, []);
+    });
 
     function preparationChanged(event) {
         setPreparation(event.target.value);
@@ -403,7 +397,7 @@ function IngredientEditList(props) {
     const setIngredients = props.setIngredients;
     const [ingredientNameList, ingredientNameListStatus, ingredientNameListRefresh] = useApi("recipes/all/list-ingredient/distinct", true);
 
-    useEffect(ingredientNameListRefresh, []);
+    useMountEffect(ingredientNameListRefresh);
 
     function addIngredient() {
         setIngredients(ingredients.concat(IngredientData.createFromJSON({})));

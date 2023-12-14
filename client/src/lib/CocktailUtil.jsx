@@ -1,5 +1,6 @@
-const { useEffect, useState } = require("react");
-const { useApi } = require("src/lib/Api");
+import { useMountEffect } from "src/lib/Misc";
+import { useState } from "react";
+import { useApi } from "src/lib/Api";
 
 class CocktailData {
     id = null;
@@ -556,9 +557,9 @@ function useCocktailData(value, primaryKey="name") {
     );
 
     // Start pulling data on first load
-    useEffect(() => {
+    useMountEffect(() => {
         cocktailData.pull();
-    }, []);
+    });
 
     return cocktailData;
 }

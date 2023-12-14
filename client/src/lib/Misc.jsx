@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+
 function listInPlainEnglish(list, max) {
     if (list.length === 0) {
         return '';
@@ -25,4 +27,8 @@ function listInPlainEnglish(list, max) {
     }
 }
 
-export { listInPlainEnglish }
+function useMountEffect(callback) {
+    useEffect(callback, []); // eslint-disable-line react-hooks/exhaustive-deps
+}
+
+export { listInPlainEnglish, useMountEffect };

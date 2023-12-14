@@ -1,4 +1,5 @@
-import React, {useEffect} from "react";
+import React from "react";
+import { useMountEffect } from "src/lib/Misc";
 
 function CocktailImage(props) {
     const [imgPath, _setImgPath] = React.useState("");
@@ -13,9 +14,9 @@ function CocktailImage(props) {
     }
 
     // Initialize image path when component is first mounted
-    useEffect(() => {
+    useMountEffect(() => {
         setImgPath(props.src);
-    }, []);
+    });
 
     return (
         <img src={imgPath} alt={altText} className={props.className} />

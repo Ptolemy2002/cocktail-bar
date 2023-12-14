@@ -1,11 +1,11 @@
-import React, {useEffect} from "react";
+import React from "react";
 import SearchBar from "src/components/SearchBar";
 import Spacer from "src/components/Spacer";
 import { useCurrentPath, useQuery } from "src/lib/Browser";
 import { useApi } from "src/lib/Api";
 import { escapeRegex, transformRegex } from "src/lib/Regex";
 import { Link } from "react-router-dom";
-import { listInPlainEnglish } from "src/lib/Misc";
+import { listInPlainEnglish, useMountEffect } from "src/lib/Misc";
 
 function IngredientGalleryPage() {
     const currentPath = useCurrentPath();
@@ -29,7 +29,7 @@ function IngredientGalleryPage() {
     }
 
     // Refresh the ingredient list on first load
-    useEffect(refresh, []);
+    useMountEffect(refresh);
 
     if (!ingredientsStatus.completed) {
         return (
@@ -123,7 +123,7 @@ function IngredientCard(props) {
         });
     }
 
-    useEffect(refresh, []);
+    useMountEffect(refresh);
 
     let ingredientNamesText;
     if (!recipeNamesStatus.completed) {
