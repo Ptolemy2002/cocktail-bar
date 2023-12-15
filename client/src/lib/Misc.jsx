@@ -13,8 +13,11 @@ function listInPlainEnglish(list, max) {
 
     list = list.map((v, i) => {
         if (i === list.length - 1) return v;
+        
         if (v.endsWith(`"`)) {
             return v.slice(0, -2) + `," `;
+        } else if (v.endsWith(`'`)) {
+            return v.slice(0, -2) + `,' `;
         } else {
             return v + ', ';
         }
