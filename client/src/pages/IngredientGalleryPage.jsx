@@ -1,23 +1,30 @@
 import React from "react";
 import SearchBar from "src/components/SearchBar";
 import Spacer from "src/components/Spacer";
-import { useCurrentPath, useQuery } from "src/lib/Browser";
+import { useQuery } from "src/lib/Browser";
 import { useApi } from "src/lib/Api";
 import { escapeRegex, transformRegex } from "src/lib/Regex";
 import { Link } from "react-router-dom";
 import { listInPlainEnglish, useMountEffect } from "src/lib/Misc";
 
-function IngredientGalleryPage() {
-    const currentPath = useCurrentPath();
+function QueryWrapper() {
     const queryParams = useQuery();
     const query = queryParams.get("query");
     const matchWhole = queryParams.get("matchWhole") === "true";
 
-    let path = "recipes/all/list-ingredient/distinct";
-    const [ingredients, ingredientsStatus, sendIngredientsRequest] = useApi(path, true, (a, b) => a.localeCompare(b));
+    return (
+        <IngredientGalleryPage
+            query={query}
+            matchWhole={matchWhole}
+        />
+    );
+}
 
-    if (query) {
-        document.title = `Ingredient search results for "${query}" | Cocktail Bar`;
+function IngredientGalleryPage(props) {
+    const [ingredients, ingredientsStatus, sendIngredientsRequest] = useApi("recipes/all/list-ingredient/distinct", true, (a, b) => a.localeCompare(b));
+
+    if (props.query) {
+        document.title = `Ingredient search results for "${props.query}" | Cocktail Bar`;
     } else {
         document.title = "Ingredient Gallery | Cocktail Bar";
     }
@@ -31,16 +38,19 @@ function IngredientGalleryPage() {
     // Refresh the ingredient list on first load
     useMountEffect(refresh);
 
+    const searchBarElement = (
+        <SearchBar id="gallery-search"
+            query={props.query} category="name" matchWhole={props.matchWhole}
+            destinationPath="/ingredient-gallery"
+            staticCategory={true}
+        />
+    );
+
     if (!ingredientsStatus.completed) {
         return (
             <div className="IngredientGalleryPage container">
                 <h1>Ingredients Gallery</h1>
-                <SearchBar id="gallery-search"
-                    query={query} category="name" matchWhole={matchWhole}
-                    destinationPath={currentPath}
-                    staticCategory={true}
-                    staticMatchWhole={true}
-                />
+                {searchBarElement}
                 <Spacer />
                 
                 <p>Retrieving ingredients...</p>
@@ -50,23 +60,19 @@ function IngredientGalleryPage() {
         return (
             <div className="IngredientGalleryPage container">
                 <h1>Ingredient Gallery</h1>
-                <SearchBar id="gallery-search"
-                    query={query} category="name" matchWhole={matchWhole}
-                    destinationPath={currentPath}
-                    staticCategory={true}
-                    staticMatchWhole={true}
-                />
+                {searchBarElement}
+                <Spacer />
 
                 <p className="text-danger">Failed to retrieve ingredients. Error details logged to console.</p>
             </div>
         );
     } else {
         const shownIngredients = ingredients.filter((ingredient) => {
-            if (query) {
-                let regex = transformRegex(escapeRegex(query), {
+            if (props.query) {
+                let regex = transformRegex(escapeRegex(props.query), {
                     accentInsensitive: true,
                     caseInsensitive: true,
-                    matchWhole: matchWhole
+                    matchWhole: props.matchWhole
                 });
                 
                 if (!regex.test(ingredient)) return false;
@@ -88,11 +94,7 @@ function IngredientGalleryPage() {
         return (
             <div className="IngredientGalleryPage container">
                 <h1>Ingredient Gallery</h1>
-                <SearchBar id="gallery-search"
-                    query={query} category="name" matchWhole={matchWhole}
-                    destinationPath={currentPath}
-                    staticCategory={true}
-                />
+                {searchBarElement}
                 <Spacer />
 
                 <p>{shownIngredients.length} result(s)</p>
@@ -115,7 +117,8 @@ function IngredientGalleryPage() {
 }
 
 function IngredientCard(props) {
-    const [recipeNames, recipeNamesStatus, sendRecipeNamesRequest] = useApi(`recipes/ingredient-equals/${encodeURIComponent(props.name)}/list-name`, true);
+    const [recipeNames, recipeNamesStatus, sendRecipeNamesRequest] =
+        useApi(`recipes/ingredient-equals/${encodeURIComponent(props.name)}/list-name`, true);
 
     function refresh() {
         sendRecipeNamesRequest({
@@ -164,4 +167,4 @@ function IngredientCard(props) {
     );
 }
 
-export default IngredientGalleryPage;
+export default QueryWrapper;

@@ -1,7 +1,7 @@
 import React from "react";
 import SearchBar from "src/components/SearchBar";
 import Spacer from "src/components/Spacer";
-import { useCurrentPath, useQuery } from "src/lib/Browser";
+import { useQuery } from "src/lib/Browser";
 import { useApi } from "src/lib/Api";
 import { Link } from "react-router-dom";
 import { useCocktailData } from "src/lib/CocktailUtil";
@@ -62,31 +62,43 @@ const searchCategories = [
     }
 ];
 
-function RecipeGalleryPage() {
-    const currentPath = useCurrentPath();
+function QueryWrapper() {
     const queryParams = useQuery();
     const query = queryParams.get("query");
     const category = queryParams.get("category");
     const matchWhole = queryParams.get("matchWhole") === "true";
 
-    let path = "recipes/all/list-name/distinct";
+    let queryPath = "recipes/all/list-name/distinct";
     if (query && category) {
         if (category === "general") {
-            path = `recipes/search/${encodeURIComponent(query)}/list-name/distinct`;
+            queryPath = `recipes/search/${encodeURIComponent(query)}/list-name/distinct`;
         } else {
             if (matchWhole) {
-                path = `recipes/${category}-equals/${encodeURIComponent(query)}/list-name/distinct`;
+                queryPath = `recipes/${category}-equals/${encodeURIComponent(query)}/list-name/distinct`;
             } else {
-                path = `recipes/${category}-contains/${encodeURIComponent(query)}/list-name/distinct`;
+                queryPath = `recipes/${category}-contains/${encodeURIComponent(query)}/list-name/distinct`;
             }
         }
+    }
+    
+    return (
+        <RecipeGalleryPage
+            query={query}
+            category={category}
+            matchWhole={matchWhole}
+            queryPath={queryPath}
+        />
+    );
+}
 
-        document.title = `Recipe search results for "${query}" | Cocktail Bar`;
+function RecipeGalleryPage(props) {
+    if (props.query && props.category) {
+        document.title = `Recipe search results for "${props.query}" | Cocktail Bar`;
     } else {
         document.title = "Recipe Gallery | Cocktail Bar";
     }
 
-    const [cocktailNames, cocktailNamesStatus, sendCocktailNamesRequest] = useApi(path, true, (a, b) => {
+    const [cocktailNames, cocktailNamesStatus, sendCocktailNamesRequest] = useApi(props.queryPath, true, (a, b) => {
         if (a.type === "search-result" && b.type === "search-result") {
             if (a._score !== b._score) {
                 return b._score - a._score;
@@ -107,14 +119,19 @@ function RecipeGalleryPage() {
     // Refresh the cocktail list on first load
     useMountEffect(refresh);
 
+    const searchBarElement = (
+        <SearchBar id="gallery-search"
+            query={props.query} category={props.category} matchWhole={props.matchWhole}
+            destinationPath="/recipe-gallery"
+            categories={searchCategories}
+        />
+    );
+
     if (!cocktailNamesStatus.completed) {
         return (
             <div className="RecipeGalleryPage container">
                 <h2>Recipe Gallery</h2>
-                <SearchBar id="gallery-search"
-                    query={query} category={category} matchWhole={matchWhole}
-                    destinationPath={currentPath} categories={searchCategories}
-                />
+                {searchBarElement}
                 <Spacer />
                 
                 <p>Retrieving cocktails...</p>
@@ -124,10 +141,7 @@ function RecipeGalleryPage() {
         return (
             <div className="RecipeGalleryPage container">
                 <h2>Recipe Gallery</h2>
-                <SearchBar id="gallery-search"
-                    query={query} category={category} matchWhole={matchWhole}
-                    destinationPath={currentPath} categories={searchCategories}
-                />
+                {searchBarElement}
                 <Spacer />
 
                 <p className="text-danger">Failed to retrieve cocktails. Error details logged to console.</p>
@@ -148,10 +162,7 @@ function RecipeGalleryPage() {
         return (
             <div className="RecipeGalleryPage container">
                 <h1>Recipe Gallery</h1>
-                <SearchBar id="gallery-search"
-                    query={query} category={category} matchWhole={matchWhole}
-                    destinationPath={currentPath} categories={searchCategories}
-                />
+                {searchBarElement}
                 <Spacer />
 
                 <p>{cocktailNames.length} result(s)</p>
@@ -250,4 +261,4 @@ function CocktailCard(props) {
     }
 }
 
-export default RecipeGalleryPage;
+export default QueryWrapper;

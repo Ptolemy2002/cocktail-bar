@@ -6,10 +6,20 @@ import NotFoundPage from "src/pages/NotFoundPage";
 import { nanoid } from "nanoid";
 import CocktailImage from "src/components/CocktailImage";
 import { useMountEffect } from "src/lib/Misc";
+import { EditField } from "src/lib/Form";
 
-function RecipeDetailPage() {
+function QueryWrapper() {
     const { name } = useParams();
-    const cocktailData = useCocktailData(name);
+
+    return (
+        <RecipeDetailPage
+            name={name}
+        />
+    );
+}
+
+function RecipeDetailPage(props) {
+    const cocktailData = useCocktailData(props.name);
 
     document.title = `${cocktailData.name} | Cocktail Bar`;
     const [editMode, _setEditMode] = useState(false);
@@ -25,7 +35,7 @@ function RecipeDetailPage() {
     if (cocktailData.pullInProgress() || cocktailData.lastRequest === null) {
         return (
             <div className="RecipeDetailPage container">
-                <h1>{name}</h1>
+                <h1>{props.name}</h1>
                 <p>Retrieving cocktail data...</p>
             </div>
         );
@@ -33,7 +43,7 @@ function RecipeDetailPage() {
         if (cocktailData.requestError?.is404) return <NotFoundPage />;
         return (
             <div className="RecipeDetailPage container">
-                <h1>{name}</h1>
+                <h1>{props.name}</h1>
                 <p className="text-danger">Failed to retrieve cocktail data. Error details logged to console.</p>
             </div>
         );
@@ -294,6 +304,7 @@ function RecipeDetailEdit(props) {
                 name="name"
                 placeholder="Enter Name Here"
                 setValue={setName}
+                optionsClassName="btns-hor"
             />
 
             <EditField
@@ -312,6 +323,7 @@ function RecipeDetailEdit(props) {
                 customMessage="Use Custom Image"
                 refreshMessage="Refresh Image Options"
                 setValue={setImage}
+                optionsClassName="btns-hor"
             />
 
             <EditField
@@ -330,6 +342,7 @@ function RecipeDetailEdit(props) {
                 customMessage="Use Custom Category"
                 refreshMessage="Refresh Category Options"
                 setValue={setCategory}
+                optionsClassName="btns-hor"
             />
 
             <EditField
@@ -348,6 +361,7 @@ function RecipeDetailEdit(props) {
                 customMessage="Use Custom Glass"
                 refreshMessage="Refresh Glass Options"
                 setValue={setGlass}
+                optionsClassName="btns-hor"
             />
 
             <EditField
@@ -366,6 +380,7 @@ function RecipeDetailEdit(props) {
                 customMessage="Use Custom Garnish"
                 refreshMessage="Refresh Garnish Options"
                 setValue={setGarnish}
+                optionsClassName="btns-hor"
             />
 
             <h2>Ingredients</h2>
@@ -537,6 +552,7 @@ function IngredientEdit(props) {
                     customMessage="Use Custom Name"
                     refreshMessage="Refresh Name Options"
                     setValue={setName}
+                    optionsClassName="btns-hor"
                 />
 
                 <div className="form-check mb-1">
@@ -554,6 +570,7 @@ function IngredientEdit(props) {
                             name="label"
                             placeholder="Enter Label Here"
                             setValue={setLabel}
+                            optionsClassName="btns-hor"
                         />
                     ) : null
                 }
@@ -570,6 +587,7 @@ function IngredientEdit(props) {
                     name="amount"
                     placeholder="Enter Amount Here"
                     setValue={setAmount}
+                    optionsClassName="btns-hor"
                 />
 
                 <EditField
@@ -582,6 +600,7 @@ function IngredientEdit(props) {
                     name="unit"
                     placeholder="Enter Unit Here"
                     setValue={setUnit}
+                    optionsClassName="btns-hor"
                 />
 
 
@@ -620,6 +639,7 @@ function IngredientEdit(props) {
                     name="text"
                     placeholder="Enter Text Here"
                     setValue={setText}
+                    optionsClassName="btns-hor"
                 />
 
                 <div className="btns-hor">
@@ -648,120 +668,4 @@ function IngredientEdit(props) {
     }
 }
 
-function EditField(props) {
-    const [value, _setValue] = useState(props.value);
-    const [prevValue, setPrevValue] = useState(value);
-    const [custom, _setCustom] = useState(props.custom);
-    
-    function setValue(v) {
-        _setValue(v);
-        if (props.setValue && !props.manualSave) props.setValue(v);
-    }
-
-    function setCustom(v) {
-        _setCustom(v);
-        if (v) {
-            setPrevValue(value);
-            setValue(props.defaultValue);
-        } else {
-            setValue(prevValue);
-        }
-    }
-
-    function validate(v) {
-        if (props.number || props.integer) {
-            if (v === "") return true;
-            if (v === "-" && (props.min === undefined || props.min < 0)) return true;
-            if (v === "+" && (props.max === undefined || props.max >= 0)) return true;
-            if (isNaN(v) || isNaN(parseFloat(v))) return false;
-            if (props.integer && !Number.isInteger(v)) return false;
-            if (props.min !== undefined && v < props.min) return false;
-            if (props.max !== undefined && v > props.max) return false;
-        }
-
-        return true;
-    }
-
-    function onChange(event) {
-        if (!validate(event.target.value)) return;
-        setValue(event.target.value);
-    }
-
-    const optionsElement = (
-        <div className="btns-hor">
-            {
-                !props.staticCustom ? (
-                    <button className="btn btn-outline-secondary" onClick={() => setCustom(!custom)}>
-                        {custom ? props.existingMessage : props.customMessage}
-                    </button>
-                ) : null
-            }
-            
-            {
-                custom ? null : (
-                    <button
-                        className="btn btn-outline-secondary"
-                        onClick={props.refreshHandler}
-                        disabled={props.listStatus.inProgress}
-                    >
-                        {
-                            props.listStatus.inProgress ?
-                                "Unavailable":
-                            // Else
-                            props.refreshMessage
-                        }
-                    </button>
-                )
-            }
-
-            {
-                props.manualSave ? (
-                    <button 
-                        className="btn btn-outline-secondary"
-                        onClick={() => {if (props.setValue) props.setValue(value)}}
-                    >
-                        Save
-                    </button>
-                ) : null
-            }
-        </div>
-    );
-
-    if (custom) {
-        return (
-            <div className="form-group mb-1">
-                <label htmlFor={props.name}><h6>{props.label}</h6></label>
-                <input type="text" placeholder={props.placeholder} className="form-control" value={value} onChange={onChange} name={props.name} />
-                {optionsElement}
-            </div>
-        );
-    } else {
-        if (!props.listStatus.completed) {
-            return (
-                <p>{props.inProgressMessage}</p>
-            );
-        } else if (props.listStatus.failed) {
-            return (
-                <p className="text-danger">{props.failedMessage}</p>
-            );
-        } else {
-            const choices = props.list.map((item, i) => {
-                return (
-                    <option key={"option-" + i} value={item}>{item}</option>
-                );
-            });
-
-            return (
-                <div className="form-group mb-1">
-                    <label htmlFor={props.name}><h6>{props.label}</h6></label>
-                    <select className="form-control mb-1" value={value} onChange={onChange} name={props.name}>
-                        {choices}
-                    </select>
-                    {optionsElement}
-                </div>
-            );
-        }
-    }
-}
-
-export default RecipeDetailPage;
+export default QueryWrapper;
