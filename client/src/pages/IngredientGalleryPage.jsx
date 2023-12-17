@@ -6,9 +6,9 @@ import { useApi } from "src/lib/Api";
 import { escapeRegex, transformRegex } from "src/lib/Regex";
 import { Link } from "react-router-dom";
 import { listInPlainEnglish, useMountEffect } from "src/lib/Misc";
-import { BootstrapCard } from "src/lib/Bootstrap";
+import BootstrapCard from "src/lib/Bootstrap/Card";
 
-function QueryWrapper() {
+export default function QueryWrapper() {
     const queryParams = useQuery();
     const query = queryParams.get("query");
     const matchWhole = queryParams.get("matchWhole") === "true";
@@ -21,7 +21,7 @@ function QueryWrapper() {
     );
 }
 
-function IngredientGalleryPage(props) {
+export function IngredientGalleryPage(props) {
     const [ingredients, ingredientsStatus, sendIngredientsRequest] = useApi("recipes/all/list-ingredient/distinct", true, (a, b) => a.localeCompare(b));
 
     if (props.query) {
@@ -117,7 +117,7 @@ function IngredientGalleryPage(props) {
     }
 }
 
-function IngredientCard(props) {
+export function IngredientCard(props) {
     const [recipeNames, recipeNamesStatus, sendRecipeNamesRequest] =
         useApi(`recipes/ingredient-equals/${encodeURIComponent(props.name)}/list-name`, true);
 
@@ -167,5 +167,3 @@ function IngredientCard(props) {
         </BootstrapCard>
     );
 }
-
-export default QueryWrapper;

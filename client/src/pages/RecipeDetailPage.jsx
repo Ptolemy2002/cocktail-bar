@@ -8,7 +8,7 @@ import CocktailImage from "src/components/CocktailImage";
 import { useMountEffect } from "src/lib/Misc";
 import { EditField } from "src/lib/Form";
 
-function QueryWrapper() {
+export default function QueryWrapper() {
     const { name } = useParams();
 
     return (
@@ -18,7 +18,7 @@ function QueryWrapper() {
     );
 }
 
-function RecipeDetailPage(props) {
+export function RecipeDetailPage(props) {
     const cocktailData = useCocktailData(props.name);
 
     document.title = `${cocktailData.name} | Cocktail Bar`;
@@ -210,7 +210,7 @@ function RecipeDetailPage(props) {
     }
 }
 
-function RecipeDetailDisplay(props) {
+export function RecipeDetailDisplay(props) {
     const data = props.cocktailData;
     const altText = data.isPlaceholderImage() ? "Placeholder image" : `Image of a "${data.name}" cocktail`;
 
@@ -252,7 +252,39 @@ function RecipeDetailDisplay(props) {
     );
 }
 
-function RecipeDetailEdit(props) {
+export function RecipeEditField(props) {
+    const newProps = {
+        key: props.name + "-edit",
+        value: props.value,
+        defaultValue: props.defaultValue || "",
+        list: props.list,
+        listStatus: props.listStatus,
+        refreshHandler: props.refreshHandler,
+        label: props.label,
+        name: props.name,
+        placeholder: props.placeholder || `Enter ${props.label} Here`,
+        inProgressMessage: props.inProgressMessage || `Retrieving ${props.label.toLowerCase()} options...`,
+        failedMessage: props.failedMessage || `Failed to retrieve ${props.label.toLowerCase()} options. Error details logged to console.`,
+        existingMessage: props.existingMessage || `Use Existing ${props.label}`,
+        customMessage: props.customMessage || `Use Custom ${props.label}`,
+        refreshMessage: props.refreshMessage || `Refresh ${props.label} Options`,
+        setValue: props.setValue,
+        optionsClassName: props.optionsClassName || "btns-hor",
+        custom: props.custom || false,
+        staticCustom: props.staticCustom || false,
+        number: props.number || false,
+        integer: props.integer || false,
+        min: props.min || null,
+        max: props.max || null,
+        manualSave: props.manualSave || false
+    };
+
+    return (
+        <EditField {...newProps} />
+    );
+}
+
+export function RecipeDetailEdit(props) {
     const data = props.cocktailData;
 
     const [name, setName] = useState(data.name);
@@ -294,93 +326,53 @@ function RecipeDetailEdit(props) {
     return (
         <div className="recipe-detail-container">
             <h2>Properties</h2>
-            <EditField
-                key="name-edit"
+            <RecipeEditField
+                name="name"
+                label="Name"
                 value={name}
-                defaultValue=""
+                setValue={setName}
                 custom={true}
                 staticCustom={true}
-                label="Name"
-                name="name"
-                placeholder="Enter Name Here"
-                setValue={setName}
-                optionsClassName="btns-hor"
             />
 
-            <EditField
-                key="image-edit"
+            <RecipeEditField
+                name="image"
+                label="Image"
                 value={image}
-                defaultValue=""
                 list={imageList}
                 listStatus={imageListStatus}
                 refreshHandler={imageListRefresh}
-                label="Image"
-                name="image"
-                placeholder="Enter Image Here"
-                inProgressMessage="Retrieving image options..."
-                failedMessage="Failed to retrieve image options. Error details logged to console."
-                existingMessage="Use Existing Image"
-                customMessage="Use Custom Image"
-                refreshMessage="Refresh Image Options"
                 setValue={setImage}
-                optionsClassName="btns-hor"
             />
 
-            <EditField
-                key="category-edit"
+            <RecipeEditField
+                name="category"
+                label="Category"
                 value={category}
-                defaultValue=""
                 list={categoryList}
                 listStatus={categoryListStatus}
                 refreshHandler={categoryListRefresh}
-                label="Category"
-                name="category"
-                placeholder="Enter Category Here"
-                inProgressMessage="Retrieving category options..."
-                failedMessage="Failed to retrieve category options. Error details logged to console."
-                existingMessage="Use Existing Category"
-                customMessage="Use Custom Category"
-                refreshMessage="Refresh Category Options"
                 setValue={setCategory}
-                optionsClassName="btns-hor"
             />
 
-            <EditField
-                key="glass-edit"
+            <RecipeEditField
+                name="glass"
+                label="Glass"
                 value={glass}
-                defaultValue=""
                 list={glassList}
                 listStatus={glassListStatus}
                 refreshHandler={glassListRefresh}
-                label="Glass"
-                name="glass"
-                placeholder="Enter Glass Here"
-                inProgressMessage="Retrieving glass options..."
-                failedMessage="Failed to retrieve glass options. Error details logged to console."
-                existingMessage="Use Existing Glass"
-                customMessage="Use Custom Glass"
-                refreshMessage="Refresh Glass Options"
                 setValue={setGlass}
-                optionsClassName="btns-hor"
             />
 
-            <EditField
-                key="garnish-edit"
+            <RecipeEditField
+                name="garnish"
+                label="Garnish"
                 value={garnish}
-                defaultValue=""
                 list={garnishList}
                 listStatus={garnishListStatus}
                 refreshHandler={garnishListRefresh}
-                label="Garnish"
-                name="garnish"
-                placeholder="Enter Garnish Here"
-                inProgressMessage="Retrieving garnish options..."
-                failedMessage="Failed to retrieve garnish options. Error details logged to console."
-                existingMessage="Use Existing Garnish"
-                customMessage="Use Custom Garnish"
-                refreshMessage="Refresh Garnish Options"
                 setValue={setGarnish}
-                optionsClassName="btns-hor"
             />
 
             <h2>Ingredients</h2>
@@ -407,7 +399,7 @@ function RecipeDetailEdit(props) {
     );
 }
 
-function IngredientEditList(props) {
+export function IngredientEditList(props) {
     const ingredients = props.ingredients;
     const setIngredients = props.setIngredients;
     const [ingredientNameList, ingredientNameListStatus, ingredientNameListRefresh] = useApi("recipes/all/list-ingredient/distinct", true);
@@ -484,7 +476,7 @@ function IngredientEditList(props) {
     );
 }
 
-function IngredientEdit(props) {
+export function IngredientEdit(props) {
     const ingredient = props.ingredient;
     const removeIngredient = props.removeIngredient;
 
@@ -536,23 +528,14 @@ function IngredientEdit(props) {
     if (!ingredient.isSpecial()) {
         return (
             <div className="ingredient-edit">
-                <EditField
-                    key="name-edit"
+                <RecipeEditField
+                    name="name"
+                    label="Name"
                     value={name}
-                    defaultValue=""
                     list={nameList}
                     listStatus={nameListStatus}
                     refreshHandler={nameListRefresh}
-                    label="Name"
-                    name="name"
-                    placeholder="Enter Name Here"
-                    inProgressMessage="Retrieving ingredient name options..."
-                    failedMessage="Failed to retrieve ingredient name options. Error details logged to console."
-                    existingMessage="Use Existing Name"
-                    customMessage="Use Custom Name"
-                    refreshMessage="Refresh Name Options"
                     setValue={setName}
-                    optionsClassName="btns-hor"
                 />
 
                 <div className="form-check mb-1">
@@ -561,48 +544,35 @@ function IngredientEdit(props) {
                 </div>
                 {
                     useLabel ? (
-                        <EditField
-                            key="label-edit"
-                            value={label}
-                            custom={true}
-                            staticCustom={true}
-                            label="Label"
+                        <RecipeEditField
                             name="label"
-                            placeholder="Enter Label Here"
+                            label="Label"
+                            value={label}
                             setValue={setLabel}
-                            optionsClassName="btns-hor"
                         />
                     ) : null
                 }
                 
-                <EditField
-                    key="amount-edit"
-                    value={amount}
-                    defaultValue="0"
-                    number={true}
-                    min={0}
-                    custom={true}
-                    staticCustom={true}
-                    label="Amount (non-negative number)"
+                <RecipeEditField
                     name="amount"
-                    placeholder="Enter Amount Here"
-                    setValue={setAmount}
-                    optionsClassName="btns-hor"
-                />
-
-                <EditField
-                    key="unit-edit"
-                    value={unit}
+                    label="Amount"
+                    value={amount}
                     defaultValue=""
                     custom={true}
                     staticCustom={true}
-                    label="Unit"
-                    name="unit"
-                    placeholder="Enter Unit Here"
-                    setValue={setUnit}
-                    optionsClassName="btns-hor"
+                    setValue={setAmount}
+                    number={true}
+                    min={0}
                 />
 
+                <RecipeEditField
+                    name="unit"
+                    label="Unit"
+                    value={unit}
+                    setValue={setUnit}
+                    custom={true}
+                    staticCustom={true}
+                />
 
                 <div className="btns-hor">
                     <button className="btn btn-outline-secondary" onClick={removeIngredient}>
@@ -630,16 +600,13 @@ function IngredientEdit(props) {
     } else {
         return (
             <div className="ingredient-edit">
-                <EditField
-                    key="text-edit"
+                <RecipeEditField
+                    name="text"
+                    label="Text"
                     value={text}
                     custom={true}
                     staticCustom={true}
-                    label="Text"
-                    name="text"
-                    placeholder="Enter Text Here"
                     setValue={setText}
-                    optionsClassName="btns-hor"
                 />
 
                 <div className="btns-hor">
@@ -667,5 +634,3 @@ function IngredientEdit(props) {
         );
     }
 }
-
-export default QueryWrapper;

@@ -6,7 +6,7 @@ const accentPatterns = [
     "(u|ú|ù|ü|û)", "(U|Ú|Ù|Ü|Û)"
 ];
 
-function escapeRegex(value, flags = "") {
+export function escapeRegex(value, flags = "") {
     if (typeof value === 'string') {
         return new RegExp(value.replaceAll(/[.*+?^${}()|[\]\\]/g, '\\$&'), flags);
     } else if (value instanceof RegExp) {
@@ -16,7 +16,7 @@ function escapeRegex(value, flags = "") {
     }
 }
 
-function regexAccentInsensitive(value, flags = "") {
+export function regexAccentInsensitive(value, flags = "") {
     if (typeof value === 'string') {
         accentPatterns.forEach((pattern) => {
             value = value.replaceAll(new RegExp(pattern, "g"), pattern);
@@ -29,7 +29,7 @@ function regexAccentInsensitive(value, flags = "") {
     }
 }
 
-function regexCaseInsensitive(value, flags = "") {
+export function regexCaseInsensitive(value, flags = "") {
     if (typeof value === 'string') {
         if (!flags.includes("i")) {
             flags += "i";
@@ -42,7 +42,7 @@ function regexCaseInsensitive(value, flags = "") {
     }
 }
 
-function regexMatchWhole(value, flags = "") {
+export function regexMatchWhole(value, flags = "") {
     if (typeof value === 'string') {
         return new RegExp(`^${value}$`, flags);
     } else if (value instanceof RegExp) {
@@ -52,17 +52,9 @@ function regexMatchWhole(value, flags = "") {
     }
 }
 
-function transformRegex(value, args) {
+export function transformRegex(value, args) {
     if (args.accentInsensitive) value = regexAccentInsensitive(value);
     if (args.caseInsensitive) value = regexCaseInsensitive(value);
     if (args.matchWhole) value = regexMatchWhole(value);
     return value;
 }
-
-module.exports = {
-    escapeRegex,
-    regexAccentInsensitive,
-    regexCaseInsensitive,
-    regexMatchWhole,
-    transformRegex
-};

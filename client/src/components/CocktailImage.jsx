@@ -1,8 +1,8 @@
 import React from "react";
 import { useMountEffect } from "src/lib/Misc";
-import { BootstrapCard } from "src/lib/Bootstrap";
+import BootstrapCard from "src/lib/Bootstrap/Card";
 
-function CocktailImage(props) {
+export default function CocktailImage(props) {
     const [imgPath, _setImgPath] = React.useState("");
 
     function setImgPath(path) {
@@ -19,12 +19,11 @@ function CocktailImage(props) {
     });
 
     const newProps = {
-        ...props,
-        // src is a prop that will be handled by us, not passed to the <img> tag
-        src: undefined,
-        // isCardImage is a prop that will be handled by us, not passed to the <img> tag
-        isCardImage: undefined
+        ...props
     };
+    // Delete props will be handled by us, not passed to the <img> tag
+    delete newProps.src;
+    delete newProps.isCardImage;
 
     if (props.isCardImage) {
         // alt text will likely be provided in the props, so I'm dismissing the eslint warning
@@ -38,5 +37,3 @@ function CocktailImage(props) {
         );
     }
 }
-
-export default CocktailImage;

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-function listInPlainEnglish(list, max) {
+export function listInPlainEnglish(list, max) {
     if (list.length === 0) {
         return '';
     }
@@ -30,12 +30,10 @@ function listInPlainEnglish(list, max) {
     }
 }
 
-function useMountEffect(callback) {
+export function useMountEffect(callback) {
     useEffect(callback, []); // eslint-disable-line react-hooks/exhaustive-deps
 }
 
-function combineClassNames(...classNames) {
+export function combineClassNames(...classNames) {
     return classNames.filter(c => c).join(' ');
 }
-
-export { listInPlainEnglish, useMountEffect, combineClassNames };

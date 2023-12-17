@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 
-function SearchBar(props) {
+export default function SearchBar(props) {
     const [query, setQuery] = useState(props.query || "");
     const [category, setCategory] = useState(props.category || "general");
     const [matchWhole, setMatchWhole] = useState(props.matchWhole || false);
@@ -128,5 +128,3 @@ function SearchBar(props) {
         </div>
     );
 }
-
-export default SearchBar;

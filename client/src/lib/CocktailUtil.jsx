@@ -2,7 +2,7 @@ import { useMountEffect } from "src/lib/Misc";
 import { useState } from "react";
 import { useApi } from "src/lib/Api";
 
-class CocktailData {
+export class CocktailData {
     id = null;
     name = "Unknown Cocktail";
     image = "Shaker.jpg";
@@ -374,7 +374,7 @@ class CocktailData {
     }
 }
 
-class I_IngredientData {
+export class I_IngredientData {
     previousStates = [];
     _stateIndex = 0;
 
@@ -450,7 +450,7 @@ class I_IngredientData {
     }
 }
 
-class IngredientData extends I_IngredientData {
+export class IngredientData extends I_IngredientData {
     name = "Unknown Ingredient";
     label = null;
     amount = 0;
@@ -503,7 +503,7 @@ class IngredientData extends I_IngredientData {
     }
 }
 
-class SpecialIngredientData extends I_IngredientData {
+export class SpecialIngredientData extends I_IngredientData {
     text = "";
 
     static createFromJSON(ingredientState) {
@@ -540,7 +540,7 @@ class SpecialIngredientData extends I_IngredientData {
     }
 }
 
-function useCocktailData(value, primaryKey="name") {
+export function useCocktailData(value, primaryKey="name") {
     const _push = useApi(`recipes/update/by-exact-${primaryKey}/${encodeURIComponent(value)}`)[2];
     const _pull = useApi(`recipes/get/by-exact-${primaryKey}/${encodeURIComponent(value)}`)[2];
     const _duplicate = useApi(`recipes/duplicate/by-exact-${primaryKey}/${encodeURIComponent(value)}`)[2];
@@ -563,6 +563,3 @@ function useCocktailData(value, primaryKey="name") {
 
     return cocktailData;
 }
-
-
-export { CocktailData, IngredientData, SpecialIngredientData, useCocktailData };

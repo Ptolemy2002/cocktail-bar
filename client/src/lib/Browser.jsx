@@ -5,7 +5,7 @@ import RecipeGalleryPage from "src/pages/RecipeGalleryPage";
 import RecipeDetailPage from "src/pages/RecipeDetailPage";
 import IngredientGalleryPage from "src/pages/IngredientGalleryPage";
 
-const routes = [
+export const routes = [
     {
       path: "/",
       navigationText: "Home",
@@ -30,7 +30,7 @@ const routes = [
     }
 ];
 
-const useCurrentPath = () => {
+export const useCurrentPath = () => {
   const location = useLocation();
   const [{ route }] = matchRoutes(routes, location) || [{route: null}];
 
@@ -39,9 +39,7 @@ const useCurrentPath = () => {
   return route?.path
 }
 
-function useQuery() {
+export function useQuery() {
   const location = useLocation();
   return useMemo(() => new URLSearchParams(location.search), [location]);
 }
-
-export { useCurrentPath, useQuery, routes }

@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import { useCocktailData } from "src/lib/CocktailUtil";
 import CocktailImage from "src/components/CocktailImage";
 import { useMountEffect } from "src/lib/Misc";
-import { BootstrapCard } from "src/lib/Bootstrap";
+import BootstrapCard from "src/lib/Bootstrap/Card";
 
 const searchCategories = [
     {
@@ -63,7 +63,7 @@ const searchCategories = [
     }
 ];
 
-function QueryWrapper() {
+export default function QueryWrapper() {
     const queryParams = useQuery();
     const query = queryParams.get("query");
     const category = queryParams.get("category");
@@ -92,7 +92,7 @@ function QueryWrapper() {
     );
 }
 
-function RecipeGalleryPage(props) {
+export function RecipeGalleryPage(props) {
     if (props.query && props.category) {
         document.title = `Recipe search results for "${props.query}" | Cocktail Bar`;
     } else {
@@ -185,7 +185,7 @@ function RecipeGalleryPage(props) {
     }
 }
 
-function CocktailCard(props) {
+export function CocktailCard(props) {
     const data = useCocktailData(props.name);
 
     function refresh() {
@@ -261,5 +261,3 @@ function CocktailCard(props) {
         );
     }
 }
-
-export default QueryWrapper;

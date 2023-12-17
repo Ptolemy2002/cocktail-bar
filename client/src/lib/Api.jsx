@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function useApi(path, sort=false, sortFunc=null) {
+export function useApi(path, sort=false, sortFunc=null) {
     const [data, setData] = useState(null);
     const [completed, setCompleted] = useState(false);
     const [failed, setFailed] = useState(false);
@@ -102,5 +102,3 @@ function useApi(path, sort=false, sortFunc=null) {
 
     return [data, {completed, failed, error}, sendRequest];
 }
-
-export {useApi};

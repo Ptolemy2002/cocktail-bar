@@ -1,6 +1,6 @@
 import React from "react";
 
-function NotFoundPage() {
+export default function NotFoundPage() {
     document.title = "404 Page Not Found | Cocktail Bar";
     
     return (
@@ -9,5 +9,3 @@ function NotFoundPage() {
         </div>
     );
 }
-
-export default NotFoundPage;

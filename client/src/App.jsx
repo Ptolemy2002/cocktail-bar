@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import { useCurrentPath, routes } from 'src/lib/Browser';
 import NotFoundPage from 'src/pages/NotFoundPage';
 
-function App() {
+export default function App() {
     const routeElements = routes.map((route) => {
         return (
             <Route key={route.path} path={route.path} element={route.element} />
@@ -88,5 +88,3 @@ function Footer() {
         </footer>
     );
 }
-
-export default App;

@@ -1,7 +1,7 @@
 import React from "react";
 import { combineClassNames } from "src/lib/Misc";
 
-function BootstrapCard(props) {
+export default function BootstrapCard(props) {
     const newProps = {
         ...props,
         className: combineClassNames(props.className, "card")
@@ -14,7 +14,7 @@ function BootstrapCard(props) {
     );
 }
 
-function BootstrapCardBody(props) {
+export function BootstrapCardBody(props) {
     const newProps = {
         ...props,
         className: combineClassNames(props.className, "card-body")
@@ -27,13 +27,14 @@ function BootstrapCardBody(props) {
     );
 }
 
-function BootstrapCardTitle(props) {
+export function BootstrapCardTitle(props) {
     const newProps = {
         ...props,
-        className: combineClassNames(props.className, "card-title"),
-        // hLevel is a prop that will be handled by us, not passed to the <h> tag
-        hLevel: undefined
+        className: combineClassNames(props.className, "card-title")
     };
+
+    // Delete props will be handled by us, not passed to the <img> tag
+    delete newProps.hLevel;
 
     // For some reason, eslint doesn't recognize that hTag is used in the return statement
     const hTag = `h${props.hLevel || 5}`; //eslint-disable-line no-unused-vars
@@ -44,13 +45,14 @@ function BootstrapCardTitle(props) {
     );
 }
 
-function BootstapCardSubtitle(props) {
+export function BootstapCardSubtitle(props) {
     const newProps = {
         ...props,
         className: combineClassNames(props.className, "card-subtitle"),
-        // hLevel is a prop that will be handled by us, not passed to the <h> tag
-        hLevel: undefined
     };
+
+    // Delete props will be handled by us, not passed to the <img> tag
+    delete newProps.hLevel;
 
     // For some reason, eslint doesn't recognize that hTag is used in the return statement
     const hTag = `h${props.hLevel || 6}`; //eslint-disable-line no-unused-vars
@@ -61,7 +63,7 @@ function BootstapCardSubtitle(props) {
     );
 }
 
-function BootstrapCardText(props) {
+export function BootstrapCardText(props) {
     const newProps = {
         ...props,
         className: combineClassNames(props.className, "card-text")
@@ -74,13 +76,14 @@ function BootstrapCardText(props) {
     );
 }
 
-function BootstrapCardImage(props) {
+export function BootstrapCardImage(props) {
     const newProps = {
         ...props,
         className: combineClassNames(props.className, "card-img-" + props.position),
-        // position is a prop that will be handled by us, not passed to the <img> tag
-        position: undefined
     };
+
+    // Delete props will be handled by us, not passed to the <img> tag
+    delete newProps.position;
 
     // alt text will likely be provided in the props, so I'm dismissing the eslint warning
     return (
@@ -94,5 +97,3 @@ BootstrapCard.Title = BootstrapCardTitle;
 BootstrapCard.Subtitle = BootstapCardSubtitle;
 BootstrapCard.Text = BootstrapCardText;
 BootstrapCard.Image = BootstrapCardImage;
-
-export { BootstrapCard };

@@ -1,6 +1,6 @@
 import React from "react";
 
-function HomePage() {
+export default function HomePage() {
     document.title = "Home | Cocktail Bar";
     
     return (
@@ -12,5 +12,3 @@ function HomePage() {
         </div>
     );
 }
-
-export default HomePage;

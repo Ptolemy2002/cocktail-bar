@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-function EditField(props) {
+export function EditField(props) {
     const [value, _setValue] = useState(props.value);
     const [prevValue, setPrevValue] = useState(value);
     const [custom, _setCustom] = useState(props.custom);
@@ -115,5 +115,3 @@ function EditField(props) {
         }
     }
 }
-
-export { EditField };
