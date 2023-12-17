@@ -34,4 +34,8 @@ function useMountEffect(callback) {
     useEffect(callback, []); // eslint-disable-line react-hooks/exhaustive-deps
 }
 
-export { listInPlainEnglish, useMountEffect };
+function combineClassNames(...classNames) {
+    return classNames.filter(c => c).join(' ');
+}
+
+export { listInPlainEnglish, useMountEffect, combineClassNames };

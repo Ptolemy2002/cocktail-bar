@@ -6,6 +6,7 @@ import { useApi } from "src/lib/Api";
 import { escapeRegex, transformRegex } from "src/lib/Regex";
 import { Link } from "react-router-dom";
 import { listInPlainEnglish, useMountEffect } from "src/lib/Misc";
+import { BootstrapCard } from "src/lib/Bootstrap";
 
 function QueryWrapper() {
     const queryParams = useQuery();
@@ -138,14 +139,14 @@ function IngredientCard(props) {
     }
 
     return (
-        <div className="card">
-            <div className="card-body">
-                <h5 className="card-title">{props.name}</h5>
+        <BootstrapCard>
+            <BootstrapCard.Body>
+                <BootstrapCard.Title hLevel={5}>{props.name}</BootstrapCard.Title>
 
-                <p className="card-text">
+                <BootstrapCard.Text>
                     <b>Used in: </b>
                     {ingredientNamesText}
-                </p>
+                </BootstrapCard.Text>
 
                 <Link
                     key="view-recipes"
@@ -162,8 +163,8 @@ function IngredientCard(props) {
                 <button className="btn btn-outline-secondary" onClick={refresh}>
                     Refresh
                 </button>   
-            </div>
-        </div>
+            </BootstrapCard.Body>
+        </BootstrapCard>
     );
 }
 

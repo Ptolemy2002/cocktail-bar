@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { useCocktailData } from "src/lib/CocktailUtil";
 import CocktailImage from "src/components/CocktailImage";
 import { useMountEffect } from "src/lib/Misc";
+import { BootstrapCard } from "src/lib/Bootstrap";
 
 const searchCategories = [
     {
@@ -194,48 +195,48 @@ function CocktailCard(props) {
     // If lastRequest is null, the pull has not been started yet, but will be soon
     if (data.pullInProgress() || data.lastRequest === null) {
         return (
-            <div className="card">
-                <div className="card-body">
-                    <h5 className="card-title">{props.name}</h5>
-                    <p className="card-text">
+            <BootstrapCard>
+                <BootstrapCard.Body>
+                    <BootstrapCard.Title hLevel={5}>{props.name}</BootstrapCard.Title>
+                    <BootstrapCard.Text>
                         Retrieving recipe...
-                    </p>
-                </div>
-            </div>
+                    </BootstrapCard.Text>
+                </BootstrapCard.Body>
+            </BootstrapCard>
         );
     } else if (data.pullFailed()) {
         return (
-            <div className="card">
-                <div className="card-body">
-                    <h5 className="card-title">{props.name}</h5>
-                    <p className="card-text">
+            <BootstrapCard>
+                <BootstrapCard.Body>
+                    <BootstrapCard.Title hLevel={5}>{props.name}</BootstrapCard.Title>
+                    <BootstrapCard.Text>
                         <span className="text-danger">Failed to retrieve recipe. Error details logged to console.</span>
-                    </p>
+                    </BootstrapCard.Text>
                     <button
                         className="btn btn-outline-secondary"
                         onClick={refresh}
                     >
                         Refresh
                     </button>
-                </div>
-            </div>
+                </BootstrapCard.Body>
+            </BootstrapCard>
         );
     } else {
         const altText = data.isPlaceholderImage() ? "Placeholder image" : `Image of a "${data.name}" cocktail`;
 
         return (
-            <div className="card">
-                <CocktailImage className="card-img-top" src={data.image} alt={altText} />
+            <BootstrapCard>
+                <CocktailImage isCardImage={true} position="top" src={data.image} alt={altText} />
 
-                <div className="card-body">
-                    <h5 className="card-title">{data.name}</h5>
-                    <h6 className="card-subtitle mb-2 text-muted">{data.category}</h6>
+                <BootstrapCard.Body>
+                    <BootstrapCard.Title hLevel={5}>{data.name}</BootstrapCard.Title>
+                    <BootstrapCard.Subtitle className="mb-2 text-muted">{data.category}</BootstrapCard.Subtitle>
 
-                    <p className="card-text">
+                    <BootstrapCard.Text>
                         <b>Glass:</b> {data.glass} <br />
                         <b>Garnish:</b> {data.garnish} <br />
                         <b>Ingredient Count:</b> {data.ingredients.length}
-                    </p>
+                    </BootstrapCard.Text>
 
                     <Link
                         key="view-recipe"
@@ -255,8 +256,8 @@ function CocktailCard(props) {
                     >
                         Refresh
                     </button>
-                </div>
-            </div>
+                </BootstrapCard.Body>
+            </BootstrapCard>
         );
     }
 }

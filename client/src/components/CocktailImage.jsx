@@ -1,9 +1,9 @@
 import React from "react";
 import { useMountEffect } from "src/lib/Misc";
+import { BootstrapCard } from "src/lib/Bootstrap";
 
 function CocktailImage(props) {
     const [imgPath, _setImgPath] = React.useState("");
-    const [altText, setAltText] = React.useState(props.alt);
 
     function setImgPath(path) {
         if (path) {
@@ -18,9 +18,25 @@ function CocktailImage(props) {
         setImgPath(props.src);
     });
 
-    return (
-        <img src={imgPath} alt={altText} className={props.className} />
-    );
+    const newProps = {
+        ...props,
+        // src is a prop that will be handled by us, not passed to the <img> tag
+        src: undefined,
+        // isCardImage is a prop that will be handled by us, not passed to the <img> tag
+        isCardImage: undefined
+    };
+
+    if (props.isCardImage) {
+        // alt text will likely be provided in the props, so I'm dismissing the eslint warning
+        return (
+            <BootstrapCard.Image {...newProps} src={imgPath} /> // eslint-disable-line jsx-a11y/alt-text
+        );
+    } else {
+        // alt text will likely be provided in the props, so I'm dismissing the eslint warning
+        return (
+            <img {...newProps} src={imgPath} /> // eslint-disable-line jsx-a11y/alt-text
+        );
+    }
 }
 
 export default CocktailImage;
