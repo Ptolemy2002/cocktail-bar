@@ -8,6 +8,7 @@ import { useCocktailData } from "src/lib/CocktailUtil";
 import CocktailImage from "src/components/CocktailImage";
 import { useMountEffect } from "src/lib/Misc";
 import BootstrapCard from "src/lib/Bootstrap/Card";
+import BootstrapAlert from "src/lib/Bootstrap/Alert";
 
 const searchCategories = [
     {
@@ -145,7 +146,10 @@ export function RecipeGalleryPage(props) {
                 {searchBarElement}
                 <Spacer />
 
-                <p className="text-danger">Failed to retrieve cocktails. Error details logged to console.</p>
+                <BootstrapAlert type="danger" allowDismiss={false}>
+                    <BootstrapAlert.Heading>Error</BootstrapAlert.Heading>
+                    Failed to retrieve cocktails. Error details logged to console.
+                </BootstrapAlert>
             </div>
         );
     } else {

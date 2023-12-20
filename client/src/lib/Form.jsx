@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import BootstrapAlert from "./Bootstrap/Alert";
 
 export function EditField(props) {
     const [value, _setValue] = useState(props.value);
@@ -98,7 +99,10 @@ export function EditField(props) {
             );
         } else if (props.listStatus.failed) {
             return (
-                <p className="text-danger">{props.failedMessage}</p>
+                <BootstrapAlert type="danger" allowDismiss={false}>
+                    <BootstrapAlert.Heading>Error</BootstrapAlert.Heading>
+                    <p>{props.failedMessage}</p>
+                </BootstrapAlert>
             );
         } else {
             const choices = props.list.map((item, i) => {

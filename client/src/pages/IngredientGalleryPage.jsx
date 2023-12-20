@@ -7,6 +7,7 @@ import { escapeRegex, transformRegex } from "src/lib/Regex";
 import { Link } from "react-router-dom";
 import { listInPlainEnglish, useMountEffect } from "src/lib/Misc";
 import BootstrapCard from "src/lib/Bootstrap/Card";
+import BootstrapAlert from "src/lib/Bootstrap/Alert";
 
 export default function QueryWrapper() {
     const queryParams = useQuery();
@@ -64,7 +65,10 @@ export function IngredientGalleryPage(props) {
                 {searchBarElement}
                 <Spacer />
 
-                <p className="text-danger">Failed to retrieve ingredients. Error details logged to console.</p>
+                <BootstrapAlert type="danger" allowDismiss={false}>
+                    <BootstrapAlert.Heading>Error</BootstrapAlert.Heading>
+                    <p>Failed to retrieve ingredients. Error details logged to console.</p>
+                </BootstrapAlert>
             </div>
         );
     } else {

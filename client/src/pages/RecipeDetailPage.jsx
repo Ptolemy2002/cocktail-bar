@@ -7,6 +7,7 @@ import { nanoid } from "nanoid";
 import CocktailImage from "src/components/CocktailImage";
 import { useMountEffect } from "src/lib/Misc";
 import { EditField } from "src/lib/Form";
+import BootstrapAlert from "src/lib/Bootstrap/Alert";
 
 export default function QueryWrapper() {
     const { name } = useParams();
@@ -44,7 +45,10 @@ export function RecipeDetailPage(props) {
         return (
             <div className="RecipeDetailPage container">
                 <h1>{props.name}</h1>
-                <p className="text-danger">Failed to retrieve cocktail data. Error details logged to console.</p>
+                <BootstrapAlert type="danger" allowDismiss={false}>
+                    <BootstrapAlert.Heading>Failed to Retrieve Cocktail Data</BootstrapAlert.Heading>
+                    Error details logged to console.
+                </BootstrapAlert>
             </div>
         );
     } else {
@@ -52,39 +56,63 @@ export function RecipeDetailPage(props) {
 
         if (cocktailData.pushInProgress()) {
             requestInfoElement = (
-                <p className="text-info">Updating cocktail data... Other operations will be unavailable until this operation completes.</p>
+                <BootstrapAlert type="info" allowDismiss={true}>
+                    <BootstrapAlert.Heading>Updating Cocktail Data</BootstrapAlert.Heading>
+                    Other operations will be unavailable until this operation completes.
+                </BootstrapAlert>
             );
         } else if (cocktailData.pushFailed()) {
             requestInfoElement = (
-                <p className="text-danger">Failed to update cocktail data. Error details logged to console.</p>
+                <BootstrapAlert type="danger" allowDismiss={false}>
+                    <BootstrapAlert.Heading>Failed to Update Cocktail Data</BootstrapAlert.Heading>
+                    Error details logged to console.
+                </BootstrapAlert>
             );
         } else if (cocktailData.pushSuccessful()) {
             requestInfoElement = (
-                <p className="text-success">Successfully updated cocktail data.</p>
+                <BootstrapAlert type="success" allowDismiss={true}>
+                    <BootstrapAlert.Heading>Successfully Updated Cocktail Data</BootstrapAlert.Heading>
+                </BootstrapAlert>
             );
         } else if (cocktailData.deleteInProgress()) {
             requestInfoElement = (
-                <p className="text-info">Deleting cocktail... Other operations will be unavailable until this operation completes.</p>
+                <BootstrapAlert type="info" allowDismiss={true}>
+                    <BootstrapAlert.Heading>Deleting Cocktail</BootstrapAlert.Heading>
+                    Other operations will be unavailable until this operation completes.
+                </BootstrapAlert>
             );
         } else if (cocktailData.deleteFailed()) {
             requestInfoElement = (
-                <p className="text-danger">Failed to delete cocktail. Error details logged to console.</p>
+                <BootstrapAlert type="danger" allowDismiss={false}>
+                    <BootstrapAlert.Heading>Failed to Delete Cocktail</BootstrapAlert.Heading>
+                    Error details logged to console.
+                </BootstrapAlert>
             );
         } else if (cocktailData.deleteSuccessful()) {
             requestInfoElement = (
-                <p className="text-success">Successfully deleted cocktail.</p>
+                <BootstrapAlert type="success" allowDismiss={true}>
+                    <BootstrapAlert.Heading>Successfully Deleted Cocktail</BootstrapAlert.Heading>
+                </BootstrapAlert>
             );
         } else if (cocktailData.duplicateInProgress()) {
             requestInfoElement = (
-                <p className="text-info">Duplicating cocktail... Other operations will be unavailable until this operation completes.</p>
+                <BootstrapAlert type="info" allowDismiss={true}>
+                    <BootstrapAlert.Heading>Duplicating Cocktail</BootstrapAlert.Heading>
+                    Other operations will be unavailable until this operation completes.
+                </BootstrapAlert>
             );
         } else if (cocktailData.duplicateFailed()) {
             requestInfoElement = (
-                <p className="text-danger">Failed to duplicate cocktail. Error details logged to console.</p>
+                <BootstrapAlert type="danger" allowDismiss={false}>
+                    <BootstrapAlert.Heading>Failed to Duplicate Cocktail</BootstrapAlert.Heading>
+                    Error details logged to console.
+                </BootstrapAlert>
             );
         } else if (cocktailData.duplicateSuccessful()) {
             requestInfoElement = (
-                <p className="text-success">Successfully duplicated cocktail.</p>
+                <BootstrapAlert type="success" allowDismiss={true}>
+                    <BootstrapAlert.Heading>Successfully Duplicated Cocktail</BootstrapAlert.Heading>
+                </BootstrapAlert>
             );
         }
 
@@ -113,10 +141,11 @@ export function RecipeDetailPage(props) {
                         <h1>{cocktailData.name}</h1>
                         {
                             (cocktailData.isDirty(["push", "pull"]) && !cocktailData.pushFailed()) ? (
-                                <p className="text-warning">
+                                <BootstrapAlert type="warning" allowDismiss={true}>
+                                    <BootstrapAlert.Heading>Unpublished Changes</BootstrapAlert.Heading>
                                     This cocktail has unpublished changes that will be lost if you refresh the page or click the refresh button.
                                     Click the "Publish" button to publish them.
-                                </p>
+                                </BootstrapAlert>
                             ) : null
                         }
                         {requestInfoElement}
