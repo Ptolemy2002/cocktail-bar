@@ -1,23 +1,48 @@
-import React from "react";
-import { combineClassNames } from "src/lib/Misc";
+import React, { useRef, useState } from "react";
+import { combineClassNames, useMountEffect } from "src/lib/Misc";
 import { Link } from "react-router-dom";
 
 export default function BootstrapAlert(props) {
+    const alert = useRef(null);
+    const transitionDuration = props.transitionDuration || 500;
+    const [shown, setShown] = useState(true);
+
+    useMountEffect(() => {
+        alert.current.style.transition = `visibility 0s linear ${transitionDuration}ms, opacity ${transitionDuration}ms linear`;
+        alert.current.style.opacity = "1";
+        alert.current.style.visibility = "visible";
+    });
+
+    function hide() {
+        alert.current.style.opacity = "0";
+        alert.current.style.visibility = "hidden";
+
+        setTimeout(() => {
+            setShown(false);
+        }, transitionDuration);
+    }
+
     const newProps = {
         ...props,
-        className: combineClassNames(props.className, "alert", `alert-${props.type}`, props.allowDismiss ? "alert-dismissible fade show" : null),
+        className: combineClassNames(
+            props.className,
+            "alert", `alert-${props.type}`,
+            props.allowDismiss ? "alert-dismissible fade show" : null,
+            shown ? null : "d-none"
+        ),
         role: "alert"
     };
-    // Delete props will be handled by us, not passed to the <img> tag
+    // Delete props will be handled by us, not passed to the <div> tag
     delete newProps.type;
     delete newProps.allowDismiss;
-    
+    delete newProps.transitionDuration;
+
     return (
-        <div {...newProps}>
+        <div {...newProps} ref={alert}>
             {props.children}
             {
                 props.allowDismiss ? (
-                    <button className="btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <button className="btn-close" type="button" aria-label="Close" onClick={hide}></button>
                 ) : null
             }
         </div>
@@ -30,7 +55,7 @@ export function BootstrapAlertHeading(props) {
         className: combineClassNames(props.className, "alert-heading")
     };
 
-    // Delete props will be handled by us, not passed to the <img> tag
+    // Delete props will be handled by us, not passed to the <h> tag
     delete newProps.hLevel;
 
     // For some reason, eslint doesn't recognize that hTag is used in the return statement. Also, the first letter has to be capitalized for react to recognize it as a component

@@ -33,7 +33,7 @@ export function BootstrapCardTitle(props) {
         className: combineClassNames(props.className, "card-title")
     };
 
-    // Delete props will be handled by us, not passed to the <img> tag
+    // Delete props will be handled by us, not passed to the <h> tag
     delete newProps.hLevel;
 
     // For some reason, eslint doesn't recognize that hTag is used in the return statement. Also, the first letter has to be capitalized for react to recognize it as a component
@@ -51,7 +51,7 @@ export function BootstapCardSubtitle(props) {
         className: combineClassNames(props.className, "card-subtitle"),
     };
 
-    // Delete props will be handled by us, not passed to the <img> tag
+    // Delete props will be handled by us, not passed to the <h> tag
     delete newProps.hLevel;
 
     // For some reason, eslint doesn't recognize that HTag is used in the return statement. Also, the first letter has to be capitalized for react to recognize it as a component
