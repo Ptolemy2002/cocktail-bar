@@ -36,12 +36,12 @@ export function BootstrapCardTitle(props) {
     // Delete props will be handled by us, not passed to the <img> tag
     delete newProps.hLevel;
 
-    // For some reason, eslint doesn't recognize that hTag is used in the return statement
-    const hTag = `h${props.hLevel || 5}`; //eslint-disable-line no-unused-vars
+    // For some reason, eslint doesn't recognize that hTag is used in the return statement. Also, the first letter has to be capitalized for react to recognize it as a component
+    const HTag = `h${props.hLevel || 5}`; //eslint-disable-line no-unused-vars
     return (
-        <hTag {...newProps}>
+        <HTag {...newProps}>
             {props.children}
-        </hTag>
+        </HTag>
     );
 }
 
@@ -54,12 +54,12 @@ export function BootstapCardSubtitle(props) {
     // Delete props will be handled by us, not passed to the <img> tag
     delete newProps.hLevel;
 
-    // For some reason, eslint doesn't recognize that hTag is used in the return statement
-    const hTag = `h${props.hLevel || 6}`; //eslint-disable-line no-unused-vars
+    // For some reason, eslint doesn't recognize that HTag is used in the return statement. Also, the first letter has to be capitalized for react to recognize it as a component
+    const HTag = `h${props.hLevel || 6}`; //eslint-disable-line no-unused-vars
     return (
-        <hTag {...newProps}>
+        <HTag {...newProps}>
             {props.children}
-        </hTag>
+        </HTag>
     );
 }
 

@@ -1,7 +1,7 @@
 import React, {useState, useRef} from "react";
 import { useApi } from "src/lib/Api";
 import { useParams } from "react-router-dom";
-import { useCocktailData, IngredientData, SpecialIngredientData } from "src/lib/CocktailUtil";
+import { useCocktailData, IngredientData, SpecialIngredientData, CocktailDataProvider, useCocktailDataContext } from "src/lib/CocktailUtil";
 import NotFoundPage from "src/pages/NotFoundPage";
 import { nanoid } from "nanoid";
 import CocktailImage from "src/components/CocktailImage";
@@ -90,128 +90,131 @@ export function RecipeDetailPage(props) {
 
         if (editMode) {
             return (
-                <div className="RecipeDetailPage container">
-                    <h1>{cocktailData.name}</h1>
-                    {requestInfoElement}
-                    <RecipeDetailEdit
-                        cocktailData={cocktailData}
-                        exit={() => {
-                            setEditMode(false);
-                        }}
-                        exitWithoutSaving={() => {
-                            cocktailData.revert();
-                            setEditMode(false);
-                        }}
-                    />
-                </div>
+                <CocktailDataProvider data={cocktailData}>
+                    <div className="RecipeDetailPage container">
+                        <h1>{cocktailData.name}</h1>
+                        {requestInfoElement}
+                        <RecipeDetailEdit
+                            exit={() => {
+                                setEditMode(false);
+                            }}
+                            exitWithoutSaving={() => {
+                                cocktailData.revert();
+                                setEditMode(false);
+                            }}
+                        />
+                    </div>
+                </CocktailDataProvider>
             );
         } else {
             return (
-                <div className="RecipeDetailPage container">
-                    <h1>{cocktailData.name}</h1>
-                    {
-                        (cocktailData.isDirty("pull") && !cocktailData.pushFailed()) ? (
-                            <p className="text-warning">
-                                This cocktail has unpublished changes that will be lost if you refresh the page or click the refresh button.
-                                Click the "Publish" button to publish them.
-                            </p>
-                        ) : null
-                    }
-                    {requestInfoElement}
+                <CocktailDataProvider data={cocktailData}>
+                    <div className="RecipeDetailPage container">
+                        <h1>{cocktailData.name}</h1>
+                        {
+                            (cocktailData.isDirty(["push", "pull"]) && !cocktailData.pushFailed()) ? (
+                                <p className="text-warning">
+                                    This cocktail has unpublished changes that will be lost if you refresh the page or click the refresh button.
+                                    Click the "Publish" button to publish them.
+                                </p>
+                            ) : null
+                        }
+                        {requestInfoElement}
 
-                    <div className="btns-hor mb-3">
-                        <button
-                            className="btn btn-outline-secondary"
-                            onClick={() => cocktailData.pull()}
-                            disabled={cocktailData.requestInProgress}
-                        >
-                            {
-                                cocktailData.pullInProgress() ?
-                                    "Refreshing...":
-                                cocktailData.requestInProgress ?
-                                    "Unavailable":
-                                // Else
-                                "Refresh"
-                            }
-                        </button>
+                        <div className="btns-hor mb-3">
+                            <button
+                                className="btn btn-outline-secondary"
+                                onClick={() => cocktailData.pull()}
+                                disabled={cocktailData.requestInProgress}
+                            >
+                                {
+                                    cocktailData.pullInProgress() ?
+                                        "Refreshing...":
+                                    cocktailData.requestInProgress ?
+                                        "Unavailable":
+                                    // Else
+                                    "Refresh"
+                                }
+                            </button>
 
-                        <button
-                            className="btn btn-outline-secondary"
-                            onClick={() => setEditMode(true)}
-                        >
-                            Edit
-                        </button>
+                            <button
+                                className="btn btn-outline-secondary"
+                                onClick={() => setEditMode(true)}
+                            >
+                                Edit
+                            </button>
 
-                        <button
-                            className="btn btn-outline-secondary"
-                            onClick={() => {
-                                cocktailData.push(() => {
-                                    // If the name changed, this redirect will be necessary to avoid a 404
-                                    window.location.href = `/recipe/${encodeURIComponent(cocktailData.name)}`;
-                                });
-                            }}
-                            disabled={cocktailData.requestInProgress || !cocktailData.isDirty("pull")}
-                        >
-                            {
-                                cocktailData.pushInProgress() ?
-                                    "Publishing...":
-                                cocktailData.requestInProgress ?
-                                    "Unavailable":
-                                !cocktailData.isDirty("pull") ?
-                                    "No Changes":
-                                // Else
-                                "Publish"
-                            }
-                        </button>
+                            <button
+                                className="btn btn-outline-secondary"
+                                onClick={() => {
+                                    cocktailData.push(() => {
+                                        // If the name changed, this redirect will be necessary to avoid a 404
+                                        window.location.href = `/recipe/${encodeURIComponent(cocktailData.name)}`;
+                                    });
+                                }}
+                                disabled={cocktailData.requestInProgress || !cocktailData.isDirty(["push", "pull"])}
+                            >
+                                {
+                                    cocktailData.pushInProgress() ?
+                                        "Publishing...":
+                                    cocktailData.requestInProgress ?
+                                        "Unavailable":
+                                    !cocktailData.isDirty(["push", "pull"]) ?
+                                        "No Changes":
+                                    // Else
+                                    "Publish"
+                                }
+                            </button>
 
-                        <button
-                            className="btn btn-outline-secondary"
-                            onClick={() => {
-                                cocktailData.duplicate((data) => {
-                                    window.location.href = `/recipe/${encodeURIComponent(data.name)}`;
-                                });
-                            }}
-                            disabled={cocktailData.requestInProgress}
-                        >
-                            {
-                                cocktailData.duplicateInProgress() ?
-                                    "Duplicating...":
-                                cocktailData.requestInProgress ?
-                                    "Unavailable":
-                                // Else
-                                "Publish as Duplicate"
-                            }
-                        </button>
+                            <button
+                                className="btn btn-outline-secondary"
+                                onClick={() => {
+                                    cocktailData.duplicate((data) => {
+                                        window.location.href = `/recipe/${encodeURIComponent(data.name)}`;
+                                    });
+                                }}
+                                disabled={cocktailData.requestInProgress}
+                            >
+                                {
+                                    cocktailData.duplicateInProgress() ?
+                                        "Duplicating...":
+                                    cocktailData.requestInProgress ?
+                                        "Unavailable":
+                                    // Else
+                                    "Publish as Duplicate"
+                                }
+                            </button>
 
-                        <button
-                            className="btn btn-outline-secondary"
-                            onClick={() => {
-                                cocktailData.delete(() => {
-                                    window.location.href = "/";
-                                });
-                            }}
-                            disabled={cocktailData.requestInProgress}
-                        >
-                            {
-                                cocktailData.deleteInProgress() ?
-                                    "Deleting...":
-                                cocktailData.requestInProgress ?
-                                    "Unavailable":
-                                // Else
-                                "Delete"
-                            }
-                        </button>
+                            <button
+                                className="btn btn-outline-secondary"
+                                onClick={() => {
+                                    cocktailData.delete(() => {
+                                        window.location.href = "/";
+                                    });
+                                }}
+                                disabled={cocktailData.requestInProgress}
+                            >
+                                {
+                                    cocktailData.deleteInProgress() ?
+                                        "Deleting...":
+                                    cocktailData.requestInProgress ?
+                                        "Unavailable":
+                                    // Else
+                                    "Delete"
+                                }
+                            </button>
+                        </div>
+        
+                        <RecipeDetailDisplay />
                     </div>
-    
-                    <RecipeDetailDisplay cocktailData={cocktailData} />
-                </div>
+                </CocktailDataProvider>
             );
         }
     }
 }
 
-export function RecipeDetailDisplay(props) {
-    const data = props.cocktailData;
+export function RecipeDetailDisplay() {
+    const data = useCocktailDataContext();
     const altText = data.isPlaceholderImage() ? "Placeholder image" : `Image of a "${data.name}" cocktail`;
 
     const ingredientElements = data.ingredients.map((ingredient, i) => {
@@ -285,7 +288,7 @@ export function RecipeEditField(props) {
 }
 
 export function RecipeDetailEdit(props) {
-    const data = props.cocktailData;
+    const data = useCocktailDataContext();
 
     const [name, setName] = useState(data.name);
     const [image, setImage] = useState(data.image);

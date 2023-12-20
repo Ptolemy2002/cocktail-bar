@@ -126,12 +126,18 @@ export class CocktailData {
         return this.previousStates[this.stateIndex] || null;
     }
 
+    checkpointTypeMatches(checkpoint, type) {
+        if (type === null) return true;
+        if (Array.isArray(type)) return type.includes(checkpoint.type);
+        return checkpoint.type === type;
+    }
+
     lastCheckpointIndex(type=null, start) {
         if (type === null) return this.previousStates.length - 2;
 
         start = start || this.stateIndex;
         for (let i = start; i >= 0; i--) {
-            if (this.previousStates[i].type === type) return i;
+            if (this.checkpointTypeMatches(this.previousStates[i], type)) return i;
         }
 
         return -1;
@@ -148,7 +154,7 @@ export class CocktailData {
 
         let count = 0;
         for (let i = 0; i < Math.min(this.previousStates.length, max); i++) {
-            if (this.previousStates[i].type === type) count++;
+            if (this.checkpointTypeMatches(this.previousStates[i], type)) count++;
         }
 
         return count;
@@ -610,4 +616,27 @@ export function useCocktailDataContext() {
         throw new Error("No CocktailDataContext provider found.");
     }
     return context;
+}
+
+// These two functions are just utility, so they shouldn't be exported. Use CocktailDataProvider instead.
+function CocktailDataProviderData(props) {
+    return (
+        <CocktailDataContext.Provider value={props.value}>
+            {props.children}
+        </CocktailDataContext.Provider>
+    );
+}
+
+function CocktailDataProviderUse(props) {
+    const cocktailData = useCocktailData(props.value, props.primaryKey || "name");
+    return <CocktailDataProviderData value={cocktailData}>{props.children}</CocktailDataProviderData>;
+}
+
+
+export function CocktailDataProvider(props) {
+    if (props.data) {
+        return <CocktailDataProviderData value={props.data}>{props.children}</CocktailDataProviderData>;
+    } else {
+        return <CocktailDataProviderUse {...props} />;
+    }
 }
