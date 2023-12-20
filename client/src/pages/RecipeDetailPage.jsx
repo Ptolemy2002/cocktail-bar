@@ -110,7 +110,7 @@ export function RecipeDetailPage(props) {
                 <div className="RecipeDetailPage container">
                     <h1>{cocktailData.name}</h1>
                     {
-                        (cocktailData.isDirty() && !cocktailData.pushFailed()) ? (
+                        (cocktailData.isDirty("pull") && !cocktailData.pushFailed()) ? (
                             <p className="text-warning">
                                 This cocktail has unpublished changes that will be lost if you refresh the page or click the refresh button.
                                 Click the "Publish" button to publish them.
@@ -150,14 +150,14 @@ export function RecipeDetailPage(props) {
                                     window.location.href = `/recipe/${encodeURIComponent(cocktailData.name)}`;
                                 });
                             }}
-                            disabled={cocktailData.requestInProgress || !cocktailData.isDirty()}
+                            disabled={cocktailData.requestInProgress || !cocktailData.isDirty("pull")}
                         >
                             {
                                 cocktailData.pushInProgress() ?
                                     "Publishing...":
                                 cocktailData.requestInProgress ?
                                     "Unavailable":
-                                !cocktailData.isDirty() ?
+                                !cocktailData.isDirty("pull") ?
                                     "No Changes":
                                 // Else
                                 "Publish"
@@ -274,8 +274,8 @@ export function RecipeEditField(props) {
         staticCustom: props.staticCustom || false,
         number: props.number || false,
         integer: props.integer || false,
-        min: props.min || null,
-        max: props.max || null,
+        min: props.min || undefined,
+        max: props.max || undefined,
         manualSave: props.manualSave || false
     };
 

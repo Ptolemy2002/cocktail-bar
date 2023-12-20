@@ -20,15 +20,19 @@ export function EditField(props) {
         }
     }
 
+    function isNullOrUndefined(v) {
+        return v === null || v === undefined;
+    }
+
     function validate(v) {
         if (props.number || props.integer) {
             if (v === "") return true;
-            if (v === "-" && (props.min === undefined || props.min < 0)) return true;
-            if (v === "+" && (props.max === undefined || props.max >= 0)) return true;
+            if (v === "-" && (isNullOrUndefined(props.min) || props.min < 0)) return true;
+            if (v === "+" && (isNullOrUndefined(props.max) || props.max >= 0)) return true;
             if (isNaN(v) || isNaN(parseFloat(v))) return false;
             if (props.integer && !Number.isInteger(v)) return false;
-            if (props.min !== undefined && v < props.min) return false;
-            if (props.max !== undefined && v > props.max) return false;
+            if (!isNullOrUndefined(props.min) && v < props.min) return false;
+            if (!isNullOrUndefined(props.max) && v > props.max) return false;
         }
 
         return true;

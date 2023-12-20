@@ -1,5 +1,5 @@
 import { useMountEffect } from "src/lib/Misc";
-import { useState } from "react";
+import { useState, useContext, createContext } from "react";
 import { useApi } from "src/lib/Api";
 
 export class CocktailData {
@@ -36,8 +36,8 @@ export class CocktailData {
         }
     }
 
-    isDirty() {
-        return !this.jsonEquals(this.currentCheckpoint());
+    isDirty(type=null) {
+        return !this.jsonEquals(this.lastCheckpoint(type, this.stateIndex));
     }
 
     static createFromID(id, _push, _pull, _duplicate, _delete) {
@@ -123,14 +123,46 @@ export class CocktailData {
     }
 
     currentCheckpoint() {
-        return this.previousStates[this.stateIndex] || {};
+        return this.previousStates[this.stateIndex] || null;
     }
 
-    undo(steps = 1) {
-        if (this.stateIndex >= steps) {
-            this.stateIndex -= steps;
-        } else {
-            this.stateIndex = 0;
+    lastCheckpointIndex(type=null, start) {
+        if (type === null) return this.previousStates.length - 2;
+
+        start = start || this.stateIndex;
+        for (let i = start; i >= 0; i--) {
+            if (this.previousStates[i].type === type) return i;
+        }
+
+        return -1;
+    }
+
+    lastCheckpoint(type=null, start) {
+        const index = this.lastCheckpointIndex(type, start);
+        if (index === -1) return null;
+        return this.previousStates[index];
+    }
+
+    countCheckpoints(type=null, max=Infinity) {
+        if (type === null) return this.previousStates.length;
+
+        let count = 0;
+        for (let i = 0; i < Math.min(this.previousStates.length, max); i++) {
+            if (this.previousStates[i].type === type) count++;
+        }
+
+        return count;
+    }
+
+    undo(steps = 1, type=null) {
+        if (this.countCheckpoints(type) === 0) return this;
+
+        let index = this.stateIndex;
+        for (let i = 0; i < steps; i++) {
+            index = this.lastCheckpointIndex(type, index - 1);
+            if (index === -1) {
+                throw new Error(`Could not find checkpoint number ${i + 1} of type ${type}.`);
+            }
         }
 
         this.fromJSON(this.currentCheckpoint());
@@ -138,11 +170,15 @@ export class CocktailData {
         return this;
     }
 
-    redo(steps = 1) {
-        if (this.stateIndex < this.previousStates.length - steps) {
-            this.stateIndex += steps;
-        } else {
-            this.stateIndex = this.previousStates.length - 1;
+    redo(steps = 1, type=null) {
+        if (this.countCheckpoints(type) === 0) return this;
+
+        let index = this.stateIndex;
+        for (let i = 0; i < steps; i++) {
+            index = this.lastCheckpointIndex(type, index + 1);
+            if (index === -1) {
+                throw new Error(`Could not find checkpoint number ${i + 1} of type ${type}.`);
+            }
         }
 
         this.fromJSON(this.currentCheckpoint());
@@ -150,16 +186,18 @@ export class CocktailData {
         return this;
     }
 
-    revert() {
-        return this.undo();
+    revert(type=null) {
+        return this.undo(1, type);
     }
 
-    checkpoint() {
+    checkpoint(type) {
         if (this.stateIndex < this.previousStates.length - 1) {
             this.previousStates = this.previousStates.slice(0, this.stateIndex + 1);
         }
 
-        this.previousStates.push(this.toJSON());
+        const checkpoint = this.toJSON();
+        checkpoint.type = type || "manual";
+        this.previousStates.push(checkpoint);
         this.stateIndex = this.previousStates.length - 1;
 
         this.ingredients.forEach(ingredient => ingredient.checkpoint());
@@ -186,7 +224,7 @@ export class CocktailData {
             method: "POST",
             body: this.toJSON(),
             onSuccess: (data) => {
-                this.checkpoint();
+                this.checkpoint("push");
                 this.requestInProgress = false;
                 if (onSuccess) onSuccess(data);
             },
@@ -236,7 +274,7 @@ export class CocktailData {
                     this.fromJSON(data);
                 }
 
-                this.checkpoint();
+                this.checkpoint("pull");
                 this.requestInProgress = false;
                 if (onSuccess) onSuccess(data);
             },
@@ -562,4 +600,14 @@ export function useCocktailData(value, primaryKey="name") {
     });
 
     return cocktailData;
+}
+
+export const CocktailDataContext = createContext(undefined);
+
+export function useCocktailDataContext() {
+    const context = useContext(CocktailDataContext);
+    if (context === undefined) {
+        throw new Error("No CocktailDataContext provider found.");
+    }
+    return context;
 }
