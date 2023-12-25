@@ -137,7 +137,7 @@ export function IngredientCard(props) {
     if (!recipeNamesStatus.completed) {
         ingredientNamesText = "Retrieving Recipes with this ingredient...";
     } else if (recipeNamesStatus.failed) {
-        ingredientNamesText = "Failed to retrieve recipes with this ingredient. Error details logged to console.";
+        ingredientNamesText = <span className="text-danger">Failed to retrieve recipes with this ingredient. Error details logged to console."</span>;
     } else {
         ingredientNamesText = listInPlainEnglish(recipeNames.map((v) => `"${v}"`), 3);
     }
