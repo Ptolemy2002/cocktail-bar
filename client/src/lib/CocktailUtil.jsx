@@ -119,7 +119,7 @@ export class CocktailData {
     }
 
     clone() {
-        return CocktailData.createFromJSON(this.toJSON(), this._push, this._pull);
+        return CocktailData.createFromJSON(this.toJSON(), this._push, this._pull, this._duplicate, this._delete);
     }
 
     currentCheckpoint() {

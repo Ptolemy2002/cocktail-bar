@@ -170,7 +170,7 @@ function updateFunction(fun) {
             }
         });
 
-        // If the update has an _id, remove it
+        // Remove _id from update and query
         if (update.hasOwnProperty("_id")) {
             delete update._id;
         }
